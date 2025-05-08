@@ -324,7 +324,7 @@
         .no-results {
             display: none;
             text-align: center;
-            color: #6b7280;
+            color: Giles;
             font-size: 1rem;
             grid-column: 1 / -1;
         }
@@ -341,6 +341,26 @@
         .mobile-sidebar-item:hover, .mobile-sidebar-item.active {
             color: #d97706;
             background-color: #f3f4f6;
+        }
+
+        /* Quantity Modal */
+        #quantity-modal {
+            transition: opacity 0.3s ease;
+        }
+        #quantity-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #quantity-modal:not(.hidden) {
+            opacity: 1;
+        }
+        #quantity-input {
+            appearance: textfield;
+        }
+        #quantity-input::-webkit-outer-spin-button,
+        #quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         /* Responsive Adjustments */
@@ -483,7 +503,7 @@
         <div class="absolute inset-0 bg-cover bg-center animate-zoomIn" style="background-image: url('{{ url_for('static', filename='images/pot7.jpg') }}');">
             <div class="container mx-auto h-full flex items-center px-4">
                 <div class="bg-white bg-opacity-80 p-6 rounded animate-fadeInUp">
-                    <h1 class="text-4xl font-bold text-yellow-600">Our Fair price Products</h1>
+                    <h1 class="text-4xl font-bold text-yellow-600">Our Fair Price Products</h1>
                     <p class="mt-2 text-gray-800">Discover Our Premium Artifacts at Original Prices</p>
                 </div>
             </div>
@@ -589,6 +609,18 @@
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+        </div>
+    </div>
+
+    <!-- Quantity Popup Modal -->
+    <div id="quantity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Select Quantity</h3>
+            <input type="number" id="quantity-input" min="1" value="1" class="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-600">
+            <div class="flex justify-end gap-2">
+                <button id="cancel-quantity" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">Cancel</button>
+                <button id="confirm-quantity" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">Add to Cart</button>
+            </div>
         </div>
     </div>
 
@@ -900,29 +932,73 @@
             });
         }
 
-        // Add to Cart
+        // Add to Cart with Quantity Popup
         function addToCart(productId) {
-            fetch('/api/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ product_id: productId, quantity: 1 }),
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            // Show quantity modal
+            const modal = document.getElementById('quantity-modal');
+            const quantityInput = document.getElementById('quantity-input');
+            const confirmButton = document.getElementById('confirm-quantity');
+            const cancelButton = document.getElementById('cancel-quantity');
+
+            // Reset input
+            quantityInput.value = 1;
+
+            // Show modal
+            modal.classList.remove('hidden');
+
+            // Confirm button handler
+            const confirmHandler = () => {
+                const quantity = parseInt(quantityInput.value);
+                if (isNaN(quantity) || quantity < 1) {
+                    alert('Please enter a valid quantity (1 or more).');
+                    return;
                 }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error adding to cart:', error);
-                alert('Failed to add to cart: ' + error.message);
-            });
+
+                fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: quantity }),
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (response.redirected && response.url.includes('/login')) {
+                        alert('Session expired. Please log in.');
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data) {
+                        alert(data.message);
+                        modal.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    alert('Failed to add to cart: ' + error.message);
+                })
+                .finally(() => {
+                    confirmButton.removeEventListener('click', confirmHandler);
+                    cancelButton.removeEventListener('click', cancelHandler);
+                });
+            };
+
+            // Cancel button handler
+            const cancelHandler = () => {
+                modal.classList.add('hidden');
+                confirmButton.removeEventListener('click', confirmHandler);
+                cancelButton.removeEventListener('click', cancelHandler);
+            };
+
+            // Attach event listeners
+            confirmButton.addEventListener('click', confirmHandler);
+            cancelButton.addEventListener('click', cancelHandler);
         }
 
         // Mobile Navbar Toggle

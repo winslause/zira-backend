@@ -1026,24 +1026,83 @@ async function deleteOrder(orderId) {
             }
         }
 
-        async function populateDiscounts(data) {
+        async function populateDiscounts() {
             try {
-                const discounts = data || await fetchData('discounts');
-                const tbody = document.getElementById('discounts-table');
-                tbody.innerHTML = discounts.map(discount => `
-                    <tr>
+                const response = await fetch('/api/discounts', { credentials: 'include' });
+                if (response.redirected && response.url.includes('/login')) {
+                    window.location.href = '/login';
+                    return;
+                }
+                if (!response.ok) {
+                    const data = await response.json();
+                    console.warn('Failed to fetch discounts:', data.error || 'Unknown error');
+                    // Display fallback message instead of toast
+                    const tbody = document.querySelector('#discounts-table tbody');
+                    tbody.innerHTML = '<tr><td colspan="7">Unable to load discounts. Please try again later.</td></tr>';
+                    return;
+                }
+                const discounts = await response.json();
+                const tbody = document.querySelector('#discounts-table tbody');
+                tbody.innerHTML = '';
+                discounts.forEach(discount => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
                         <td>${discount.id}</td>
+                        <td>${discount.productId || 'N/A'}</td>
                         <td>${discount.productName}</td>
                         <td>${discount.percent}%</td>
                         <td>${discount.startDate}</td>
                         <td>${discount.endDate}</td>
                         <td>
-                            <button class="action-btn text-blue-600 hover:text-blue-800" onclick="editDiscount(${discount.id})"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn text-red-600 hover:text-red-800" onclick="deleteDiscount(${discount.id})"><i class="fas fa-trash"></i></button>
+                            <button onclick="editDiscount(${discount.id})">Edit</button>
+                            <button onclick="deleteDiscount(${discount.id})">Delete</button>
                         </td>
-                    </tr>
-                `).join('');
+                    `;
+                    tbody.appendChild(row);
+                });
             } catch (error) {
+                console.error('Error populating discounts:', error);
+                // Display fallback message instead of toast
+                const tbody = document.querySelector('#discounts-table tbody');
+                tbody.innerHTML = '<tr><td colspan="7">Unable to load discounts. Please try again later.</td></tr>';
+            }
+        }
+        
+        async function addDiscount() {
+            try {
+                const form = document.querySelector('#discount-form');
+                const formData = new FormData(form);
+                const data = {
+                    productId: parseInt(formData.get('productId')),
+                    percent: parseInt(formData.get('percent')),
+                    startDate: formData.get('startDate'),
+                    endDate: formData.get('endDate')
+                };
+        
+                const response = await fetch('/api/discounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+        
+                if (response.redirected && response.url.includes('/login')) {
+                    showToast('Session expired. Please log in.', 'error');
+                    window.location.href = '/login';
+                    return;
+                }
+        
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.error || 'Failed to add discount');
+                }
+        
+                const result = await response.json();
+                showToast('Discount added successfully');
+                await populateDiscounts(); // Refresh table
+                form.reset(); // Clear form
+            } catch (error) {
+                console.error('Error adding discount:', error);
                 showToast(error.message, 'error');
             }
         }
@@ -1728,7 +1787,7 @@ async function deleteOrder(orderId) {
                     populateReviews()
                 ]);
             } catch (error) {
-                showToast('Initialization failed: ' + error.message, 'error');
+               // showToast('Initialization failed: ' + error.message, 'error');
             }
         }
 

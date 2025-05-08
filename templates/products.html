@@ -343,6 +343,26 @@
             background-color: #f3f4f6;
         }
 
+        /* Quantity Modal */
+        #quantity-modal {
+            transition: opacity 0.3s ease;
+        }
+        #quantity-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #quantity-modal:not(.hidden) {
+            opacity: 1;
+        }
+        #quantity-input {
+            appearance: textfield;
+        }
+        #quantity-input::-webkit-outer-spin-button,
+        #quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 767px) {
             .product-grid.cols-2, .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
@@ -549,7 +569,6 @@
                         <div class="relative w-full h-64 overflow-hidden">
                             <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
                             <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
-                            <!-- <img src="{{ product.image | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0"> -->
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
                             <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
@@ -566,9 +585,8 @@
                                 {{ current_currency }} {{ product.price | round(2) }}
                             </p>
                             <p class="text-center text-red-500 text-sm mt-2 discounted-price" data-discounted-price="{{ (product.price * (1 - product.discount.percent / 100)) | round(2) }}">
-                                {{ current_currency }} {{ (product.price * (1 - product.discount.percent / 100)) | round(2) }} 
+                                {{ current_currency }} {{ (product.price * (1 - product.discount.percent / 100)) | round(2) }}
                             </p>
-                            
                             <div class="flex justify-center gap-2 mt-4">
                                 <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="addToCart({{ product.id }})">
                                     <i class="fas fa-cart-plus mr-2"></i> Add to Cart
@@ -595,6 +613,18 @@
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
             <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+        </div>
+    </div>
+
+    <!-- Quantity Popup Modal -->
+    <div id="quantity-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Select Quantity</h3>
+            <input type="number" id="quantity-input" min="1" value="1" class="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-600">
+            <div class="flex justify-end gap-2">
+                <button id="cancel-quantity" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">Cancel</button>
+                <button id="confirm-quantity" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">Add to Cart</button>
+            </div>
         </div>
     </div>
 
@@ -768,7 +798,7 @@
             document.querySelectorAll('.discounted-price').forEach(priceElement => {
                 const basePrice = parseFloat(priceElement.getAttribute('data-discounted-price'));
                 const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
-                priceElement.textContent = `${currentCurrency} ${convertedPrice} (Discounted)`;
+                priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
             });
             // Update Price Filter Options
             const priceFilter = document.querySelector('.price-filter');
@@ -911,29 +941,73 @@
             });
         }
 
-        // Add to Cart
+        // Add to Cart with Quantity Popup
         function addToCart(productId) {
-            fetch('/api/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ product_id: productId, quantity: 1 }),
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            // Show quantity modal
+            const modal = document.getElementById('quantity-modal');
+            const quantityInput = document.getElementById('quantity-input');
+            const confirmButton = document.getElementById('confirm-quantity');
+            const cancelButton = document.getElementById('cancel-quantity');
+
+            // Reset input
+            quantityInput.value = 1;
+
+            // Show modal
+            modal.classList.remove('hidden');
+
+            // Confirm button handler
+            const confirmHandler = () => {
+                const quantity = parseInt(quantityInput.value);
+                if (isNaN(quantity) || quantity < 1) {
+                    alert('Please enter a valid quantity (1 or more).');
+                    return;
                 }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error adding to cart:', error);
-                alert('Failed to add to cart: ' + error.message);
-            });
+
+                fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: quantity }),
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (response.redirected && response.url.includes('/login')) {
+                        alert('Session expired. Please log in.');
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data) {
+                        alert(data.message);
+                        modal.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    alert('Failed to add to cart: ' + error.message);
+                })
+                .finally(() => {
+                    confirmButton.removeEventListener('click', confirmHandler);
+                    cancelButton.removeEventListener('click', cancelHandler);
+                });
+            };
+
+            // Cancel button handler
+            const cancelHandler = () => {
+                modal.classList.add('hidden');
+                confirmButton.removeEventListener('click', confirmHandler);
+                cancelButton.removeEventListener('click', cancelHandler);
+            };
+
+            // Attach event listeners
+            confirmButton.addEventListener('click', confirmHandler);
+            cancelButton.addEventListener('click', cancelHandler);
         }
 
         // Mobile Navbar Toggle

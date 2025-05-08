@@ -422,7 +422,7 @@
                 <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item">Special Discount</a>
                 <a href="{{ url_for('user_login') }}" class="mobile-sidebar-item">Login</a>
                 <a href="{{ url_for('account') }}" class="mobile-sidebar-item active">My Account</a>
-                <a href="{{ url_for('logout') }}" class="mobile-sidebar-item">Logout</a>
+                <a href="{{ url_for('user_logout') }}" class="mobile-sidebar-item">Logout</a>
             </div>
         </div>
     </div>
@@ -454,7 +454,7 @@
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('profile-modal')">Update Profile</button>
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('picture-modal')">Change Picture</button>
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('address-modal')">Add Address</button>
-                        <a href="{{ url_for('logout') }}" class="action-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 text-lg font-medium text-center">Logout</a>
+                        <a href="{{ url_for('user_logout') }}" class="action-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 text-lg font-medium text-center">Logout</a>
                     </div>
                 </div>
 
@@ -496,14 +496,18 @@
                         <h3 class="text-2xl font-semibold text-gray-800 mb-4">Cart</h3>
                         <div id="cart-items" class="space-y-4">
                             {% for item in cart_items %}
-                                <div class="cart-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card">
+                                <div class="cart-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card" data-product-id="{{ item.product_id }}">
                                     <img src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
                                     <div class="flex-1 text-center sm:text-left">
                                         <h3 class="text-xl font-semibold text-gray-800">{{ item.product.name }}</h3>
                                         <p class="text-gray-600 price text-lg" data-price="{{ item.product.price }}">{{ current_currency }} {{ item.product.price }}</p>
-                                        <p class="text-gray-600 text-lg">Quantity: {{ item.quantity }}</p>
+                                        <div class="flex items-center justify-center sm:justify-start gap-2 mt-2">
+                                            <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity - 1 }})"><i class="fas fa-minus"></i></button>
+                                            <input type="number" class="w-16 p-1 border rounded text-center" value="{{ item.quantity }}" min="1" onchange="updateCartQuantity({{ item.product_id }}, this.value)">
+                                            <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity + 1 }})"><i class="fas fa-plus"></i></button>
+                                        </div>
                                     </div>
-                                    <button class="text-red-500 hover:text-red-700" onclick="removeFromCart({{ item.id }})"><i class="fas fa-trash text-lg"></i></button>
+                                    <button class="text-red-500 hover:text-red-700" onclick="removeFromCart({{ item.product_id }})"><i class="fas fa-trash text-lg"></i></button>
                                 </div>
                             {% else %}
                                 <div class="custom-card p-6">
@@ -639,93 +643,93 @@
     </div>
 
     <!-- Checkout Modal -->
-<div id="checkout-modal" class="modal">
-    <div class="flex flex-col md:flex-row items-center justify-center gap-4 max-w-5xl mx-auto">
-        <!-- Floating Payment Details Card -->
-        <div class="custom-card p-6 bg-white rounded-lg shadow-lg w-full md:w-80 animate-slideIn delay-[100ms] md:mr-4">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details</h3>
-            <div id="payment-details" class="space-y-4">
-                <!-- Default content for Pay Immediately -->
-                <div id="immediate-payment-details">
-                    <div class="mb-4">
-                        <h4 class="text-lg font-medium text-gray-700">PayPal</h4>
-                        <p class="text-gray-600 text-sm">Send payment to: <a href="mailto:payments@ziraartifacts.com" class="text-yellow-600 hover:underline">payments@ziraartifacts.com</a></p>
-                        <p class="text-gray-600 text-sm mt-1">Include your order ID in the payment note.</p>
+    <div id="checkout-modal" class="modal">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 max-w-5xl mx-auto">
+            <!-- Floating Payment Details Card -->
+            <div class="custom-card p-6 bg-white rounded-lg shadow-lg w-full md:w-80 animate-slideIn delay-[100ms] md:mr-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details</h3>
+                <div id="payment-details" class="space-y-4">
+                    <!-- Default content for Pay Immediately -->
+                    <div id="immediate-payment-details">
+                        <div class="mb-4">
+                            <h4 class="text-lg font-medium text-gray-700">PayPal</h4>
+                            <p class="text-gray-600 text-sm">Send payment to: <a href="mailto:payments@ziraartifacts.com" class="text-yellow-600 hover:underline">payments@ziraartifacts.com</a></p>
+                            <p class="text-gray-600 text-sm mt-1">Include your order ID in the payment note.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-700">Bank Transfer</h4>
+                            <p class="text-gray-600 text-sm">Bank: Zira Bank</p>
+                            <p class="text-gray-600 text-sm">Account: 1234-5678-9012-3456</p>
+                            <p class="text-gray-600 text-sm">SWIFT: ZIRAUS33</p>
+                            <p class="text-gray-600 text-sm mt-1">Reference: Your order ID</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="text-lg font-medium text-gray-700">Bank Transfer</h4>
-                        <p class="text-gray-600 text-sm">Bank: Zira Bank</p>
-                        <p class="text-gray-600 text-sm">Account: 1234-5678-9012-3456</p>
-                        <p class="text-gray-600 text-sm">SWIFT: ZIRAUS33</p>
-                        <p class="text-gray-600 text-sm mt-1">Reference: Your order ID</p>
+                    <!-- Content for Pay on Delivery (hidden by default) -->
+                    <div id="delivery-payment-details" class="hidden">
+                        <p class="text-gray-600 text-sm">Payment will be collected upon delivery.</p>
+                        <p class="text-gray-600 text-sm mt-1">Please ensure you have cash or a valid payment method available when your order arrives.</p>
                     </div>
-                </div>
-                <!-- Content for Pay on Delivery (hidden by default) -->
-                <div id="delivery-payment-details" class="hidden">
-                    <p class="text-gray-600 text-sm">Payment will be collected upon delivery.</p>
-                    <p class="text-gray-600 text-sm mt-1">Please ensure you have cash or a valid payment method available when your order arrives.</p>
                 </div>
             </div>
-        </div>
-        <!-- Modal Content -->
-        <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-lg animate-slideIn delay-[200ms]">
-            <span class="modal-close" onclick="closeModal('checkout-modal')"><i class="fas fa-times"></i></span>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Checkout</h2>
-            <form id="checkout-form" class="space-y-4" onsubmit="placeOrder(event)">
-                <div>
-                    <label class="block text-gray-700 mb-1">Full Name</label>
-                    <input type="text" name="name" value="{{ user.name }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" name="phone_number" value="{{ user.phone_number | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">Street Address</label>
-                    <input type="text" name="street" value="{{ address.street | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">City</label>
-                    <input type="text" name="city" value="{{ address.city | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">Country</label>
-                    <select name="country" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                        <option value="USA" {{ 'selected' if address.country == 'USA' }}>USA</option>
-                        <option value="Germany" {{ 'selected' if address.country == 'Germany' }}>Germany</option>
-                        <option value="UK" {{ 'selected' if address.country == 'UK' }}>UK</option>
-                        <option value="Kenya" {{ 'selected' if address.country == 'Kenya' }}>Kenya</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">Postal Code</label>
-                    <input type="text" name="postal_code" value="{{ address.postal_code | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
-                </div>
-                <div>
-                    <label class="block text-gray-700 mb-1">Payment Method</label>
-                    <div class="radio-group">
-                        <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="immediate" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" checked>
-                            Pay Immediately
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="delivery" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();">
-                            Pay on Delivery
-                        </label>
+            <!-- Modal Content -->
+            <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-lg animate-slideIn delay-[200ms]">
+                <span class="modal-close" onclick="closeModal('checkout-modal')"><i class="fas fa-times"></i></span>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Checkout</h2>
+                <form id="checkout-form" class="space-y-4" onsubmit="placeOrder(event)">
+                    <div>
+                        <label class="block text-gray-700 mb-1">Full Name</label>
+                        <input type="text" name="name" value="{{ user.name }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
                     </div>
-                </div>
-                <div id="message-code-section">
-                    <label class="block text-gray-700 mb-1">Message Code</label>
-                    <input type="text" name="message_code" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600">
-                </div>
-                <div class="flex gap-4">
-                    <button type="submit" class="action-btn bg-yellow-600 text-white px-4 py-2 rounded flex-1 hover:bg-yellow-700">Place Order</button>
-                    <button type="button" class="action-btn bg-gray-500 text-white px-4 py-2 rounded flex-1 hover:bg-gray-600" onclick="closeModal('checkout-modal')">Cancel</button>
-                </div>
-            </form>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" name="phone_number" value="{{ user.phone_number | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Street Address</label>
+                        <input type="text" name="street" value="{{ address.street | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">City</label>
+                        <input type="text" name="city" value="{{ address.city | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Country</label>
+                        <select name="country" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+                            <option value="USA" {{ 'selected' if address.country == 'USA' }}>USA</option>
+                            <option value="Germany" {{ 'selected' if address.country == 'Germany' }}>Germany</option>
+                            <option value="UK" {{ 'selected' if address.country == 'UK' }}>UK</option>
+                            <option value="Kenya" {{ 'selected' if address.country == 'Kenya' }}>Kenya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Postal Code</label>
+                        <input type="text" name="postal_code" value="{{ address.postal_code | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Payment Method</label>
+                        <div class="radio-group">
+                            <label class="flex items-center">
+                                <input type="radio" name="payment_method" value="immediate" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" checked>
+                                Pay Immediately
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="payment_method" value="delivery" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();">
+                                Pay on Delivery
+                            </label>
+                        </div>
+                    </div>
+                    <div id="message-code-section">
+                        <label class="block text-gray-700 mb-1">Message Code</label>
+                        <input type="text" name="message_code" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600">
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="submit" class="action-btn bg-yellow-600 text-white px-4 py-2 rounded flex-1 hover:bg-yellow-700">Place Order</button>
+                        <button type="button" class="action-btn bg-gray-500 text-white px-4 py-2 rounded flex-1 hover:bg-gray-600" onclick="closeModal('checkout-modal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Floating Country Button -->
     <div id="country-btn-container" class="fixed bottom-16 left-16 z-20">
@@ -912,8 +916,8 @@
             // Update Cart Prices
             document.querySelectorAll('#cart-items .price').forEach(priceElement => {
                 const basePrice = parseFloat(priceElement.getAttribute('data-price'));
-                const quantityElement = priceElement.parentElement.querySelector('p:nth-child(3)');
-                const quantity = quantityElement ? parseInt(quantityElement.textContent.replace('Quantity: ', '')) : 1;
+                const quantityElement = priceElement.parentElement.querySelector('input[type="number"]');
+                const quantity = quantityElement ? parseInt(quantityElement.value) : 1;
                 const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
                 priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
                 cartTotal += parseFloat(convertedPrice) * quantity;
@@ -1106,10 +1110,43 @@
             });
         }
 
+        // Update Cart Quantity
+        async function updateCartQuantity(productId, quantity) {
+            if (quantity < 1) {
+                alert('Quantity must be at least 1');
+                return;
+            }
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, quantity: parseInt(quantity) }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message || 'Quantity updated successfully');
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to update quantity');
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                alert('Failed to update quantity: ' + error.message);
+            }
+        }
+
         // Remove from Cart
-        function removeFromCart(cartId) {
-            fetch(`/api/cart/${cartId}`, {
+        function removeFromCart(productId) {
+            fetch('/api/cart', {
                 method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId }),
                 credentials: 'include'
             })
             .then(response => response.json().then(data => ({ status: response.status, body: data })))
@@ -1156,11 +1193,8 @@
                     if (status >= 400) {
                         throw new Error(body.error || 'Failed to cancel order');
                     }
-                    // Show alert for success
                     alert(body.message || 'Order canceled successfully');
-                    // Optionally keep toast for consistency
                     showToast(body.message || 'Order canceled successfully', 'success');
-                    // Refresh the page
                     window.location.reload();
                 })
                 .catch(error => {
@@ -1172,8 +1206,7 @@
                 });
             }
         }
-        
-        // Existing showToast function (unchanged)
+
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `fixed top-4 right-4 p-4 rounded shadow-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
@@ -1182,63 +1215,64 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-async function populateOrders() {
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-        });
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Failed to fetch orders');
-        }
-        const orders = await response.json();
-        const orderItems = document.getElementById('order-items');
-        orderItems.innerHTML = orders.length === 0
-            ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
-            : orders.map(order => `
-                <div class="order-card flex flex-col gap-4 p-6 custom-card">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Order #${order.id}</h3>
-                            <p class="text-gray-600 text-lg">Date: ${new Date(order.created_at).toISOString().split('T')[0]}</p>
-                            <p class="text-gray-600 text-lg">Total: <span class="price" data-price="${order.total}">${currentCurrency} ${(order.total * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
-                            <p class="text-gray-600 text-lg">Status: ${order.status}</p>
-                        </div>
-                        ${order.status === 'Pending' ? `<button class="action-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id})">Cancel Order</button>` : ''}
-                    </div>
-                    <div class="border-t pt-4">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Items</h4>
-                        ${order.order_items.map(item => `
-                            <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
-                                ${item.product ? `
-                                    <img src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
-                                    <div class="flex-1">
-                                        <p class="text-gray-800 font-medium">${item.product.name}</p>
-                                        <p class="text-gray-600">Quantity: ${item.quantity}</p>
-                                        <p class="text-gray-600">Price: <span class="price" data-price="${item.product.price}">${currentCurrency} ${(item.product.price * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
-                                    </div>
-                                ` : `
-                                    <div class="flex-1">
-                                        <p class="text-gray-600">Product not found (ID: ${item.product_id})</p>
-                                        <p class="text-gray-600">Quantity: ${item.quantity}</p>
-                                    </div>
-                                `}
+        async function populateOrders() {
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to fetch orders');
+                }
+                const orders = await response.json();
+                const orderItems = document.getElementById('order-items');
+                orderItems.innerHTML = orders.length === 0
+                    ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
+                    : orders.map(order => `
+                        <div class="order-card flex flex-col gap-4 p-6 custom-card">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Order #${order.id}</h3>
+                                    <p class="text-gray-600 text-lg">Date: ${new Date(order.created_at).toISOString().split('T')[0]}</p>
+                                    <p class="text-gray-600 text-lg">Total: <span class="price" data-price="${order.total}">${currentCurrency} ${(order.total * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
+                                    <p class="text-gray-600 text-lg">Status: ${order.status}</p>
+                                </div>
+                                ${order.status === 'Pending' ? `<button class="action-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id})">Cancel Order</button>` : ''}
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        updatePrices(); // Update currency
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        showToast('Failed to load orders: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for("user_login") }}';
+                            <div class="border-t pt-4">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Items</h4>
+                                ${order.order_items.map(item => `
+                                    <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
+                                        ${item.product ? `
+                                            <img src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
+                                            <div class="flex-1">
+                                                <p class="text-gray-800 font-medium">${item.product.name}</p>
+                                                <p class="text-gray-600">Quantity: ${item.quantity}</p>
+                                                <p class="text-gray-600">Price: <span class="price" data-price="${item.product.price}">${currentCurrency} ${(item.product.price * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
+                                            </div>
+                                        ` : `
+                                            <div class="flex-1">
+                                                <p class="text-gray-600">Product not found (ID: ${item.product_id})</p>
+                                                <p class="text-gray-600">Quantity: ${item.quantity}</p>
+                                            </div>
+                                        `}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                updatePrices();
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+                showToast('Failed to load orders: ' + error.message, 'error');
+                if (error.message.includes('Unauthorized')) {
+                    window.location.href = '{{ url_for("user_login") }}';
+                }
+            }
         }
-    }
-}
+
         // Toggle Message Code Field
         function toggleMessageCode() {
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
@@ -1246,6 +1280,20 @@ async function populateOrders() {
             messageCodeSection.style.display = paymentMethod === 'immediate' ? 'block' : 'none';
             if (paymentMethod !== 'immediate') {
                 document.querySelector('input[name="message_code"]').value = '';
+            }
+        }
+
+        // Update Payment Details
+        function updatePaymentDetails() {
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            const immediateDetails = document.getElementById('immediate-payment-details');
+            const deliveryDetails = document.getElementById('delivery-payment-details');
+            if (paymentMethod === 'immediate') {
+                immediateDetails.classList.remove('hidden');
+                deliveryDetails.classList.add('hidden');
+            } else {
+                immediateDetails.classList.add('hidden');
+                deliveryDetails.classList.remove('hidden');
             }
         }
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -278,6 +278,12 @@ def logout():
         return jsonify({'message': 'User logged out successfully'})
     return jsonify({'message': 'No user logged in'})
 
+@app.route('/logout1')
+def user_logout():
+    session.pop('user', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('user_login'))
+
 # Product Routes
 @app.route('/api/discounted_artefacts', methods=['GET', 'POST'])
 def handle_products():
@@ -503,12 +509,12 @@ def handle_discounts():
         return jsonify({'error': 'Unauthorized'}), 401
     if request.method == 'GET':
         try:
-            discounts = Discount.query.join(Product, Product.discount_id == Discount.id).all()
+            discounts = Discount.query.all()
             return jsonify([
                 {
                     'id': d.id,
-                    'productId': d.product.id if d.product else None,
-                    'productName': d.product.name if d.product else 'N/A',
+                    'productId': p.id if (p := Product.query.filter_by(discount_id=d.id).first()) else None,
+                    'productName': p.name if (p := Product.query.filter_by(discount_id=d.id).first()) else 'N/A',
                     'percent': d.percent,
                     'startDate': d.start_date.strftime('%Y-%m-%d'),
                     'endDate': d.end_date.strftime('%Y-%m-%d')
@@ -1414,44 +1420,71 @@ def delete_wishlist_item(id):
     db.session.commit()
     return jsonify({'message': 'Product removed from wishlist'})
 
-@app.route('/api/cart', methods=['GET', 'POST'])
+@app.route('/api/cart', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def handle_cart():
+    # Check if user is logged in
     if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+        return jsonify({'error': 'Unauthorized', 'redirect': '/login'}), 401
+
+    # Get user
     user = User.query.filter_by(email=session['user']).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
+    
     user_id = user.id
+
     if request.method == 'GET':
-        cart_items = Cart.query.filter_by(user_id=user_id).join(Product).all()
-        return jsonify([
-            {
-                'id': item.id,
-                'product_id': item.product_id,
-                'name': item.product.name,
-                'price': item.product.price,
-                'image': item.product.image,
-                'quantity': item.quantity
-            } for item in cart_items
-        ])
-    if request.method == 'POST':
+        # Retrieve cart items
+        try:
+            cart_items = Cart.query.filter_by(user_id=user_id).join(Product).all()
+            return jsonify([
+                {
+                    'id': item.id,
+                    'product_id': item.product_id,
+                    'name': item.product.name,
+                    'price': item.product.price,
+                    'image': item.product.image,
+                    'quantity': item.quantity,
+                    'total_price': round(item.product.price * item.quantity, 2)
+                } for item in cart_items
+            ])
+        except SQLAlchemyError as e:
+            logging.error(f"Database error in GET /api/cart: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+
+    elif request.method == 'POST':
+        # Add or update product in cart
         try:
             data = request.get_json()
             product_id = data.get('product_id')
             quantity = data.get('quantity', 1)
+
+            # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(quantity, int) or quantity < 1:
+                return jsonify({'error': 'Quantity must be a positive integer'}), 400
+
             product = Product.query.get(product_id)
             if not product:
                 return jsonify({'error': 'Product not found'}), 404
+
+            # Check stock availability (if applicable)
+            if hasattr(product, 'stock') and product.stock < quantity:
+                return jsonify({'error': f'Only {product.stock} items available in stock'}), 400
+
             cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
             if cart_item:
+                # Update existing cart item
                 cart_item.quantity += quantity
             else:
+                # Add new cart item
                 cart_item = Cart(user_id=user_id, product_id=product_id, quantity=quantity)
                 db.session.add(cart_item)
+
             db.session.commit()
-            return jsonify({'message': 'Product added to cart'}), 201
+            return jsonify({'message': 'Product added to cart', 'product_id': product_id, 'quantity': cart_item.quantity}), 201
+
         except SQLAlchemyError as e:
             db.session.rollback()
             logging.error(f"Database error in POST /api/cart: {str(e)}")
@@ -1459,6 +1492,70 @@ def handle_cart():
         except Exception as e:
             db.session.rollback()
             logging.error(f"Unexpected error in POST /api/cart: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'PUT':
+        # Update quantity of an existing cart item
+        try:
+            data = request.get_json()
+            product_id = data.get('product_id')
+            quantity = data.get('quantity')
+
+            # Validate input
+            if not product_id:
+                return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(quantity, int) or quantity < 1:
+                return jsonify({'error': 'Quantity must be a positive integer'}), 400
+
+            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+            if not cart_item:
+                return jsonify({'error': 'Cart item not found'}), 404
+
+            product = Product.query.get(product_id)
+            if not product:
+                return jsonify({'error': 'Product not found'}), 404
+
+            # Check stock availability (if applicable)
+            if hasattr(product, 'stock') and product.stock < quantity:
+                return jsonify({'error': f'Only {product.stock} items available in stock'}), 400
+
+            cart_item.quantity = quantity
+            db.session.commit()
+            return jsonify({'message': 'Cart item updated', 'product_id': product_id, 'quantity': quantity}), 200
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            logging.error(f"Database error in PUT /api/cart: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Unexpected error in PUT /api/cart: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'DELETE':
+        # Remove product from cart
+        try:
+            data = request.get_json()
+            product_id = data.get('product_id')
+
+            if not product_id:
+                return jsonify({'error': 'Product ID is required'}), 400
+
+            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+            if not cart_item:
+                return jsonify({'error': 'Cart item not found'}), 404
+
+            db.session.delete(cart_item)
+            db.session.commit()
+            return jsonify({'message': 'Product removed from cart', 'product_id': product_id}), 200
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            logging.error(f"Database error in DELETE /api/cart: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Unexpected error in DELETE /api/cart: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/cart/<int:id>', methods=['DELETE'])
