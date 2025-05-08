@@ -1,0 +1,39 @@
+def migrate_order_item_table():
+      try:
+        # Create new table with CASCADE
+        db.engine.execute("""
+            CREATE TABLE order_item_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                product_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                FOREIGN KEY (order_id) REFERENCES "order" (id) ON DELETE CASCADE,
+                FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE
+            )
+        """)
+        # Migrate data
+        db.engine.execute("""
+            INSERT INTO order_item_new (id, order_id, product_id, quantity)
+            SELECT id, order_id, product_id, quantity FROM order_item
+        """)
+        # Drop old table and rename new table
+        db.engine.execute("DROP TABLE order_item")
+        db.engine.execute("ALTER TABLE order_item_new RENAME TO order_item")
+        db.session.commit()
+        logging.info("OrderItem table migrated successfully")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Error migrating OrderItem table: {str(e)}")
+        raise
+
+# Run migration once during app initialization
+with app.app_context():
+    # Check if migration is needed (e.g., check if old table exists)
+    if db.engine.dialect.has_table(db.engine, 'order_item'):
+        try:
+            # Test if product_id has CASCADE (will fail if not)
+            db.engine.execute("PRAGMA foreign_key_check")
+            migrate_order_item_table()
+        except Exception as e:
+            logging.warning(f"Migration check failed, assuming migration needed: {str(e)}")
+            migrate_order_item_table()

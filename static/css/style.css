@@ -1,0 +1,550 @@
+/* Custom Animations */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-7px); }
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+@keyframes slideDown {
+    0% { transform: translateY(-100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+.hero-slide {
+    opacity: 0;
+    animation: fadeOut 3s forwards ease-in-out;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.hero-slide.active {
+    opacity: 1;
+    animation: fadeIn 3s forwards ease-in-out;
+}
+.nav-hover:hover .dropdown-menu {
+    display: block;
+    animation: appear 0.3s ease-in;
+}
+@keyframes appear {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.discount-page {
+    transition: transform 0.5s ease-in-out;
+}
+.floating-btn {
+    transition: all 0.3s ease;
+    animation: bounce 2s infinite;
+}
+.floating-btn:hover {
+    transform: scale(1.1);
+}
+.navbar-item {
+    transition: color 0.3s ease;
+}
+.navbar-item:hover {
+    color: #f59e0b; /* Gold hover color */
+}
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: #d1d5db; /* Gray */
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px;
+    transition: background-color 0.3s ease;
+}
+.dot.active {
+    background-color: #f59e0b; /* Gold */
+}
+
+/* Floating button adjustments */
+.floating-btn-container {
+    position: fixed;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+/* WhatsApp Button */
+.whatsapp-btn-container {
+    bottom: 16px;
+    right: 16px;
+}
+.whatsapp-btn-container .floating-btn {
+    width: 48px;
+    height: 48px;
+    background-color: #25D366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.whatsapp-btn-container .floating-btn::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg') no-repeat center center;
+    background-size: 60%;
+}
+.whatsapp-btn-container .floating-text {
+    margin-right: 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.whatsapp-btn-container .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #EF4444;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+}
+/* Discount Button */
+.discount-btn-container {
+    bottom: 16px;
+    left: 16px;
+}
+.discount-btn-container .floating-btn {
+    background-color: #EC4899;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    height: 48px;
+}
+.discount-btn-container .floating-btn img {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .whatsapp-btn-container .floating-btn,
+    .discount-btn-container .floating-btn {
+        height: 36px;
+    }
+    .whatsapp-btn-container .floating-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .whatsapp-btn-container .floating-text {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    .whatsapp-btn-container .badge {
+        font-size: 8px;
+        padding: 1px 4px;
+        top: -2px;
+        right: -2px;
+    }
+    .discount-btn-container .floating-btn {
+        font-size: 10px;
+        padding: 12px;
+    }
+    .discount-btn-container .floating-btn img {
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+    }
+}
+
+/* Top Layer Adjustments for Desktop */
+.top-layer {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 30; /* Above the navbar */
+}
+.navbar {
+    top: 0; /* Default for mobile */
+}
+@media (min-width: 768px) {
+    .navbar {
+        top: 36px; /* Height of the top layer */
+    }
+}
+
+/* Slider Container */
+#hero-slider {
+    background-color: #000; /* Fallback background to prevent white flash */
+}
+
+/* Search Bar Styling for Desktop */
+.search-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.search-container input {
+    padding-right: 2.5rem; /* Space for the icon */
+}
+.search-container i {
+    position: absolute;
+    right: 0.75rem;
+    color: #6b7280; /* Gray-500 */
+    pointer-events: none; /* Prevent icon from capturing clicks */
+}
+
+/* Search Bar for Mobile */
+#mobile-search-bar {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    margin-top: 0.5rem;
+    z-index: 40;
+}
+#mobile-search-bar.active {
+    display: block;
+    animation: slideDown 0.3s ease-in-out;
+}
+
+/* Shop by Category */
+#shopByCategory .animate-pulse-category {
+    animation: pulse-category 3s infinite ease-in-out;
+}
+@keyframes pulse-category {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+#shopByCategory::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://darpanfurnishings.com/wp-content/uploads/2022/02/Untitled-design-34.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    animation: zoomInOut 20s infinite ease-in-out;
+    transition: transform 1s;
+}
+@keyframes zoomInOut {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Customer Reviews Background */
+#zira-customer-reviews::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('../images/curve7.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+/* Review Slider */
+#reviewSliderLargeInner,
+#reviewSliderSmallInner {
+    display: flex;
+    transition: transform 0.7s ease-in-out;
+}
+#prevReview,
+#nextReview {
+    transition: all 0.3s ease;
+}
+#prevReview:disabled,
+#nextReview:disabled {
+    background-color: #e5e7eb; /* Gray-200 */
+    color: #9ca3af; /* Gray-400 */
+    cursor: not-allowed;
+}
+
+/* Featured This Month */
+#featured-this-month {
+    font-family: sans-serif;
+    background: #f9f9f9;
+    padding: 2rem 1rem;
+}
+#featured-this-month .ftm-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: goldenrod;
+    margin-bottom: 1.5rem;
+}
+#featured-this-month .ftm-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+#featured-this-month .ftm-tab {
+    position: relative;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding-bottom: 0.3rem;
+    color: #333;
+}
+#featured-this-month .ftm-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: black;
+}
+#featured-this-month .ftm-tab-content {
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+#featured-this-month .ftm-tab-content.active {
+    display: flex;
+}
+#featured-this-month .ftm-card {
+    width: 240px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+#featured-this-month .ftm-card:hover {
+    transform: scale(1.05);
+}
+#featured-this-month .ftm-card-img {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+#featured-this-month .ftm-card-img img {
+    width: 100%;
+    transition: transform 1s ease;
+}
+#featured-this-month .ftm-card:hover .ftm-card-img img {
+    transform: scale(1.1) rotate(360deg);
+}
+#featured-this-month .ftm-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #e74c3c;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+}
+#featured-this-month .ftm-card-content {
+    padding: 1rem;
+}
+#featured-this-month .ftm-product-name {
+    font-weight: bold;
+    color: goldenrod;
+    margin-bottom: 0.5rem;
+}
+#featured-this-month .ftm-price {
+    font-size: 1rem;
+}
+#featured-this-month .ftm-old-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-left: 0.5rem;
+}
+#featured-this-month .ftm-view-all {
+    display: block;
+    margin: 2rem auto 0;
+    background-color: goldenrod;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+#featured-this-month .ftm-view-all:hover {
+    background-color: #d4af37;
+}
+
+/* Responsive Adjustments for Featured This Month */
+@media (max-width: 768px) {
+    #featured-this-month .ftm-card {
+        width: calc(50% - 1rem);
+        max-width: 200px;
+    }
+    #featured-this-month .ftm-tab-content {
+        gap: 1rem;
+    }
+    #featured-this-month .ftm-tabs {
+        flex-wrap: nowrap;
+        gap: 1rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+    }
+    #featured-this-month .ftm-tab {
+        font-size: 0.9rem;
+    }
+}
+@media (max-width: 480px) {
+    #featured-this-month .ftm-card {
+        width: calc(50% - 0.5rem);
+        max-width: 160px;
+    }
+    #featured-this-month .ftm-tab-content {
+        gap: 0.5rem;
+    }
+    #featured-this-month .ftm-tab {
+        font-size: 0.8rem;
+    }
+}
+
+/* Responsive Adjustments for Shop by Category */
+@media (max-width: 768px) {
+    #shopByCategory .flex {
+        gap: 1rem !important;
+    }
+    #shopByCategory .w-64 {
+        width: calc(50% - 0.5rem) !important;
+    }
+    #shopByCategory .w-48 {
+        width: 100% !important;
+        max-width: 150px !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+}
+@media (max-width: 480px) {
+    #shopByCategory .flex {
+        gap: 0.5rem !important;
+    }
+    #shopByCategory .w-64 {
+        width: calc(50% - 0.25rem) !important;
+    }
+    #shopByCategory .w-48 {
+        max-width: 120px !important;
+    }
+}
+
+/* Navbar Dropdown Icon */
+.navbar-item i {
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+.navbar-item:hover {
+    text-decoration: underline;
+}
+
+/* Navbar */
+.navbar {
+    top: 0; /* Default for mobile */
+    z-index: 50; /* Increased to ensure navbar is above other elements */
+}
+
+/* Top Layer Adjustments for Desktop */
+.top-layer {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 60; /* Higher than navbar to appear above it */
+}
+@media (min-width: 768px) {
+    .navbar {
+        top: 36px; /* Height of the top layer */
+    }
+}
+
+/* Customer Reviews Section */
+#zira-customer-reviews {
+    position: relative;
+    z-index: 10; /* Ensure the section is above background elements */
+}
+#zira-customer-reviews::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('../images/curve7.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    z-index: -1; /* Explicitly behind content */
+}
+
+/* Review Slider Buttons */
+#prevReview,
+#nextReview {
+    position: relative;
+    z-index: 20; /* Ensure buttons are clickable */
+    transition: all 0.3s ease;
+}
+#prevReview:disabled,
+#nextReview:disabled {
+    background-color: #e5e7eb; /* Gray-200 */
+    color: #9ca3af; /* Gray-400 */
+    cursor: not-allowed;
+}
+
+/* Review Slider Containers */
+#reviewSliderLarge,
+#reviewSliderSmall {
+    position: relative;
+    z-index: 15; /* Above the ::before pseudo-element */
+}
+#reviewSliderLargeInner,
+#reviewSliderSmallInner {
+    display: flex;
+    transition: transform 0.7s ease-in-out;
+}
+
+/* Hero Slider */
+#hero-slider {
+    background-color: #000;
+    z-index: 5; /* Lower than navbar and review section */
+}
+
+/* Floating Buttons */
+.floating-btn-container {
+    z-index: 30; /* High, but below navbar and top layer */
+}
+
+/* Ensure no pointer-events block clicks */
+.navbar-item,
+#prevReview,
+#nextReview {
+    pointer-events: auto; /* Explicitly allow clicks */
+}

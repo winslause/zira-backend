@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zira Artifacts - Full Price Products</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        /* Custom Font */
+        body, .navbar {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Image Transition on Hover */
+        .product-card img {
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Wishlist Button and Tooltip */
+        .wishlist-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #6b7280; /* Tailwind gray-500 */
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        .wishlist-btn:hover {
+            color: #d97706; /* Tailwind yellow-600 */
+        }
+        .wishlist-btn.active {
+            color: #d97706; /* Tailwind yellow-600 */
+        }
+        .wishlist-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: -40px;
+            right: -10px;
+            background-color: #d97706; /* Tailwind yellow-600 */
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 15;
+        }
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #d97706;
+        }
+
+        /* Animations */
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .animate-bounceIn {
+            animation: bounceIn 1s ease-out forwards;
+        }
+        .animate-zoomIn {
+            animation: zoomIn 5s ease-out forwards;
+        }
+        .animate-pageLoad {
+            animation: pageLoad 1s ease-out forwards;
+        }
+        .animate-navLoad {
+            animation: navLoad 0.8s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes zoomIn {
+            from { background-size: 100%; }
+            to { background-size: 110%; }
+        }
+        @keyframes pageLoad {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes navLoad {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toggler Animations */
+        .animate-rotateToggle {
+            animation: rotateToggle 0.3s ease-in-out forwards;
+        }
+        .animate-bounce {
+            animation: bounce 0.2s ease-in-out;
+        }
+        .animate-pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+        @keyframes rotateToggle {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(90deg) scale(1.2); }
+            100% { transform: rotate(180deg) scale(1); }
+        }
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Delay Classes */
+        .delay-\[100ms\] { animation-delay: 100ms; }
+        .delay-\[200ms\] { animation-delay: 200ms; }
+        .delay-\[300ms\] { animation-delay: 300ms; }
+        .delay-\[400ms\] { animation-delay: 400ms; }
+
+        /* Navbar Styling */
+        .navbar {
+            background: #ffffff; /* Tailwind white */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            z-index: 50;
+            animation: navLoad 0.8s ease-out;
+        }
+        .navbar-item {
+            position: relative;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #4b5563; /* Tailwind gray-700 */
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .navbar-item:hover, .navbar-item.active {
+            color: #1f2937; /* Tailwind gray-900 */
+            transform: scale(1.05);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .navbar-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background-color: #1f2937;
+            transition: width 0.3s ease;
+        }
+        .navbar-item:hover::after, .navbar-item.active::after {
+            width: 50%;
+        }
+        .nav-hover:hover {
+            transform: scale(1.05);
+        }
+
+        /* Search Container */
+        .search-container {
+            position: relative;
+        }
+        .search-container input {
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 0.375rem;
+            padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+            outline: none;
+        }
+        .search-container .fa-search {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280; /* Tailwind gray-500 */
+        }
+        #mobile-search-bar {
+            display: none;
+            position: absolute;
+            top: 3rem;
+            left: 0;
+            right: 0;
+            margin: 0 1rem;
+            z-index: 45;
+        }
+        #mobile-search-bar.active {
+            display: block;
+        }
+
+        /* Sidebar Filter Hover Effects */
+        .filter-item:hover, .sidebar select:hover {
+            transform: scale(1.05);
+            color: #d97706;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive Grid for Product Cards */
+        .product-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .product-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .product-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+        .product-grid.list-view {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .product-grid.list-view .product-card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+        }
+        .product-grid.list-view .product-card .relative {
+            width: 150px;
+            height: 150px;
+        }
+        .product-grid.list-view .product-card .p-4 {
+            flex: 1;
+            text-align: left;
+        }
+
+        /* Display Option Icons */
+        .display-option {
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #4b5563;
+            transition: color 0.3s ease;
+        }
+        .display-option:hover, .display-option.active {
+            color: #d97706;
+        }
+
+        /* Floating Filter Toggler Button (Mobile) */
+        .filter-toggler {
+            display: none;
+            position: fixed;
+            top: 100px;
+            left: 16px;
+            background-color: #d97706;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 40;
+            transition: background-color 0.3s ease;
+        }
+        .filter-toggler:hover {
+            background-color: #b45309;
+        }
+
+        /* Filter Close Button (Mobile) */
+        #filter-close-btn {
+            display: none;
+            background-color: #d97706;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        #filter-close-btn:hover {
+            background-color: #b45309;
+        }
+
+        /* Country Button Fixed Position */
+        #country-btn-container {
+            position: fixed !important;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 50;
+            pointer-events: auto;
+            transform: none;
+            will-change: auto;
+        }
+        #country-dropdown {
+            position: absolute;
+            bottom: 3rem;
+            left: 0;
+            z-index: 50;
+        }
+
+        /* Flag Styling */
+        .flag {
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Action Button Hover Effect */
+        .action-btn {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Search Bar Styling */
+        .search-input:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+        }
+
+        /* No Results Message */
+        .no-results {
+            display: none;
+            text-align: center;
+            color: #6b7280;
+            font-size: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        /* Mobile Sidebar Styling */
+        .mobile-sidebar-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4b5563;
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+        .mobile-sidebar-item:hover, .mobile-sidebar-item.active {
+            color: #d97706;
+            background-color: #f3f4f6;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 767px) {
+            .product-grid.cols-2, .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
+                grid-template-columns: 1fr;
+            }
+            .product-grid.list-view .product-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .product-grid.list-view .product-card .relative {
+                width: 100%;
+                height: 200px;
+            }
+            .product-grid.list-view .product-card .p-4 {
+                text-align: center;
+            }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100%;
+                background-color: #f3f4f6;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 60;
+                overflow-y: auto;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .filter-toggler {
+                display: block;
+            }
+            #filter-close-btn {
+                display: block;
+            }
+            .tooltip {
+                right: 0;
+                top: -50px;
+            }
+            .tooltip::after {
+                right: 10px;
+            }
+            .navbar {
+                padding: 0.5rem 0;
+            }
+            .navbar-logo {
+                height: 48px;
+            }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sidebar {
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            .navbar-item {
+                padding: 0.5rem 0.75rem;
+                font-size: 1rem;
+            }
+            .navbar-logo {
+                height: 56px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+            .navbar-logo {
+                height: 64px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Navbar -->
+    <nav class="navbar bg-white shadow-md fixed w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Mobile Navbar -->
+            <div class="md:hidden flex items-center justify-between w-full relative">
+                <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <div class="flex items-center space-x-4">
+                    <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
+                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                </div>
+                <!-- Mobile Search Bar -->
+                <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden">
+                    <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
+                </div>
+            </div>
+            <!-- Desktop Navbar -->
+            <div class="hidden md:flex items-center justify-between w-full">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <div class="flex space-x-6">
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
+                    </div>
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 active">Products</a>
+                    </div>
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
+                    </div>
+                </div>
+                <!-- Search and Icons -->
+                <div class="flex items-center space-x-4">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
+                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
+        <div class="p-4">
+            <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
+            <div class="space-y-2">
+                <a href="{{ url_for('index') }}" class="mobile-sidebar-item">Home</a>
+                <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item active">Products</a>
+                <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item">Special Discount</a>
+                <a href="{{ url_for('user_login') }}" class="mobile-sidebar-item">Login</a>
+                <a href="{{ url_for('account') }}" class="mobile-sidebar-item">My Account</a>
+                <a href="{{ url_for('logout') }}" class="mobile-sidebar-item">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative h-96">
+        <div class="absolute inset-0 bg-cover bg-center animate-zoomIn" style="background-image: url('{{ url_for('static', filename='images/pot7.jpg') }}');">
+            <div class="container mx-auto h-full flex items-center px-4">
+                <div class="bg-white bg-opacity-80 p-6 rounded animate-fadeInUp">
+                    <h1 class="text-4xl font-bold text-yellow-600">Our Fair price Products</h1>
+                    <p class="mt-2 text-gray-800">Discover Our Premium Artifacts at Original Prices</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products-section" class="bg-white py-16 animate-pageLoad">
+        <div class="max-w-7xl mx-auto px-4 relative">
+            <!-- Floating Filter Toggler Button (Mobile) -->
+            <button id="filter-toggler" class="filter-toggler">
+                <i class="fas fa-filter"></i>
+            </button>
+
+            <!-- Header and Display Options -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+                <h2 class="text-3xl font-semibold text-yellow-600 animate-fadeInUp">Explore Full Price Artifacts</h2>
+                <div class="display-options flex gap-2 mt-4 md:mt-0">
+                    <i class="fas fa-th display-option cols-2" data-cols="2" title="2 Columns"></i>
+                    <i class="fas fa-th-large display-option cols-3 active" data-cols="3" title="3 Columns"></i>
+                    <i class="fas fa-th display-option cols-4" data-cols="4" title="4 Columns"></i>
+                    <i class="fas fa-th display-option cols-5" data-cols="5" title="5 Columns"></i>
+                    <i class="fas fa-list display-option list-view" data-view="list" title="List View"></i>
+                </div>
+            </div>
+
+            <!-- Main Content with Sidebar -->
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Left Sidebar with Filters -->
+                <div class="sidebar w-full md:w-64 bg-gray-100 p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-yellow-600">Filters</h3>
+                        <button id="filter-close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- Category Filter -->
+                    <div class="mb-6">
+                        <label class="text-gray-700 font-medium mb-2 block">Category</label>
+                        <div class="space-y-2">
+                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="all">All Categories</a>
+                            {% for category in categories %}
+                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="{{ category.name }}">{{ category.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Price Range Filter -->
+                    <div>
+                        <label class="text-gray-700 font-medium mb-2 block">Price Range</label>
+                        <select class="w-full p-2 border rounded-md focus:outline-none price-filter">
+                            <option value="all">All Prices</option>
+                            <option value="0-100">{{ current_currency }} 0 - 100</option>
+                            <option value="100-200">{{ current_currency }} 100 - 200</option>
+                            <option value="200+">{{ current_currency }} 200+</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Product Cards -->
+                <div class="product-grid grid gap-8 flex-1 cols-3" id="product-grid">
+                    {% for product in products %}
+                    <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}">
+                        <div class="relative w-full h-64 overflow-hidden">
+                            <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+                            <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+                            <!-- Wishlist Button -->
+                            <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
+                                <i class="far fa-heart"></i>
+                                <span class="tooltip">Add to Wishlist</span>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
+                                {{ product.name }}
+                            </h3>
+                            <p class="text-center text-gray-600 text-sm mt-2">{{ product.category }}</p>
+                            <p class="text-center text-gray-600 mt-2 price" data-price="{{ product.price }}">
+                                {{ current_currency }} {{ product.price | round(2) }}
+                            </p>
+                            <div class="flex justify-center gap-2 mt-4">
+                                <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="addToCart({{ product.id }})">
+                                    <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="no-results text-gray-600 col-span-full text-center">No full price products available.</p>
+                    {% endfor %}
+                    <p class="no-results text-gray-600 col-span-full text-center" id="no-search-results">No matching products found.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Country Button -->
+    <div id="country-btn-container">
+        <button id="country-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-yellow-700 transition flex items-center">
+            <span class="flag">🇺🇸</span> USA
+        </button>
+        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32">
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Desktop Layout -->
+            <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#">Track My Order</a></li>
+                        <li><a href="#">Artifact Collections</a></li>
+                        <li><a href="#">Wholesale Artifacts</a></li>
+                        <li><a href="#">Buyer FAQs</a></li>
+                        <li><a href="#">Handcrafted Artifact Disclaimer</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#">Sell on Zira Artifacts</a></li>
+                        <li><a href="#">Artisan Seller Login</a></li>
+                        <li><a href="#">Artisan Seller FAQ</a></li>
+                        <li><a href="#">Seller Policies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy & Sharing</a></li>
+                        <li><a href="#">Return & Refund Policy</a></li>
+                        <li><a href="#">Shipping & Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Artisan Stories</a></li>
+                        <li><a href="#">Explore Cultural Heritage</a></li>
+                        <li class="mt-4 text-white font-medium">+254 790 867 733</li>
+                        <li>sales@ziraartifacts.com</li>
+                        <li class="flex gap-4 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
+                    <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
+                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile Dropdowns -->
+            <div class="md:hidden space-y-4">
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#">Track My Order</a></li>
+                        <li><a href="#">Artifact Collections</a></li>
+                        <li><a href="#">Wholesale Artifacts</a></li>
+                        <li><a href="#">Buyer FAQs</a></li>
+                        <li><a href="#">Handcrafted Artifact Disclaimer</a></li>
+                    </ul>
+                </details>
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#">Sell on Zira Artifacts</a></li>
+                        <li><a href="#">Artisan Seller Login</a></li>
+                        <li><a href="#">Artisan Seller FAQ</a></li>
+                        <li><a href="#">Seller Policies</a></li>
+                    </ul>
+                </details>
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy & Sharing</a></li>
+                        <li><a href="#">Return & Refund Policy</a></li>
+                        <li><a href="#">Shipping & Delivery</a></li>
+                    </ul>
+                </details>
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Artisan Stories</a></li>
+                        <li><a href="#">Explore Cultural Heritage</a></li>
+                    </ul>
+                    <div class="mt-3 text-sm">
+                        <p>+254 790 867 733</p>
+                        <p>sales@ziraartifacts.com</p>
+                        <div class="flex gap-3 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </details>
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
+                    <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
+                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Currency Conversion Logic
+        const exchangeRates = {
+            USD: 1,
+            EUR: 0.85,
+            GBP: 0.73,
+            KES: 130
+        };
+        let currentCurrency = '{{ current_currency }}';
+
+        // Toggle Country Dropdown
+        document.getElementById('country-btn').addEventListener('click', () => {
+            const dropdown = document.getElementById('country-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Update Currency
+        document.querySelectorAll('.country-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                const country = e.target.getAttribute('data-country');
+                const flag = e.target.getAttribute('data-flag');
+                currentCurrency = e.target.getAttribute('data-currency');
+                document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
+                document.getElementById('country-dropdown').classList.add('hidden');
+                updatePrices();
+            });
+        });
+
+        // Update Prices
+        function updatePrices() {
+            document.querySelectorAll('.price').forEach(priceElement => {
+                const basePrice = parseFloat(priceElement.getAttribute('data-price'));
+                const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
+                priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+            });
+            // Update Price Filter Options
+            const priceFilter = document.querySelector('.price-filter');
+            const selectedValue = priceFilter.value;
+            priceFilter.innerHTML = `
+                <option value="all">All Prices</option>
+                <option value="0-100">${currentCurrency} 0 - ${(100 * exchangeRates[currentCurrency]).toFixed(2)}</option>
+                <option value="100-200">${currentCurrency} 100 - ${(200 * exchangeRates[currentCurrency]).toFixed(2)}</option>
+                <option value="200+">${currentCurrency} 200+</option>
+            `;
+            priceFilter.value = selectedValue;
+        }
+
+        // Filter Logic
+        let selectedCategory = 'all';
+        let selectedPriceRange = 'all';
+        let searchQuery = '';
+
+        const applyFilters = () => {
+            let visibleProducts = 0;
+            document.querySelectorAll('.product-card').forEach(card => {
+                // Category Filter
+                const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
+                // Price Filter
+                const price = parseFloat(card.querySelector('.price').getAttribute('data-price'));
+                let priceMatch = true;
+                if (selectedPriceRange === '0-100') {
+                    priceMatch = price <= 100;
+                } else if (selectedPriceRange === '100-200') {
+                    priceMatch = price > 100 && price <= 200;
+                } else if (selectedPriceRange === '200+') {
+                    priceMatch = price > 200;
+                }
+                // Search Filter
+                const name = card.getAttribute('data-name');
+                const category = card.getAttribute('data-category').toLowerCase();
+                const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
+
+                // Combined Filter
+                if (categoryMatch && priceMatch && searchMatch) {
+                    card.style.display = 'block';
+                    visibleProducts++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Toggle No Results Messages
+            const noProducts = document.querySelector('.no-results:not(#no-search-results)');
+            const noSearchResults = document.getElementById('no-search-results');
+            if (visibleProducts === 0) {
+                if (searchQuery) {
+                    noSearchResults.style.display = 'block';
+                    if (noProducts) noProducts.style.display = 'none';
+                } else {
+                    noSearchResults.style.display = 'none';
+                    if (noProducts) noProducts.style.display = 'block';
+                }
+            } else {
+                noSearchResults.style.display = 'none';
+                if (noProducts) noProducts.style.display = 'none';
+            }
+        };
+
+        // Live Search
+        document.querySelectorAll('.search-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                applyFilters();
+            });
+        });
+
+        // Category Filter
+        document.querySelectorAll('.filter-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedCategory = e.target.getAttribute('data-filter');
+                document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
+                e.target.classList.add('font-bold', 'text-yellow-600');
+                applyFilters();
+            });
+        });
+
+        // Price Range Filter
+        document.querySelector('.price-filter').addEventListener('change', (e) => {
+            selectedPriceRange = e.target.value;
+            applyFilters();
+        });
+
+        // Display Options
+        document.querySelectorAll('.display-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
+                e.target.classList.add('active');
+
+                const grid = document.querySelector('.product-grid');
+                grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
+
+                if (e.target.classList.contains('list-view')) {
+                    grid.classList.add('list-view');
+                } else {
+                    const cols = e.target.getAttribute('data-cols');
+                    grid.classList.add(`cols-${cols}`);
+                }
+            });
+        });
+
+        // Wishlist Button Toggle
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const icon = btn.querySelector('i');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('far');
+            });
+        });
+
+        // Add to Wishlist
+        function addToWishlist(productId) {
+            fetch('/api/wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId }),
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error adding to wishlist:', error);
+                alert('Failed to add to wishlist: ' + error.message);
+            });
+        }
+
+        // Add to Cart
+        function addToCart(productId) {
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId, quantity: 1 }),
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart: ' + error.message);
+            });
+        }
+
+        // Mobile Navbar Toggle
+        document.getElementById('nav-toggler').addEventListener('click', () => {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const icon = document.querySelector('#nav-toggler i');
+            sidebar.classList.toggle('-translate-x-full');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+        });
+
+        // Close Mobile Sidebar
+        document.getElementById('close-sidebar').addEventListener('click', () => {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const icon = document.querySelector('#nav-toggler i');
+            sidebar.classList.add('-translate-x-full');
+            icon.classList.add('fa-bars');
+            icon.classList.remove('fa-times');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+        });
+
+        // Mobile Search Toggle
+        document.getElementById('mobile-search-icon').addEventListener('click', () => {
+            const searchBar = document.getElementById('mobile-search-bar');
+            searchBar.classList.toggle('active');
+            const icon = document.getElementById('mobile-search-icon');
+            icon.classList.add('animate-bounce');
+            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+        });
+
+        // Filter Toggler Button (Mobile)
+        document.getElementById('filter-toggler').addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const button = document.getElementById('filter-toggler');
+            sidebar.classList.toggle('open');
+            button.classList.add('animate-pulse');
+            setTimeout(() => button.classList.remove('animate-pulse'), 300);
+        });
+
+        // Filter Close Button (Mobile)
+        document.getElementById('filter-close-btn').addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const icon = document.querySelector('#filter-close-btn i');
+            sidebar.classList.remove('open');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            applyFilters();
+        });
+
+        // Close Filter Sidebar When Clicking Outside (Mobile)
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const toggler = document.getElementById('filter-toggler');
+            const closeBtn = document.getElementById('filter-close-btn');
+            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
+                sidebar.classList.remove('open');
+                applyFilters();
+            }
+        });
+
+        // Initialize Prices and Filters
+        updatePrices();
+        applyFilters();
+    </script>
+</body>
+</html>

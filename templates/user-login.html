@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zira Artifacts - User Login</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Toastify.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .main-content {
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .validation-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .validation-check.valid i {
+            color: #16a34a; /* Green */
+        }
+        .validation-check.invalid i {
+            color: #dc2626; /* Red */
+        }
+        @media (max-width: 767px) {
+            .main-content {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .hero-section button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        @media (min-width: 1280px) {
+            .main-content {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+                overflow-x: visible;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Main Content -->
+    <main class="main-content p-4 sm:p-6 min-h-screen">
+        <!-- Header -->
+        <header class="flex items-center space-x-4 mb-8">
+            <img src="/static/images/logo.png" alt="Zira Artifacts Logo" class="h-12">
+            <h1 class="text-3xl font-bold text-gray-800">Zira Artifacts</h1>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section flex flex-col md:flex-row items-center justify-between bg-white rounded-lg shadow-lg p-8 max-w-full mx-auto">
+            <div class="md:w-1/2 mb-6 md:mb-0">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome to Zira Artifacts</h2>
+                <p class="text-gray-600 mb-6">Discover unique stone carvings and cultural artifacts. Sign in or create an account to start shopping or selling!</p>
+                <div class="flex space-x-4">
+                    <button class="bg-yellow-600 text-white px-6 py-2 rounded hover:bg-yellow-700" onclick="openModal('login-modal')">Sign In</button>
+                    <button class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400" onclick="openModal('register-modal')">Sign Up</button>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://tacc.co.ke/wp-content/uploads/2024/06/ESOPDS1358_Grey_2-470x470.jpg" alt="Featured Artifact" class="w-full h-auto rounded-lg">
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal" role="dialog" aria-labelledby="login-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="login-modal-title" class="text-xl font-semibold mb-4">Sign In</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="login-email">Email</label>
+                    <input type="email" id="login-email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="login-password">Password</label>
+                    <input type="password" id="login-password" class="w-full border rounded px-3 py-2" required minlength="6">
+                </div>
+                <div class="mb-4">
+                    <a href="#" class="text-yellow-600 hover:underline text-sm" onclick="closeModal('login-modal'); openModal('reset-password-modal')">Forgot Password?</a>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onclick="closeModal('login-modal')">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="register-modal" class="modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="register-modal-title" class="text-xl font-semibold mb-4">Sign Up</h2>
+            <form id="register-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="register-name">Name</label>
+                    <input type="text" id="register-name" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="register-email">Email</label>
+                    <input type="email" id="register-email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="register-password">Password</label>
+                    <input type="password" id="register-password" class="w-full border rounded px-3 py-2" required>
+                    <div id="password-validation" class="text-sm hidden">
+                        <div id="length-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least 6 characters</div>
+                        <div id="uppercase-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one uppercase letter</div>
+                        <div id="lowercase-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one lowercase letter</div>
+                        <div id="number-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one number</div>
+                        <div id="special-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one special character</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" class="w-full border rounded px-3 py-2" required>
+                    <div id="confirm-password-validation" class="text-sm validation-check invalid hidden">
+                        <i class="fas fa-circle"></i> <span id="confirm-password-text">Passwords do not match</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="register-role">Role</label>
+                    <select id="register-role" class="w-full border rounded px-3 py-2" required>
+                        <option value="buyer">Buyer</option>
+                        <option value="artisan">Artisan Seller</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onclick="closeModal('register-modal')">Cancel</button>
+                    <button type="submit" id="register-submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700" disabled>Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="reset-password-modal" class="modal" role="dialog" aria-labelledby="reset-password-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="reset-password-modal-title" class="text-xl font-semibold mb-4">Reset Password</h2>
+            <form id="reset-password-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="reset-email">Email</label>
+                    <input type="email" id="reset-email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onclick="closeModal('reset-password-modal')">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.getElementById(modalId).querySelector('input').focus();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            const form = document.getElementById(modalId.replace('modal', 'form'));
+            form.reset();
+            resetValidation();
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                style: {
+                    background: type === 'success' ? '#d97706' : '#dc2626'
+                }
+            }).showToast();
+        }
+
+        // Form Validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePassword(password) {
+            return {
+                length: password.length >= 6,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+        }
+
+        function updatePasswordValidation(password) {
+            const checks = validatePassword(password);
+            const validationDiv = document.getElementById('password-validation');
+            validationDiv.classList.toggle('hidden', password === '');
+
+            document.getElementById('length-check').classList.toggle('valid', checks.length);
+            document.getElementById('length-check').classList.toggle('invalid', !checks.length);
+            document.getElementById('uppercase-check').classList.toggle('valid', checks.uppercase);
+            document.getElementById('uppercase-check').classList.toggle('invalid', !checks.uppercase);
+            document.getElementById('lowercase-check').classList.toggle('valid', checks.lowercase);
+            document.getElementById('lowercase-check').classList.toggle('invalid', !checks.lowercase);
+            document.getElementById('number-check').classList.toggle('valid', checks.number);
+            document.getElementById('number-check').classList.toggle('invalid', !checks.number);
+            document.getElementById('special-check').classList.toggle('valid', checks.special);
+            document.getElementById('special-check').classList.toggle('invalid', !checks.special);
+
+            return Object.values(checks).every(v => v);
+        }
+
+        function updateConfirmPasswordValidation(password, confirmPassword) {
+            const confirmDiv = document.getElementById('confirm-password-validation');
+            confirmDiv.classList.toggle('hidden', confirmPassword === '');
+            const isMatch = password === confirmPassword && confirmPassword !== '';
+            confirmDiv.classList.toggle('valid', isMatch);
+            confirmDiv.classList.toggle('invalid', !isMatch);
+            document.getElementById('confirm-password-text').textContent = isMatch ? 'Passwords match' : 'Passwords do not match';
+            return isMatch;
+        }
+
+        function resetValidation() {
+            const validationDiv = document.getElementById('password-validation');
+            validationDiv.classList.add('hidden');
+            ['length', 'uppercase', 'lowercase', 'number', 'special'].forEach(id => {
+                const check = document.getElementById(`${id}-check`);
+                check.classList.add('invalid');
+                check.classList.remove('valid');
+            });
+            const confirmDiv = document.getElementById('confirm-password-validation');
+            confirmDiv.classList.add('hidden');
+            confirmDiv.classList.add('invalid');
+            confirmDiv.classList.remove('valid');
+            document.getElementById('confirm-password-text').textContent = 'Passwords do not match';
+            document.getElementById('register-submit').disabled = true;
+        }
+
+        // Enable/Disable Submit Button
+        function updateSubmitButton() {
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const isPasswordValid = updatePasswordValidation(password);
+            const isConfirmValid = updateConfirmPasswordValidation(password, confirmPassword);
+            document.getElementById('register-submit').disabled = !(isPasswordValid && isConfirmValid);
+        }
+
+        // Live Validation Listeners
+        document.getElementById('register-password').addEventListener('input', updateSubmitButton);
+        document.getElementById('register-confirm-password').addEventListener('input', updateSubmitButton);
+
+        // Login Form Handler
+        document.getElementById('login-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!validateEmail(email)) {
+                showToast('Please enter a valid email', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/user_login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'  // Ensure session cookie is sent/stored
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showToast(data.error || 'Login failed', 'error');
+                    return;
+                }
+                showToast('Logged in successfully');
+                closeModal('login-modal');
+                window.location.href = '/';
+            } catch (error) {
+                showToast('Network error, please try again', 'error');
+            }
+        });
+
+        // Registration Form Handler
+        document.getElementById('register-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const role = document.getElementById('register-role').value;
+
+            if (!validateEmail(email)) {
+                showToast('Please enter a valid email', 'error');
+                return;
+            }
+            if (!updatePasswordValidation(password)) {
+                showToast('Password does not meet requirements', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, confirmPassword, role }),
+                    credentials: 'include'  // Ensure session cookie is sent/stored
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showToast(data.error || 'Registration failed', 'error');
+                    return;
+                }
+                showToast('Registration successful! Please sign in.');
+                closeModal('register-modal');
+                openModal('login-modal');
+            } catch (error) {
+                showToast('Network error, please try again', 'error');
+            }
+        });
+
+        // Reset Password Form Handler
+        document.getElementById('reset-password-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value;
+
+            if (!validateEmail(email)) {
+                showToast('Please enter a valid email', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/reset_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                    credentials: 'include'  // Ensure session cookie is sent/stored
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showToast(data.error || 'Reset failed', 'error');
+                    return;
+                }
+                showToast('Password reset link sent (check implementation)');
+                closeModal('reset-password-modal');
+            } catch (error) {
+                showToast('Network error, please try again', 'error');
+            }
+        });
+
+        // Close Modal on Escape Key
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
