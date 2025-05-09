@@ -402,6 +402,129 @@
             </div>
         </div>
     </section>
+    <style>
+        /* Ensure the container for the cards uses flexbox to align cards */
+.ftm-tab-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem; /* Adjust gap as needed */
+}
+
+/* Style for each card to have the same height */
+.ftm-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 360px; /* Fixed minimum height for all cards */
+    width: 240px; /* Maintain existing width */
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+/* Image container with fixed height, no extra padding */
+.ftm-card-img {
+    position: relative;
+    width: 100%;
+    height: 240px; /* Fixed height for uniformity */
+    overflow: hidden;
+}
+
+/* Ensure the entire image is visible, filling the container vertically */
+.ftm-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Use cover to fill container, avoiding white space */
+    object-position: center; /* Center the image */
+}
+
+/* Style for the discount badge */
+.ftm-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #d97706;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Content area takes remaining space and aligns content */
+.ftm-card-content {
+    flex: 1; /* Take remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out content evenly */
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Ensure product name doesn't overflow and wraps */
+.ftm-product-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    margin-bottom: 0.5rem;
+}
+
+/* Price styling */
+.ftm-price {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #d97706;
+    margin-bottom: 0.5rem;
+}
+
+.ftm-old-price {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-decoration: line-through;
+    margin-left: 0.5rem;
+}
+
+/* Wishlist button styling */
+.wishlist-btn {
+    width: 100%;
+    background: #d97706;
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.wishlist-btn:hover {
+    background: #b45309;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ftm-card {
+        width: 100%;
+        max-width: 280px; /* Slightly smaller for mobile */
+        min-height: 340px; /* Adjust for mobile */
+    }
+
+    .ftm-card-img {
+        height: 220px; /* Slightly smaller image height for mobile */
+    }
+
+    .ftm-product-name {
+        font-size: 1rem;
+    }
+}
+    </style>
 
     <style>
         /* Ensure the tab content grid doesn't interfere with button centering */

@@ -1,12 +1,26 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 # from models import Story
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 import logging
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_file(file):
+    if file and allowed_file(file.filename):
+        filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        return filename
+    return None
 
 
 app = Flask(__name__)
@@ -56,6 +70,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='Pending')
+    customer_status = db.Column(db.String(20), default='Active')  # Added column
     payment_method = db.Column(db.String(20), nullable=False)
     message_code = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -113,7 +128,9 @@ class Cart(db.Model):
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
     product = db.relationship('Product', backref='cart_items', lazy=True)
 
-# Database Initialization (unchanged)
+# Database Initialization
+# Database Initialization
+# Database Initialization
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
@@ -132,7 +149,13 @@ with app.app_context():
             email='john.doe@example.com',
             phone_number='+1234567890',
             password=generate_password_hash('password123'),
-            role='buyer'
+            role='buyer',
+            address={
+                'street': '00100 Northern Bypass Road, Intersection',
+                'city': 'Nairobi',
+                'country': 'Kenya',
+                'postal_code': '00100'
+            }
         )
         db.session.add(user)
         db.session.commit()
@@ -190,6 +213,7 @@ with app.app_context():
                 product.discount_id = discount.id
         db.session.commit()
 
+    # Temporarily disable Order initialization to allow schema update
     if not Order.query.first():
         user = User.query.filter_by(email='john.doe@example.com').first()
         orders = [
@@ -197,6 +221,7 @@ with app.app_context():
                 user_id=user.id,
                 total=3600.00,
                 status='Pending',
+                customer_status='Active',
                 payment_method='immediate',
                 created_at=datetime(2025, 5, 1)
             ),
@@ -204,24 +229,17 @@ with app.app_context():
                 user_id=user.id,
                 total=1500.00,
                 status='Delivered',
+                customer_status='Active',
                 payment_method='delivery',
                 created_at=datetime(2025, 5, 2)
             ),
         ]
         db.session.bulk_save_objects(orders)
         db.session.commit()
-
-# Helper Functions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png'}
-
-def save_file(file):
-    if file and allowed_file(file.filename):
-        filename = f"{datetime.now().timestamp()}_{file.filename}"
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return filename
-    return None
-
+    # Ensure existing orders have customer_status
+    Order.query.filter_by(customer_status=None).update({'customer_status': 'Active'})
+    db.session.commit()
+    
 @app.route('/')
 def index():
     if 'user' not in session:
@@ -449,63 +467,84 @@ def handle_product(id):
 @app.route('/api/orders', methods=['GET'])
 def handle_orders():
     if 'admin' not in session:
+        logging.debug('Unauthorized: No admin in session')
         return jsonify({'error': 'Unauthorized'}), 401
-    orders = Order.query.all()
-    return jsonify([
-        {
-            'id': o.id,
-            'customer': User.query.get(o.user_id).name,
-            'customer_number': User.query.get(o.user_id).phone_number or 'N/A',
-            'location': User.query.get(o.user_id).address.get('location', 'N/A') if User.query.get(o.user_id).address else 'N/A',
-            'total': o.total,
-            'status': o.status,
-            'payment_method': o.payment_method
-        } for o in orders
-    ])
+    try:
+        orders = Order.query.all()
+        orders_data = []
+        for o in orders:
+            # Fetch user and handle None case
+            user = User.query.get(o.user_id) if o.user_id else None
+            if not user:
+                logging.warning(f"Order {o.id} has invalid or missing user_id: {o.user_id}")
+                customer = 'Unknown'
+                customer_number = 'N/A'
+                location = 'N/A'
+            else:
+                customer = user.name
+                customer_number = user.phone_number or 'N/A'
+                location = user.address or 'N/A'
+
+            orders_data.append({
+                'id': o.id,
+                'customer': customer,
+                'customer_number': customer_number,
+                'location': location,
+                'total': o.total if o.total is not None else 0.0,
+                'status': o.status or 'Unknown',
+                'customer_status': o.customer_status or 'Unknown',
+                'payment_method': o.payment_method or 'N/A'
+            })
+        return jsonify(orders_data), 200
+    except SQLAlchemyError as e:
+        logging.error(f"Database error in GET /api/orders: {str(e)}")
+        return jsonify([]), 500  # Return empty array to prevent frontend errors
+    except Exception as e:
+        logging.error(f"Unexpected error in GET /api/orders: {str(e)}")
+        return jsonify([]), 500  # Return empty array to prevent frontend errors
+
+
+
 
 @app.route('/api/orders/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_order(id):
     if 'admin' not in session:
+        logging.debug('Unauthorized: No admin in session')
         return jsonify({'error': 'Unauthorized'}), 401
-    order = Order.query.get_or_404(id)
-    if request.method == 'GET':
-        return jsonify({
-            'id': order.id,
-            'customer': User.query.get(order.user_id).name,
-            'customer_number': User.query.get(order.user_id).phone_number or 'N/A',
-            'location': User.query.get(order.user_id).address.get('location', 'N/A') if User.query.get(order.user_id).address else 'N/A',
-            'total': order.total,
-            'status': order.status,
-            'payment_method': order.payment_method
-        })
-    if request.method == 'PUT':
-        try:
+    try:
+        order = Order.query.get_or_404(id)
+        if request.method == 'GET':
+            return jsonify({
+                'id': order.id,
+                'customer': User.query.get(order.user_id).name,
+                'customer_number': User.query.get(order.user_id).phone_number or 'N/A',
+                'location': User.query.get(order.user_id).address or 'N/A',  # Full address JSON
+                'total': order.total,
+                'status': order.status,
+                'customer_status': order.customer_status,
+                'payment_method': order.payment_method
+            }), 200
+        if request.method == 'PUT':
             data = request.get_json()
-            order.status = data.get('status', order.status)
+            order.status = data.get('status', order.status)  # Only update admin status
             db.session.commit()
-            return jsonify({'message': 'Order updated successfully'})
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logging.error(f"Database error in PUT /api/orders/{id}: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"Unexpected error in PUT /api/orders/{id}: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
-    if request.method == 'DELETE':
-        try:
+            logging.debug(f'Order {id} status updated to {order.status}')
+            return jsonify({'message': 'Order updated successfully'}), 200
+        if request.method == 'DELETE':
             OrderItem.query.filter_by(order_id=id).delete()
             db.session.delete(order)
             db.session.commit()
-            return jsonify({'message': 'Order deleted successfully'})
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logging.error(f"Database error in DELETE /api/orders/{id}: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"Unexpected error in DELETE /api/orders/{id}: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.debug(f'Order {id} deleted')
+            return jsonify({'message': 'Order deleted successfully'}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Database error in /api/orders/{id}: {str(e)}")
+        return jsonify({'error': 'Database error'}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error in /api/orders/{id}: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 
 # Discount Routes
 @app.route('/api/discounts', methods=['GET', 'POST'])
@@ -1161,7 +1200,8 @@ def cancel_order(id):
         if order.status != 'Pending':
             logging.debug(f'Order {id} cannot be canceled, status: {order.status}')
             return jsonify({'error': 'Only pending orders can be canceled'}), 400
-        order.status = 'Canceled'
+        order.customer_status = 'Canceled'  # Update customer_status
+        order.status = 'Canceled'  # Also update status for consistency
         db.session.commit()
         logging.debug(f'Order {id} canceled by user {user_email}')
         return jsonify({'message': 'Order canceled successfully'}), 200

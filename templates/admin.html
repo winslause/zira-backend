@@ -309,6 +309,7 @@
                                 <th>Customer Number</th>
                                 <th>Location</th>
                                 <th>Total</th>
+                                <th>Customer Status</th>
                                 <th>Status</th>
                                 <th>Payment Method</th>
                                 <th>Actions</th>
@@ -495,6 +496,7 @@
 
     <!-- Product Modal -->
     <div id="product-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="max-h-[90vh] overflow-y-auto bg-white p-6 rounded-lg shadow-lg w-full max-w-xl">
         <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl animate-slideIn">
             <span class="modal-close absolute top-4 right-4 text-gray-600 hover:text-yellow-600 cursor-pointer transition-colors" onclick="closeModal('product-modal')"><i class="fas fa-times text-xl"></i></span>
             <h2 class="text-xl font-semibold mb-4 text-yellow-600" id="product-modal-title">Add Product</h2>
@@ -527,7 +529,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div></div>
 
     <!-- Category Modal -->
     <div id="category-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
@@ -732,15 +734,19 @@ function initializeCharts(salesData, usersData) {
 
         // Modal Functions
         function openModal(modalId) {
+            console.log('Opening modal:', modalId);
             const modal = document.getElementById(modalId);
             modal.classList.remove('hidden');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
-            if (modalId === 'product-modal') {
-                populateProductCategories();
-            } else if (modalId === 'discount-modal') {
-                populateDiscountProducts();
-            }
+            setTimeout(() => {
+                console.log('Modal classes after open:', modal.classList.toString());
+                if (modalId === 'product-modal') {
+                    populateProductCategories();
+                } else if (modalId === 'discount-modal') {
+                    populateDiscountProducts();
+                }
+            }, 0);
         }
 
         function closeModal(modalId) {
@@ -825,48 +831,29 @@ function initializeCharts(salesData, usersData) {
         // Fetch Data
         async function fetchData(endpoint) {
             try {
-                console.log(`Fetching /api/${endpoint}`);
-                const response = await fetch(`/api/${endpoint}`, {
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-                console.log(`Response for /api/${endpoint}:`, response.status, response.headers.get('content-type'), response.url);
+                console.log(`Fetching /api/${endpoint}...`);
+                const response = await fetch(`/api/${endpoint}`, { credentials: 'include' });
                 if (response.redirected && response.url.includes('/login')) {
+                    console.log(`Redirected to login from /api/${endpoint}`);
                     showToast('Session expired. Please log in.', 'error');
                     window.location.href = '/login';
-                    return null;
+                    return [];
                 }
-                const contentType = response.headers.get('content-type');
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        showToast('Unauthorized. Please log in.', 'error');
-                        window.location.href = '/login';
-                        return null;
-                    }
-                    if (response.status === 500) {
-                        showToast('Server error. Please try again later.', 'error');
-                        return null;
-                    }
-                    if (contentType && contentType.includes('application/json')) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Failed to fetch ${endpoint}`);
-                    } else {
-                        const text = await response.text();
-                        console.error(`Non-JSON response for /api/${endpoint}:`, text.slice(0, 100));
-                        throw new Error(`Unexpected response from ${endpoint}`);
-                    }
+                    const data = await response.json();
+                    console.warn(`Failed to fetch /api/${endpoint}:`, data.error || 'Unknown error');
+                    return [];
                 }
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error(`Non-JSON response for /api/${endpoint}:`, text.slice(0, 100));
-                    throw new Error(`Unexpected response from ${endpoint}`);
-                }
-                return response.json();
+                const data = await response.json();
+                console.log(`Data from /api/${endpoint}:`, data);
+                return Array.isArray(data) ? data : [];
             } catch (error) {
                 console.error(`Error fetching /api/${endpoint}:`, error);
-                throw error;
+                showToast('Failed to fetch data', 'error');
+                return [];
             }
         }
+
         window.onerror = function(message, source, lineno, colno, error) {
             console.error(`Global error: ${message} at ${source}:${lineno}:${colno}`, error);
         };
@@ -920,35 +907,56 @@ function initializeCharts(salesData, usersData) {
         }
 
         async function populateOrders(data) {
-    try {
-        const orders = data || await fetchData('orders');
-        const tbody = document.getElementById('orders-table');
-        tbody.innerHTML = orders.map(order => `
-            <tr>
-                <td>${order.id}</td>
-                <td>${order.customer}</td>
-                <td>${order.customer_number || 'N/A'}</td>
-                <td>${order.location || 'N/A'}</td>
-                <td>KSh ${order.total.toFixed(2)}</td>
-                <td>
-                    <select onchange="updateOrderStatus('${order.id}', this.value)">
-                        <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                        <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                        <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                        <option value="Canceled" ${order.status === 'Canceled' ? 'selected' : ''}>Canceled</option>
-                    </select>
-                </td>
-                <td>${order.payment_method}</td>
-                <td>
-                    <button class="action-btn text-blue-600 hover:text-blue-800" onclick="viewOrder('${order.id}')"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn text-red-600 hover:text-red-800" onclick="deleteOrder('${order.id}')"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
+            try {
+                console.log('Populating orders...');
+                const orders = data || await fetchData('orders');
+                console.log('Fetched orders:', orders);
+                const tbody = document.getElementById('orders-table');
+                if (!tbody) {
+                    console.error('Orders table not found');
+                    showToast('Failed to load orders table', 'error');
+                    return;
+                }
+                const orderRows = Array.isArray(orders) ? orders : [];
+                tbody.innerHTML = orderRows.length > 0 ? orderRows.map(order => {
+                    // Format address
+                    const address = order.location && typeof order.location === 'object' ? 
+                        `${order.location.street || ''}, ${order.location.city || ''}, ${order.location.country || ''}, ${order.location.postal_code || ''}`.trim() || 'N/A' : 
+                        'N/A';
+                    return `
+                        <tr>
+                            <td>${order.id || 'N/A'}</td>
+                            <td>${order.customer || 'Unknown'}</td>
+                            <td>${order.customer_number || 'N/A'}</td>
+                            <td>${address}</td>
+                            <td>KSh ${order.total ? order.total.toFixed(2) : '0.00'}</td>
+                            <td>${order.customer_status || 'Unknown'}</td>
+                            <td>
+                                <select onchange="updateOrderStatus('${order.id || 0}', this.value)">
+                                    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="Canceled" ${order.status === 'Canceled' ? 'selected' : ''}>Canceled</option>
+                                </select>
+                            </td>
+                            <td>${order.payment_method || 'N/A'}</td>
+                            <td>
+                                <button class="action-btn text-blue-600 hover:text-blue-800" onclick="viewOrder('${order.id || 0}')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn text-red-600 hover:text-red-800" onclick="deleteOrder('${order.id || 0}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('') : '<tr><td colspan="9">No orders available</td></tr>';
+            } catch (error) {
+                console.error('Error populating orders:', error);
+                showToast('Failed to load orders', 'error');
+                const tbody = document.getElementById('orders-table');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="9">Unable to load orders. Please try again later.</td></tr>';
+                }
+            }
+        }
+
 
 async function updateOrderStatus(orderId, status) {
     try {
@@ -1028,6 +1036,7 @@ async function deleteOrder(orderId) {
 
         async function populateDiscounts() {
             try {
+                console.log('Populating discounts...');
                 const response = await fetch('/api/discounts', { credentials: 'include' });
                 if (response.redirected && response.url.includes('/login')) {
                     window.location.href = '/login';
@@ -1036,35 +1045,27 @@ async function deleteOrder(orderId) {
                 if (!response.ok) {
                     const data = await response.json();
                     console.warn('Failed to fetch discounts:', data.error || 'Unknown error');
-                    // Display fallback message instead of toast
-                    const tbody = document.querySelector('#discounts-table tbody');
-                    tbody.innerHTML = '<tr><td colspan="7">Unable to load discounts. Please try again later.</td></tr>';
+                    document.getElementById('discounts-table').innerHTML = '<tr><td colspan="6">Unable to load discounts. Please try again later.</td></tr>';
                     return;
                 }
                 const discounts = await response.json();
-                const tbody = document.querySelector('#discounts-table tbody');
-                tbody.innerHTML = '';
-                discounts.forEach(discount => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+                const tbody = document.getElementById('discounts-table');
+                tbody.innerHTML = discounts.map(discount => `
+                    <tr>
                         <td>${discount.id}</td>
-                        <td>${discount.productId || 'N/A'}</td>
                         <td>${discount.productName}</td>
                         <td>${discount.percent}%</td>
                         <td>${discount.startDate}</td>
                         <td>${discount.endDate}</td>
                         <td>
-                            <button onclick="editDiscount(${discount.id})">Edit</button>
-                            <button onclick="deleteDiscount(${discount.id})">Delete</button>
+                            <!-- <button class="action-btn text-blue-600 hover:text-blue-800" onclick="editDiscount(${discount.id})"><i class="fas fa-edit"></i></button> -->
+                            <button class="action-btn text-red-600 hover:text-red-800" onclick="deleteDiscount(${discount.id})"><i class="fas fa-trash"></i></button>
                         </td>
-                    `;
-                    tbody.appendChild(row);
-                });
+                    </tr>
+                `).join('');
             } catch (error) {
                 console.error('Error populating discounts:', error);
-                // Display fallback message instead of toast
-                const tbody = document.querySelector('#discounts-table tbody');
-                tbody.innerHTML = '<tr><td colspan="7">Unable to load discounts. Please try again later.</td></tr>';
+                document.getElementById('discounts-table').innerHTML = '<tr><td colspan="6">Unable to load discounts. Please try again later.</td></tr>';
             }
         }
         
@@ -1304,18 +1305,16 @@ async function deleteOrder(orderId) {
                 const response = await fetch(url, {
                     method,
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', // Ensure session cookies are sent
+                    credentials: 'include',
                     body: JSON.stringify(discount)
                 });
         
-                // Check for redirects (e.g., to login page)
                 if (response.redirected && response.url.includes('/login')) {
                     showToast('Session expired. Please log in.', 'error');
                     window.location.href = '/login';
                     return;
                 }
         
-                // Check content type
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
                     const text = await response.text();
@@ -1327,12 +1326,18 @@ async function deleteOrder(orderId) {
                 if (!response.ok) throw new Error(data.error || 'Operation failed');
         
                 showToast(id ? 'Discount updated successfully' : 'Discount added successfully');
-                await populateDiscounts();
-                await populateProducts();
-                closeModal('discount-modal');
+                try {
+                    await populateDiscounts(); // Refresh discounts table
+                    await populateProducts(); // Refresh products table
+                } catch (refreshError) {
+                    console.error('Error refreshing tables:', refreshError);
+                    showToast('Failed to refresh tables', 'error');
+                }
+                closeModal('discount-modal'); // Ensure modal closes
             } catch (error) {
-                showToast(error.message, 'error');
                 console.error('Error adding/updating discount:', error);
+                showToast(error.message, 'error');
+                closeModal('discount-modal'); // Close modal even on error
             }
         });
 
@@ -1647,15 +1652,23 @@ async function deleteOrder(orderId) {
         }
 
         async function viewOrder(orderId) {
-            try {
-                const response = await fetch(`/api/orders/${orderId}`);
-                const order = await response.json();
-                if (!response.ok) throw new Error(order.error || 'Failed to fetch order');
-                alert(`Order Details:\nID: ${order.id}\nCustomer: ${order.customer}\nCustomer Number: ${order.customer_number || 'N/A'}\nLocation: ${order.location || 'N/A'}\nTotal: KSh ${order.total.toFixed(2)}\nStatus: ${order.status}\nPayment Method: ${order.payment_method}`);
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
+    try {
+        const response = await fetch(`/api/orders/${orderId}`, { credentials: 'include' });
+        if (response.redirected && response.url.includes('/login')) {
+            showToast('Session expired. Please log in.', 'error');
+            window.location.href = '/login';
+            return;
         }
+        const order = await response.json();
+        if (!response.ok) throw new Error(order.error || 'Failed to fetch order');
+        const address = order.location ? 
+            `${order.location.street}, ${order.location.city}, ${order.location.country}, ${order.location.postal_code}` : 
+            'N/A';
+        alert(`Order Details:\nID: ${order.id}\nCustomer: ${order.customer}\nCustomer Number: ${order.customer_number || 'N/A'}\nLocation: ${address}\nTotal: KSh ${order.total.toFixed(2)}\nCustomer Status: ${order.customer_status}\nStatus: ${order.status}\nPayment Method: ${order.payment_method}`);
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
 
         async function updateArtisanStatus(id, status) {
             try {
@@ -1749,15 +1762,25 @@ async function deleteOrder(orderId) {
         }
 
         async function populateDiscountProducts() {
-            try {
-                const products = await fetchData('discounted_artefacts');
-                const select = document.getElementById('discount-product');
-                select.innerHTML = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
+    try {
+        console.log('Populating discount products...');
+        const products = await fetchData('discounted_artefacts');
+        console.log('Fetched products:', products);
+        const select = document.getElementById('discount-product');
+        if (!select) {
+            console.error('Element with ID "discount-product" not found');
+            showToast('Failed to load product selector', 'error');
+            return;
         }
-
+        // Ensure products is an array
+        const productOptions = Array.isArray(products) ? products : [];
+        select.innerHTML = '<option value="">Select a product</option>' + 
+            productOptions.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    } catch (error) {
+        console.error('Error in populateDiscountProducts:', error);
+        showToast(error.message, 'error');
+    }
+}
         // Logout
         async function logout() {
             try {
