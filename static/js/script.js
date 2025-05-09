@@ -192,18 +192,23 @@ document.querySelectorAll('#craft-stories [data-delay]').forEach(card => {
 
 // Open Story Modal
 function openStoryModal(storyId) {
+    console.log('Opening modal for storyId:', storyId); // Debug: Confirm storyId
     fetch(`/api/stories/${storyId}`, {
         method: 'GET',
         credentials: 'include'
     })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(response => {
+        console.log('API response status:', response.status); // Debug: Log status
+        return response.json().then(data => ({ status: response.status, body: data }));
+    })
     .then(({ status, body }) => {
         if (status >= 400) {
             throw new Error(body.error || 'Failed to load story');
         }
+        console.log('API response body:', body); // Debug: Log response data
         // Populate modal content
         document.getElementById('story-title').textContent = body.title;
-        document.getElementById('story-text').textContent = body.content;
+        document.getElementById('story-text').textContent = body.content; // Full content
         document.getElementById('story-image').src = body.image ? `/static/uploads/${body.image}` : '/static/images/craft.jpg';
         document.getElementById('story-image').alt = body.title;
         // Open modal
@@ -212,20 +217,39 @@ function openStoryModal(storyId) {
     .catch(error => {
         console.error('Error loading story:', error);
         alert('Failed to load story: ' + error.message);
+        // Fallback: Open modal with error message
+        document.getElementById('story-title').textContent = 'Error';
+        document.getElementById('story-text').textContent = 'Failed to load story. Please try again.';
+        document.getElementById('story-image').src = '/static/images/craft.jpg';
+        document.getElementById('story-image').alt = 'Error';
+        openModal('story-modal');
     });
 }
 
-// Reuse existing modal functions from account.html
+// Open modal
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
-    modal.classList.add('open');
+    if (!modal) {
+        console.error(`Modal with ID ${modalId} not found`);
+        return;
+    }
+    modal.classList.remove('hidden'); // Remove hidden class
+    modal.classList.add('open'); // Add open class
     document.body.style.overflow = 'hidden';
+    console.log(`Modal ${modalId} opened`); // Debug: Confirm modal opened
 }
 
+// Close modal
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error(`Modal with ID ${modalId} not found`);
+        return;
+    }
     modal.classList.remove('open');
+    modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
+    console.log(`Modal ${modalId} closed`); // Debug: Confirm modal closed
 }
 
 // Close modal on outside click
@@ -235,4 +259,9 @@ document.querySelectorAll('.modal').forEach(modal => {
             closeModal(modal.id);
         }
     });
+});
+
+// Test modal on page load (optional, remove after testing)
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, modal element:', document.getElementById('story-modal')); // Debug: Check modal exists
 });

@@ -2,10 +2,12 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+# from models import Story
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 import logging
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -220,13 +222,12 @@ def save_file(file):
         return filename
     return None
 
-# Routes (only modified sections are shown)
 @app.route('/')
 def index():
-    stories = Story.query.all()
     if 'user' not in session:
         return redirect(url_for('user_login'))
 
+    stories = Story.query.all()
     latest_products = Product.query.order_by(Product.created_at.desc()).limit(4).all()
     current_date = datetime.utcnow().date()
     discount_products = Product.query.join(Discount, Product.discount_id == Discount.id).filter(
@@ -240,12 +241,16 @@ def index():
         .limit(4).all()
     popular_products = [product for product, _ in popular_products]
 
-    return render_template('index.html',
-                           latest_products=latest_products,
-                           discount_products=discount_products,
-                           popular_products=popular_products,
-                           today=datetime.utcnow().date(),
-                           current_currency='USD')
+    return render_template(
+        'index.html',
+        latest_products=latest_products,
+        discount_products=discount_products,
+        popular_products=popular_products,
+        today=datetime.utcnow().date(),
+        current_currency='USD',
+        stories=stories  
+    )
+
 
 @app.route('/admin')
 def admin():
@@ -1003,6 +1008,20 @@ def handle_story(id):
             logging.error(f"Unexpected error in DELETE /api/stories/{id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
         
+@app.route('/stories')
+def stories():
+    try:
+        stories = Story.query.all()
+        logging.debug(f"Stories fetched: {len(stories)}")
+        for s in stories:
+            logging.debug(f"Story: {s.id}, {s.title}, {s.image}")
+        if not stories:
+            logging.warning("No stories found in the database")
+        return render_template('index.html', stories=stories)
+    except Exception as e:
+        logging.error(f"Error fetching stories: {str(e)}")
+        return render_template('index.html', stories=[])
+    
 # Review Routes
 @app.route('/api/reviews', methods=['GET'])
 def handle_reviews():

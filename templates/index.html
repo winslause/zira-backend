@@ -692,6 +692,59 @@
         </div>
     </div>
 </div>
+<style>
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
+        background: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000; /* Increased to ensure modal is above navbar */
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+    
+    .modal.hidden {
+        display: none; /* Ensure hidden class hides the modal */
+    }
+    
+    .modal.open {
+        display: flex; /* Show modal when open class is added */
+        opacity: 1;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        max-width: 32rem;
+        width: 100%;
+        position: relative;
+        animation: slideIn 0.3s ease;
+        z-index: 1001; /* Slightly higher than modal backdrop for content */
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        z-index: 1002; /* Ensure close button is clickable */
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Ensure modal text is not truncated */
+    #story-text {
+        white-space: pre-wrap; /* Preserve line breaks and wrap text */
+        overflow: auto; /* Allow scrolling if content is long */
+        max-height: 50vh; /* Limit height to avoid overflow */
+    }
+</style>
 
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
