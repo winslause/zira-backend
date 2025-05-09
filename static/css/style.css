@@ -686,3 +686,31 @@
         width: 50%; /* Half width on desktop */
     }
 }
+
+#flash-message1 {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 16px;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    z-index: 9999; /* Ensure above modal */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    min-width: 200px;
+    text-align: center;
+}
+
+#flash-message1.success {
+    background-color: #d97706; /* Yellow for success */
+}
+
+#flash-message1.error {
+    background-color: #dc2626; /* Red for error */
+}
+
+#flash-message1.show {
+    opacity: 1; /* Visible when shown */
+}

@@ -3,14 +3,18 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+import string
+import secrets
+import random
 # from models import Story
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 import logging
+from flask_mail import Mail, Message
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
+logging.basicConfig(level=logging.INFO)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -20,6 +24,12 @@ def save_file(file):
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
         return filename
+    return None
+
+def validate_reset_token(token):
+    user = User.query.filter_by(reset_token=token).first()
+    if user and user.reset_token_expiry > datetime.utcnow():
+        return user
     return None
 
 
@@ -32,7 +42,27 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+# Flask-Mail configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'wenbusale383@gmail.com'
+app.config['MAIL_PASSWORD'] = 'onkc lnjg ilcl qlix'
+app.config['MAIL_DEFAULT_SENDER'] = 'wenbusale383@gmail.com'
+
 db = SQLAlchemy(app)
+mail = Mail(app)
+# logger.debug("Flask-Mail initialized with mail object: %s", mail)
+
+# Token generation and validation helpers
+def generate_reset_token():
+    return secrets.token_urlsafe(32)
+
+def store_reset_token(user, token):
+    user.reset_token = token
+    user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)  # 1-hour expiry
+    db.session.commit()
 
 # Ensure upload folder exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -53,7 +83,10 @@ class User(db.Model):
     profile_picture = db.Column(db.String(200))
     address = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    reset_token = db.Column(db.String(255))  # New column for reset token
+    reset_token_expiry = db.Column(db.DateTime)  # New column for token expiry
+    
+    
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -242,8 +275,8 @@ with app.app_context():
     
 @app.route('/')
 def index():
-    if 'user' not in session:
-        return redirect(url_for('user_login'))
+   # if 'user' not in session:
+    #    return redirect(url_for('user_login'))
 
     stories = Story.query.all()
     latest_products = Product.query.order_by(Product.created_at.desc()).limit(4).all()
@@ -1260,17 +1293,23 @@ def dashboard_stats():
             logger.error(f'Pending orders query failed: {str(e)}')
             pending_orders = 0
 
-        # Top product (by total sales value in last 30 days)
+        # Top product (by number of completed orders in last 30 days)
         try:
             top_product_query = db.session.query(
-                Artefact.name,
-                func.sum(Order.total).label('total_sales')
-            ).join(Order, Artefact.id == Order.artefact_id).filter(
+                Product.name,
+                func.count(Order.id).label('order_count')
+            ).join(OrderItem, Product.id == OrderItem.product_id).join(
+                Order, OrderItem.order_id == Order.id
+            ).filter(
                 Order.created_at >= start_date,
-                Order.status != 'Canceled'
-            ).group_by(Artefact.name).order_by(func.sum(Order.total).desc()).first()
+                Order.status == 'Delivered'
+            ).group_by(
+                Product.name
+            ).order_by(
+                func.count(Order.id).desc()
+            ).first()
             top_product = top_product_query.name if top_product_query else 'None'
-            logger.debug(f'Top product: {top_product}')
+            logger.debug(f'Top product: {top_product} (Order count: {top_product_query.order_count if top_product_query else 0})')
         except Exception as e:
             logger.error(f'Top product query failed: {str(e)}')
             top_product = 'None'
@@ -1289,7 +1328,6 @@ def dashboard_stats():
     except Exception as e:
         logger.error(f'Unexpected error in dashboard_stats: {str(e)}')
         return jsonify({'error': 'Internal server error'}), 500
-    
     
 
 @app.route('/api/orders/<int:id>/cancel', methods=['POST'])
@@ -1450,24 +1488,46 @@ def register():
         logging.error(f"Unexpected error in POST /register: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
+# Add /reset_password
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
+    logging.info('Received password reset submission')
     try:
         data = request.get_json()
-        email = data.get('email')
-        if not email:
-            return jsonify({'error': 'Email is required'}), 400
-        user = User.query.filter_by(email=email).first()
+        token = data.get('token')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        if not all([token, new_password, confirm_password]):
+            logging.error('Missing reset fields')
+            return jsonify({'error': 'Token, new password, and confirmation are required'}), 400
+        if new_password != confirm_password:
+            logging.error('Passwords do not match')
+            return jsonify({'error': 'Passwords do not match'}), 400
+        if len(new_password) < 6:
+            logging.error('Password too short')
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+
+        user = validate_reset_token(token)
         if not user:
-            return jsonify({'error': 'Email not found'}), 404
-        return jsonify({'message': 'Password reset link sent (not implemented)'})
+            logging.warning('Invalid or expired token')
+            return jsonify({'error': 'Invalid or expired token'}), 400
+
+        user.password = generate_password_hash(new_password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+        db.session.commit()
+        logging.info(f'Password reset successful for {user.email}')
+        return jsonify({'message': 'Password changed successfully'}), 200
     except SQLAlchemyError as e:
-        logging.error(f"Database error in POST /reset_password: {str(e)}")
+        db.session.rollback()
+        logging.error(f'Database error in reset_password: {str(e)}')
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logging.error(f"Unexpected error in POST /reset_password: {str(e)}")
+        logging.error(f'Reset password error: {str(e)}')
         return jsonify({'error': 'Internal server error'}), 500
-
+    
+    
 @app.route('/api/check_session', methods=['GET'])
 def check_session():
     if 'user' in session:
@@ -1497,8 +1557,8 @@ def account():
 
 @app.route('/our_products')
 def our_products():
-    if 'user' not in session:
-        return redirect(url_for('user_login'))
+   # if 'user' not in session:
+     #   return redirect(url_for('user_login'))
     
     all_products = Product.query.order_by(Product.created_at.desc()).all()
     products = [
@@ -1518,8 +1578,8 @@ def our_products():
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
 def products():
-    if 'user' not in session:
-        return redirect(url_for('user_login'))
+ #   if 'user' not in session:
+    #    return redirect(url_for('user_login'))
     
     all_products = Product.query.order_by(Product.created_at.desc()).all()
     categories = Category.query.all()
@@ -1764,6 +1824,236 @@ def add_address():
     db.session.commit()
     return jsonify({'message': 'Address added successfully'})
 
+# API endpoint to send email
+@app.route('/api/send-email', methods=['POST'])
+def send_email():
+    logger.debug("Received request to /api/send-email")
+    
+    # Check session
+    if 'user' not in session:
+        logger.error("No user in session")
+        return jsonify({'error': 'User not logged in'}), 401
+
+    try:
+        # Log session user
+        user_email = session['user']
+        logger.debug(f"Session user email: {user_email}")
+
+        # Get form data
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data received")
+            return jsonify({'error': 'No data provided'}), 400
+
+        subject = data.get('subject')
+        message = data.get('message')
+        logger.debug(f"Form data - subject: {subject}, message: {message}")
+
+        if not subject or not message:
+            logger.error("Missing subject or message")
+            return jsonify({'error': 'Subject and message are required'}), 400
+
+        # Query user
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            logger.error(f"User not found for email: {user_email}")
+            return jsonify({'error': 'User not found'}), 404
+
+        logger.debug(f"User found - name: {user.name}, email: {user.email}")
+
+        # Replace newlines in message for HTML
+        formatted_message = message.replace('\n', '<br>')
+
+        # Prepare HTML email without logo
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background-color: #d97706; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Zira Collection</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px;">
+                            <h2 style="color: #333333; margin-top: 0;">New Message from Zira Collection</h2>
+                            <p style="color: #555555; line-height: 1.6;">You have received a new message from a Zira Collection user:</p>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                        <strong style="color: #333333;">From:</strong> {user.name} <{user.email}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; margin-top: 10px;">
+                                        <strong style="color: #333333;">Subject:</strong> {subject}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 24px; margin-top: 10px;">
+                                        <strong style="color: #333333;"></strong><br>{formatted_message}
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="color: #555555; line-height: 1.6;">Thank you for being part of Zira Collection!</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #d97706; padding: 10px; text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                            <p style="color: #ffffff; margin: 0; font-size: 12px;">© 2025 Zira Collection. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+        </html>
+        """
+
+        # Prepare email
+        msg = Message(
+            subject=f"Zira Collection: {subject}",
+            recipients=['wenbusale383@gmail.com'],  # Recipient is wenbusale383@gmail.com
+            html=html_body,
+            sender=(user.name, user.email)  # Sender is the logged-in user (name, email)
+        )
+
+        # Send email
+        mail.send(msg)
+        logger.info("Email sent successfully")
+
+        return jsonify({'message': 'Email sent successfully'}), 200
+
+    except Exception as e:
+        logger.exception(f"Error sending email: {str(e)}")
+        return jsonify({'error': f'Failed to send email: {str(e)}'}), 500
+    
+
+# Update /request_reset
+@app.route('/request_reset', methods=['POST'])
+def request_reset():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        if not email:
+            logging.debug('Invalid reset request: Missing email')
+            return jsonify({'error': 'Email is required'}), 400
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            logging.debug(f'Password reset failed: Email {email} not found')
+            return jsonify({'error': 'Email not found'}), 404
+
+        # Generate and store reset token
+        token = generate_reset_token()
+        store_reset_token(user, token)
+
+        # Send email with reset token
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background-color: #d97706; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Zira Artifacts</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px;">
+                            <h2 style="color: #333333; margin-top: 0;">Password Reset</h2>
+                            <p style="color: #555555; line-height: 1.6;">Dear {user.name},</p>
+                            <p style="color: #555555; line-height: 1.6;">You have requested to reset your password. Please use the following token to set a new password:</p>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; text-align: center;">
+                                        <strong style="color: #333333; font-size: 18px;">{token}</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="color: #555555; line-height: 1.6;">This token expires in 1 hour. Enter it in the password reset form to set your new password.</p>
+                            <p style="color: #555555; line-height: 1.6;">If you did not request this reset, please contact support immediately.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #d97706; padding: 10px; text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                            <p style="color: #ffffff; margin: 0; font-size: 12px;">© 2025 Zira Artifacts. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+        </html>
+        """
+
+        msg = Message(
+            subject="Zira Artifacts: Password Reset",
+            recipients=[email],
+            html=html_body,
+            sender=('Zira Artifacts', 'wenbusale383@gmail.com')
+        )
+
+        mail.send(msg)
+        logging.info(f"Password reset email sent to {email}")
+
+        return jsonify({'message': 'A reset token has been sent to your email'}), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Database error in POST /request_reset: {str(e)}")
+        return jsonify({'error': 'Database error'}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error in POST /request_reset: {str(e)}")
+        return jsonify({'error': 'Failed to send email'}), 500
+    
+    
+@app.route('/api/change_password', methods=['POST'])
+def change_password():
+    logging.info('Received request to /api/change_password')
+    try:
+        if 'user' not in session:
+            logging.warning('Unauthorized access to /api/change_password')
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = request.get_json()
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        # Validate input
+        if not old_password or not new_password or not confirm_password:
+            logging.error('Missing old_password, new_password, or confirm_password')
+            return jsonify({'error': 'All password fields are required'}), 400
+        if new_password != confirm_password:
+            logging.error('New passwords do not match')
+            return jsonify({'error': 'New passwords do not match'}), 400
+        if len(new_password) < 8:
+            logging.error('New password too short')
+            return jsonify({'error': 'New password must be at least 8 characters long'}), 400
+
+        # Find user
+        user = User.query.filter_by(email=session['user']).first()
+        if not user:
+            logging.error(f'User not found for email: {session["user"]}')
+            return jsonify({'error': 'User not found'}), 404
+
+        # Verify old password
+        if not check_password_hash(user.password, old_password):
+            logging.error('Incorrect old password provided')
+            return jsonify({'error': 'Incorrect old password'}), 400
+
+        # Update password
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+
+        logging.info(f"Password changed successfully for user {user.email}")
+        return jsonify({'message': 'Password changed successfully'}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Database error in POST /api/change_password: {str(e)}")
+        return jsonify({'error': 'Database error'}), 500
+    except Exception as e:
+        logging.error(f"Unexpected error in POST /api/change_password: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+    
+    
 @app.errorhandler(404)
 def not_found(e):
     if request.path.startswith('/api/'):

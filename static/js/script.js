@@ -265,3 +265,51 @@ document.querySelectorAll('.modal').forEach(modal => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, modal element:', document.getElementById('story-modal')); // Debug: Check modal exists
 });
+
+// send email
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('Form submitted'); // Debug
+    const formData = new FormData(e.target);
+    const data = {
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+    };
+    console.log('Form data:', data); // Debug
+
+    // Function to show flash message
+    const showFlashMessage = (text, isSuccess) => {
+        console.log('Showing flash message:', text, isSuccess); // Debug
+        const flashMessage = document.getElementById('flash-message1');
+        flashMessage.textContent = text;
+        flashMessage.className = isSuccess ? 'success' : 'error';
+        flashMessage.style.display = 'block';
+        flashMessage.classList.add('show');
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+            flashMessage.classList.remove('show');
+            setTimeout(() => {
+                flashMessage.style.display = 'none';
+            }, 500); // Wait for fade-out animation
+        }, 5000);
+    };
+
+    try {
+        const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            credentials: 'include',
+        });
+        console.log('Response status:', response.status); // Debug
+        const result = await response.json();
+        console.log('Response data:', result); // Debug
+        if (!response.ok) throw new Error(result.error || 'Failed to send message');
+        showFlashMessage('Your message has been sent successfully! We will get back to you shortly', true);
+        e.target.reset();
+    } catch (error) {
+        console.error('Error:', error.message); // Debug
+        showFlashMessage(`Error: ${error.message}`, false);
+    }
+});

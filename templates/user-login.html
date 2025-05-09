@@ -58,6 +58,13 @@
         .validation-check.invalid i {
             color: #dc2626; /* Red */
         }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 70%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
         @media (max-width: 767px) {
             .main-content {
                 padding-left: 1rem;
@@ -86,9 +93,15 @@
     <!-- Main Content -->
     <main class="main-content p-4 sm:p-6 min-h-screen">
         <!-- Header -->
-        <header class="flex items-center space-x-4 mb-8">
-            <img src="/static/images/logo.png" alt="Zira Artifacts Logo" class="h-12">
-            <h1 class="text-3xl font-bold text-gray-800">Zira Artifacts</h1>
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-4">
+                <img src="/static/images/logo.png" alt="Zira Artifacts Logo" class="h-12">
+                <h1 class="text-3xl font-bold text-gray-800">Zira Artifacts</h1>
+            </div>
+            <a href="/" class="text-gray-700 hover:text-yellow-600 flex items-center space-x-2">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
         </header>
 
         <!-- Hero Section -->
@@ -115,11 +128,12 @@
             <form id="login-form">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700" for="login-email">Email</label>
-                    <input type="email" id="login-email" class="w-full border rounded px-3 py-2" required>
+                    <input type="email" id="login-email" class="w-full border rounded px-3 py-2" required autocomplete="off">
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="login-password">Password</label>
-                    <input type="password" id="login-password" class="w-full border rounded px-3 py-2" required minlength="6">
+                    <input type="password" id="login-password" class="w-full border rounded px-3 py-2" required minlength="6" autocomplete="off">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('login-password')"></i>
                 </div>
                 <div class="mb-4">
                     <a href="#" class="text-yellow-600 hover:underline text-sm" onclick="closeModal('login-modal'); openModal('reset-password-modal')">Forgot Password?</a>
@@ -139,15 +153,16 @@
             <form id="register-form">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700" for="register-name">Name</label>
-                    <input type="text" id="register-name" class="w-full border rounded px-3 py-2" required>
+                    <input type="text" id="register-name" class="w-full border rounded px-3 py-2" required autocomplete="off">
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700" for="register-email">Email</label>
-                    <input type="email" id="register-email" class="w-full border rounded px-3 py-2" required>
+                    <input type="email" id="register-email" class="w-full border rounded px-3 py-2" required autocomplete="off">
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="register-password">Password</label>
-                    <input type="password" id="register-password" class="w-full border rounded px-3 py-2" required>
+                    <input type="password" id="register-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('register-password')"></i>
                     <div id="password-validation" class="text-sm hidden">
                         <div id="length-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least 6 characters</div>
                         <div id="uppercase-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one uppercase letter</div>
@@ -156,9 +171,10 @@
                         <div id="special-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one special character</div>
                     </div>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="register-confirm-password">Confirm Password</label>
-                    <input type="password" id="register-confirm-password" class="w-full border rounded px-3 py-2" required>
+                    <input type="password" id="register-confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('register-confirm-password')"></i>
                     <div id="confirm-password-validation" class="text-sm validation-check invalid hidden">
                         <i class="fas fa-circle"></i> <span id="confirm-password-text">Passwords do not match</span>
                     </div>
@@ -185,7 +201,7 @@
             <form id="reset-password-form">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700" for="reset-email">Email</label>
-                    <input type="email" id="reset-email" class="w-full border rounded px-3 py-2" required>
+                    <input type="email" id="reset-email" class="w-full border rounded px-3 py-2" required autocomplete="off">
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onclick="closeModal('reset-password-modal')">Cancel</button>
@@ -195,22 +211,57 @@
         </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal" role="dialog" aria-labelledby="change-password-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="change-password-modal-title" class="text-xl font-semibold mb-4">Change Password</h2>
+            <form id="change-password-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" for="reset-token">Reset Token</label>
+                    <input type="text" id="reset-token" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                </div>
+                <div class="mb-4 relative">
+                    <label class="block text-sm font-medium text-gray-700" for="new-password">New Password</label>
+                    <input type="password" id="new-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('new-password')"></i>
+                </div>
+                <div class="mb-4 relative">
+                    <label class="block text-sm font-medium text-gray-700" for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('confirm-password')"></i>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="submit" id="change-password-submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Modal Functions
         function openModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-            document.getElementById(modalId).querySelector('input').focus();
+            console.log(`Opening modal: ${modalId}`);
+            const modal = document.getElementById(modalId);
+            modal.classList.add('show');
+            const firstInput = modal.querySelector('input');
+            if (firstInput) firstInput.focus();
+            // Clear inputs to prevent autofill
+            modal.querySelectorAll('input').forEach(input => input.value = '');
+            if (modalId === 'register-modal') resetValidation();
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+            console.log(`Closing modal: ${modalId}`);
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
             const form = document.getElementById(modalId.replace('modal', 'form'));
-            form.reset();
-            resetValidation();
+            if (form) form.reset();
+            if (modalId === 'register-modal') resetValidation();
         }
 
         // Toast Notifications
         function showToast(message, type = 'success') {
+            console.log(`Showing toast: ${message}, type: ${type}`);
             Toastify({
                 text: message,
                 duration: 3000,
@@ -218,6 +269,27 @@
                     background: type === 'success' ? '#d97706' : '#dc2626'
                 }
             }).showToast();
+        }
+
+        // Password Visibility Toggle
+        function togglePassword(inputId) {
+            console.log(`Toggling password visibility for ${inputId}`);
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling;
+            if (!input || !icon) {
+                console.error(`Input or icon not found for ${inputId}`);
+                showToast('Error toggling password visibility', 'error');
+                return;
+            }
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
 
         // Form Validation
@@ -297,6 +369,7 @@
         // Login Form Handler
         document.getElementById('login-form').addEventListener('submit', async e => {
             e.preventDefault();
+            console.log('Login form submitted');
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
@@ -310,9 +383,10 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
-                    credentials: 'include'  // Ensure session cookie is sent/stored
+                    credentials: 'include'
                 });
                 const data = await response.json();
+                console.log(`Login response: ${response.status}`);
                 if (!response.ok) {
                     showToast(data.error || 'Login failed', 'error');
                     return;
@@ -321,6 +395,7 @@
                 closeModal('login-modal');
                 window.location.href = '/';
             } catch (error) {
+                console.error('Login error:', error);
                 showToast('Network error, please try again', 'error');
             }
         });
@@ -328,6 +403,7 @@
         // Registration Form Handler
         document.getElementById('register-form').addEventListener('submit', async e => {
             e.preventDefault();
+            console.log('Register form submitted');
             const name = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
@@ -352,9 +428,10 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password, confirmPassword, role }),
-                    credentials: 'include'  // Ensure session cookie is sent/stored
+                    credentials: 'include'
                 });
                 const data = await response.json();
+                console.log(`Register response: ${response.status}`);
                 if (!response.ok) {
                     showToast(data.error || 'Registration failed', 'error');
                     return;
@@ -363,6 +440,7 @@
                 closeModal('register-modal');
                 openModal('login-modal');
             } catch (error) {
+                console.error('Register error:', error);
                 showToast('Network error, please try again', 'error');
             }
         });
@@ -370,6 +448,7 @@
         // Reset Password Form Handler
         document.getElementById('reset-password-form').addEventListener('submit', async e => {
             e.preventDefault();
+            console.log('Reset password form submitted');
             const email = document.getElementById('reset-email').value;
 
             if (!validateEmail(email)) {
@@ -378,20 +457,71 @@
             }
 
             try {
-                const response = await fetch('/reset_password', {
+                const response = await fetch('/request_reset', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
-                    credentials: 'include'  // Ensure session cookie is sent/stored
+                    credentials: 'include'
                 });
                 const data = await response.json();
+                console.log(`Reset request response: ${response.status}`);
                 if (!response.ok) {
-                    showToast(data.error || 'Reset failed', 'error');
+                    showToast(data.error || 'Reset request failed', 'error');
                     return;
                 }
-                showToast('Password reset link sent (check implementation)');
+                showToast('Reset link sent to your email');
                 closeModal('reset-password-modal');
+                // Open change password modal (user enters token from email)
+                openModal('change-password-modal');
             } catch (error) {
+                console.error('Reset request error:', error);
+                showToast('Network error, please try again', 'error');
+            }
+        });
+
+        // Change Password Form Handler
+        document.getElementById('change-password-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            console.log('Change password form submitted');
+            const token = document.getElementById('reset-token').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (!token) {
+                showToast('Please enter the reset token', 'error');
+                return;
+            }
+            if (!newPassword || !confirmPassword) {
+                showToast('Both password fields are required', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/reset_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, new_password: newPassword, confirm_password: confirmPassword }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                console.log(`Change password response: ${response.status}`);
+                if (!response.ok) {
+                    showToast(data.error || 'Password change failed', 'error');
+                    return;
+                }
+                showToast('Password changed successfully! Please sign in.');
+                closeModal('change-password-modal');
+                openModal('login-modal');
+            } catch (error) {
+                console.error('Change password error:', error);
                 showToast('Network error, please try again', 'error');
             }
         });

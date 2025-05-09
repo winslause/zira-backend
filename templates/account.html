@@ -367,6 +367,19 @@
             width: 90%;
             max-width: 600px;
         }
+        /* Password Toggle Icon */
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280; /* Tailwind gray-500 */
+    transition: color 0.3s ease;
+}
+.password-toggle:hover {
+    color: #d97706; /* Tailwind yellow-600 */
+}
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -455,6 +468,7 @@
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('profile-modal')">Update Profile</button>
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('picture-modal')">Change Picture</button>
                         <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" onclick="openModal('address-modal')">Add Address</button>
+                        <button class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium" id="change-password-btn" onclick="openModal('password-modal')">Change Password</button>
                         <a href="{{ url_for('user_logout') }}" class="action-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 text-lg font-medium text-center">Logout</a>
                     </div>
                 </div>
@@ -745,6 +759,34 @@
         </div>
     </div>
 
+ 
+<!-- Change Password Modal -->
+<div id="password-modal" class="modal">
+    <div class="modal-content relative">
+        <span class="modal-close" onclick="closeModal('password-modal')"><i class="fas fa-times"></i></span>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Change Password</h2>
+        <form id="password-form" class="space-y-4" onsubmit="changePassword(event)">
+            <div class="relative">
+                <label class="block text-gray-700 mb-1">Old Password</label>
+                <input type="password" name="old_password" id="old-password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required autocomplete="current-password">
+                <i class="fas fa-eye password-toggle" onclick="togglePassword('old-password')"></i>
+            </div>
+            <div class="relative">
+                <label class="block text-gray-700 mb-1">New Password</label>
+                <input type="password" name="new_password" id="new-password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required autocomplete="new-password">
+                <i class="fas fa-eye password-toggle" onclick="togglePassword('new-password')"></i>
+            </div>
+            <div class="relative">
+                <label class="block text-gray-700 mb-1">Confirm New Password</label>
+                <input type="password" name="confirm_password" id="confirm-password" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required autocomplete="new-password">
+                <i class="fas fa-eye password-toggle" onclick="togglePassword('confirm-password')"></i>
+            </div>
+            <button type="submit" id="change-password-submit" class="action-btn bg-yellow-600 text-white px-4 py-2 rounded w-full hover:bg-yellow-700">Change Password</button>
+        </form>
+    </div>
+</div>
+
+
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
         <div class="max-w-7xl mx-auto">
@@ -876,6 +918,8 @@
     </footer>
 
     <!-- JavaScript -->
+   <!-- Replace the entire <script> section in account.html with this -->
+<!-- Replace the entire <script> section in account.html with this -->
     <script>
         // Currency Conversion Logic
         const exchangeRates = {
@@ -885,36 +929,67 @@
             KES: 130
         };
         let currentCurrency = '{{ current_currency }}';
-
+        
+        // Helper Function to Format Dates Safely
+        function formatDate(dateString) {
+            console.log(`Formatting date: ${dateString}`);
+            if (!dateString) {
+                console.warn(`Invalid date string: ${dateString}`);
+                return 'Unknown date';
+            }
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    console.warn(`Invalid date value: ${dateString}`);
+                    return 'Unknown date';
+                }
+                return date.toISOString().split('T')[0];
+            } catch (error) {
+                console.warn(`Error parsing date ${dateString}: ${error.message}`);
+                return 'Unknown date';
+            }
+        }
+        
         // Toggle Country Dropdown
-        document.getElementById('country-btn').addEventListener('click', () => {
+        document.getElementById('country-btn')?.addEventListener('click', () => {
+            console.log('Toggling country dropdown');
             const dropdown = document.getElementById('country-dropdown');
-            dropdown.classList.toggle('hidden');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            } else {
+                console.error('Country dropdown not found');
+            }
         });
-
+        
         // Update Currency
         document.querySelectorAll('.country-option').forEach(option => {
             option.addEventListener('click', (e) => {
+                console.log('Currency option clicked');
                 e.preventDefault();
                 const country = e.target.getAttribute('data-country');
                 const flag = e.target.getAttribute('data-flag');
                 currentCurrency = e.target.getAttribute('data-currency');
-                document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
-                document.getElementById('country-dropdown').classList.add('hidden');
+                const countryBtn = document.getElementById('country-btn');
+                if (countryBtn) {
+                    countryBtn.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+                }
+                const dropdown = document.getElementById('country-dropdown');
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
+                }
                 updatePrices();
             });
         });
-
+        
         // Update Wishlist, Cart, and Order Prices
         function updatePrices() {
+            console.log('Updating prices for currency:', currentCurrency);
             let cartTotal = 0;
-            // Update Wishlist Prices
             document.querySelectorAll('#wishlist-items .price').forEach(priceElement => {
                 const basePrice = parseFloat(priceElement.getAttribute('data-price'));
                 const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
                 priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
             });
-            // Update Cart Prices
             document.querySelectorAll('#cart-items .price').forEach(priceElement => {
                 const basePrice = parseFloat(priceElement.getAttribute('data-price'));
                 const quantityElement = priceElement.parentElement.querySelector('input[type="number"]');
@@ -923,31 +998,47 @@
                 priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
                 cartTotal += parseFloat(convertedPrice) * quantity;
             });
-            // Update Order Prices
             document.querySelectorAll('#order-items .price').forEach(priceElement => {
                 const basePrice = parseFloat(priceElement.getAttribute('data-price'));
                 const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
                 priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
             });
-            document.getElementById('cart-total').textContent = `${currentCurrency} ${cartTotal.toFixed(2)}`;
+            const cartTotalElement = document.getElementById('cart-total');
+            if (cartTotalElement) {
+                cartTotalElement.textContent = `${currentCurrency} ${cartTotal.toFixed(2)}`;
+            }
         }
-
+        
         // Modal Functions
         function openModal(modalId) {
+            console.log(`Attempting to open modal: ${modalId}`);
             const modal = document.getElementById(modalId);
+            if (!modal) {
+                console.error(`Modal ${modalId} not found`);
+                showToast(`Modal ${modalId} not found`, 'error');
+                return;
+            }
             modal.classList.add('open');
             document.body.style.overflow = 'hidden';
+            console.log(`Modal ${modalId} opened successfully`);
         }
-
+        
         function closeModal(modalId) {
+            console.log(`Attempting to close modal: ${modalId}`);
             const modal = document.getElementById(modalId);
+            if (!modal) {
+                console.error(`Modal ${modalId} not found`);
+                return;
+            }
             modal.classList.remove('open');
             document.body.style.overflow = 'auto';
+            console.log(`Modal ${modalId} closed successfully`);
         }
-
+        
         // Update Profile
         function updateProfile(event) {
             event.preventDefault();
+            console.log('Updating profile');
             const form = event.target;
             const data = {
                 name: form.name.value,
@@ -967,24 +1058,26 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to update profile');
                 }
-                alert(body.message);
-                if (body.message === 'User updated successfully') {
+                showToast(body.message || 'User updated successfully', 'success');
+                closeModal('profile-modal');
+                setTimeout(() => {
+                    console.log('Reloading page after profile update');
                     location.reload();
-                }
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error updating profile:', error);
-                alert('Failed to update profile: ' + error.message);
+                showToast('Failed to update profile: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
-            closeModal('profile-modal');
         }
-
+        
         // Change Profile Picture
-        document.getElementById('picture-form').addEventListener('submit', (e) => {
+        document.getElementById('picture-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
+            console.log('Submitting profile picture');
             const fileInput = e.target.querySelector('input[type="file"]');
             if (fileInput.files[0]) {
                 const formData = new FormData();
@@ -1001,25 +1094,26 @@
                     }
                     if (body.image_url) {
                         document.getElementById('profile-pic').src = body.image_url;
-                        alert('Profile picture updated!');
+                        showToast('Profile picture updated!', 'success');
                     } else {
-                        alert('Failed to update profile picture');
+                        showToast('Failed to update profile picture', 'error');
                     }
                     closeModal('picture-modal');
                 })
                 .catch(error => {
                     console.error('Error uploading picture:', error);
-                    alert('Failed to upload picture: ' + error.message);
+                    showToast('Failed to upload picture: ' + error.message, 'error');
                     if (error.message.includes('Unauthorized')) {
                         window.location.href = '{{ url_for('user_login') }}';
                     }
                 });
             }
         });
-
+        
         // Add Address
-        document.getElementById('address-form').addEventListener('submit', (e) => {
+        document.getElementById('address-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
+            console.log('Adding address');
             fetch('/api/profile/address', {
                 method: 'POST',
                 headers: {
@@ -1038,21 +1132,25 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to add address');
                 }
-                alert(body.message);
+                showToast(body.message || 'Address added successfully', 'success');
                 closeModal('address-modal');
-                location.reload();
+                setTimeout(() => {
+                    console.log('Reloading page after adding address');
+                    location.reload();
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error adding address:', error);
-                alert('Failed to add address: ' + error.message);
+                showToast('Failed to add address: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
         });
-
+        
         // Remove from Wishlist
         function removeFromWishlist(wishlistId) {
+            console.log(`Removing wishlist item: ${wishlistId}`);
             fetch(`/api/wishlist/${wishlistId}`, {
                 method: 'DELETE',
                 credentials: 'include'
@@ -1062,20 +1160,24 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to remove from wishlist');
                 }
-                alert(body.message);
-                location.reload();
+                showToast(body.message || 'Removed from wishlist', 'success');
+                setTimeout(() => {
+                    console.log('Reloading page after removing from wishlist');
+                    location.reload();
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error removing from wishlist:', error);
-                alert('Failed to remove from wishlist: ' + error.message);
+                showToast('Failed to remove from wishlist: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
         }
-
+        
         // Add to Cart from Wishlist
         function addToCartFromWishlist(wishlistId, productId) {
+            console.log(`Adding to cart from wishlist: ${wishlistId}, product: ${productId}`);
             fetch('/api/cart', {
                 method: 'POST',
                 headers: {
@@ -1099,22 +1201,26 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to remove from wishlist');
                 }
-                alert('Product moved to cart');
-                location.reload();
+                showToast('Product moved to cart', 'success');
+                setTimeout(() => {
+                    console.log('Reloading page after moving to cart');
+                    location.reload();
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error moving to cart:', error);
-                alert('Failed to move product to cart: ' + error.message);
+                showToast('Failed to move product to cart: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
         }
-
+        
         // Update Cart Quantity
         async function updateCartQuantity(productId, quantity) {
+            console.log(`Updating cart quantity for product: ${productId}, quantity: ${quantity}`);
             if (quantity < 1) {
-                alert('Quantity must be at least 1');
+                showToast('Quantity must be at least 1', 'error');
                 return;
             }
             try {
@@ -1126,22 +1232,26 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    alert(data.message || 'Quantity updated successfully');
-                    location.reload();
+                    showToast(data.message || 'Quantity updated successfully', 'success');
+                    setTimeout(() => {
+                        console.log('Reloading page after updating quantity');
+                        location.reload();
+                    }, 3000);
                 } else {
-                    alert(data.error || 'Failed to update quantity');
+                    showToast(data.error || 'Failed to update quantity', 'error');
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     }
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
-                alert('Failed to update quantity: ' + error.message);
+                showToast('Failed to update quantity: ' + error.message, 'error');
             }
         }
-
+        
         // Remove from Cart
         function removeFromCart(productId) {
+            console.log(`Removing from cart: ${productId}`);
             fetch('/api/cart', {
                 method: 'DELETE',
                 headers: {
@@ -1155,19 +1265,24 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to remove from cart');
                 }
-                alert(body.message);
-                location.reload();
+                showToast(body.message || 'Removed from cart', 'success');
+                setTimeout(() => {
+                    console.log('Reloading page after removing from cart');
+                    location.reload();
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error removing from cart:', error);
-                alert('Failed to remove from cart: ' + error.message);
+                showToast('Failed to remove from cart: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
         }
-
+        
+        // Cancel Order
         function cancelOrder(orderId) {
+            console.log(`Canceling order: ${orderId}`);
             if (confirm('Are you sure you want to cancel this order?')) {
                 fetch(`/api/orders/${orderId}/cancel`, {
                     method: 'POST',
@@ -1194,29 +1309,57 @@
                     if (status >= 400) {
                         throw new Error(body.error || 'Failed to cancel order');
                     }
-                    alert(body.message || 'Order canceled successfully');
                     showToast(body.message || 'Order canceled successfully', 'success');
-                    window.location.reload();
+                    setTimeout(() => {
+                        console.log('Reloading page after canceling order');
+                        window.location.reload();
+                    }, 3000);
                 })
                 .catch(error => {
                     console.error('Error canceling order:', error);
                     showToast('Failed to cancel order: ' + error.message, 'error');
                     if (error.message.includes('Unauthorized')) {
-                        window.location.href = '{{ url_for("user_login") }}';
+                        window.location.href = '{{ url_for('user_login') }}';
                     }
                 });
             }
         }
-
+        
+        // Show Toast Notification
         function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 p-4 rounded shadow-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            console.log(`Showing toast: ${message}, type: ${type}`);
+            try {
+                const toast = document.createElement('div');
+                toast.className = `fixed top-4 right-4 p-4 rounded shadow-lg text-white z-[100] ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+                toast.style.opacity = '1';
+                toast.style.transition = 'opacity 0.3s ease';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                console.log('Toast appended to DOM:', toast);
+                // Fade out before removing
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.remove();
+                        console.log(`Toast removed: ${message}`);
+                    }, 300);
+                }, 3000);
+                // Fallback: If toast isn't visible, use alert
+                setTimeout(() => {
+                    if (!document.body.contains(toast)) {
+                        console.warn('Toast not found in DOM, falling back to alert');
+                        window.alert(message);
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error displaying toast:', error);
+                window.alert(message); // Fallback to alert if toast fails
+            }
         }
-
+        
+        // Populate Orders
         async function populateOrders() {
+            console.log('Populating orders');
             try {
                 const response = await fetch('/api/orders', {
                     method: 'GET',
@@ -1229,80 +1372,99 @@
                 }
                 const orders = await response.json();
                 const orderItems = document.getElementById('order-items');
-                orderItems.innerHTML = orders.length === 0
-                    ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
-                    : orders.map(order => `
-                        <div class="order-card flex flex-col gap-4 p-6 custom-card">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div>
-                                    <h3 class="text-xl font-semibold text-gray-800">Order #${order.id}</h3>
-                                    <p class="text-gray-600 text-lg">Date: ${new Date(order.created_at).toISOString().split('T')[0]}</p>
-                                    <p class="text-gray-600 text-lg">Total: <span class="price" data-price="${order.total}">${currentCurrency} ${(order.total * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
-                                    <p class="text-gray-600 text-lg">Status: ${order.status}</p>
-                                </div>
-                                ${order.status === 'Pending' ? `<button class="action-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id})">Cancel Order</button>` : ''}
-                            </div>
-                            <div class="border-t pt-4">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Items</h4>
-                                ${order.order_items.map(item => `
-                                    <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
-                                        ${item.product ? `
-                                            <img src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
-                                            <div class="flex-1">
-                                                <p class="text-gray-800 font-medium">${item.product.name}</p>
-                                                <p class="text-gray-600">Quantity: ${item.quantity}</p>
-                                                <p class="text-gray-600">Price: <span class="price" data-price="${item.product.price}">${currentCurrency} ${(item.product.price * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
-                                            </div>
-                                        ` : `
-                                            <div class="flex-1">
-                                                <p class="text-gray-600">Product not found (ID: ${item.product_id})</p>
-                                                <p class="text-gray-600">Quantity: ${item.quantity}</p>
-                                            </div>
-                                        `}
+                if (orderItems) {
+                    orderItems.innerHTML = orders.length === 0
+                        ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
+                        : orders.map(order => `
+                            <div class="order-card flex flex-col gap-4 p-6 custom-card">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-gray-800">Order #${order.id}</h3>
+                                        <p class="text-gray-600 text-lg">Date: ${formatDate(order.created_at)}</p>
+                                        <p class="text-gray-600 text-lg">Total: <span class="price" data-price="${order.total}">${currentCurrency} ${(order.total * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
+                                        <p class="text-gray-600 text-lg">Status: ${order.status}</p>
                                     </div>
-                                `).join('')}
+                                    ${order.status === 'Pending' ? `<button class="action-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id})">Cancel Order</button>` : ''}
+                                </div>
+                                <div class="border-t pt-4">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Items</h4>
+                                    ${order.order_items.map(item => `
+                                        <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
+                                            ${item.product ? `
+                                                <img src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
+                                                <div class="flex-1">
+                                                    <p class="text-gray-800 font-medium">${item.product.name}</p>
+                                                    <p class="text-gray-600">Quantity: ${item.quantity}</p>
+                                                    <p class="text-gray-600">Price: <span class="price" data-price="${item.product.price}">${currentCurrency} ${(item.product.price * exchangeRates[currentCurrency]).toFixed(2)}</span></p>
+                                                </div>
+                                            ` : `
+                                                <div class="flex-1">
+                                                    <p class="text-gray-600">Product not found (ID: ${item.product_id})</p>
+                                                    <p class="text-gray-600">Quantity: ${item.quantity}</p>
+                                                </div>
+                                            `}
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `).join('');
+                }
                 updatePrices();
             } catch (error) {
                 console.error('Error fetching orders:', error);
-                showToast('Failed to load orders: ' + error.message, 'error');
+                // Only show toast for critical errors (e.g., fetch failure, unauthorized)
+                if (error.message.includes('Failed to fetch orders') || error.message.includes('Unauthorized')) {
+                    showToast('Failed to load orders: ' + error.message, 'error');
+                }
                 if (error.message.includes('Unauthorized')) {
-                    window.location.href = '{{ url_for("user_login") }}';
+                    window.location.href = '{{ url_for('user_login') }}';
                 }
             }
         }
-
+        
         // Toggle Message Code Field
         function toggleMessageCode() {
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-            const messageCodeSection = document.getElementById('message-code-section');
-            messageCodeSection.style.display = paymentMethod === 'immediate' ? 'block' : 'none';
-            if (paymentMethod !== 'immediate') {
-                document.querySelector('input[name="message_code"]').value = '';
+            console.log('Toggling message code visibility');
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (paymentMethod) {
+                const messageCodeSection = document.getElementById('message-code-section');
+                if (messageCodeSection) {
+                    messageCodeSection.style.display = paymentMethod.value === 'immediate' ? 'block' : 'none';
+                    if (paymentMethod.value !== 'immediate') {
+                        const messageCodeInput = document.querySelector('input[name="message_code"]');
+                        if (messageCodeInput) {
+                            messageCodeInput.value = '';
+                        }
+                    }
+                }
             }
         }
-
+        
         // Update Payment Details
         function updatePaymentDetails() {
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-            const immediateDetails = document.getElementById('immediate-payment-details');
-            const deliveryDetails = document.getElementById('delivery-payment-details');
-            if (paymentMethod === 'immediate') {
-                immediateDetails.classList.remove('hidden');
-                deliveryDetails.classList.add('hidden');
-            } else {
-                immediateDetails.classList.add('hidden');
-                deliveryDetails.classList.remove('hidden');
+            console.log('Updating payment details');
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (paymentMethod) {
+                const immediateDetails = document.getElementById('immediate-payment-details');
+                const deliveryDetails = document.getElementById('delivery-payment-details');
+                if (immediateDetails && deliveryDetails) {
+                    if (paymentMethod.value === 'immediate') {
+                        immediateDetails.classList.remove('hidden');
+                        deliveryDetails.classList.add('hidden');
+                    } else {
+                        immediateDetails.classList.add('hidden');
+                        deliveryDetails.classList.remove('hidden');
+                    }
+                }
             }
         }
-
+        
         // Place Order
         function placeOrder(event) {
             event.preventDefault();
+            console.log('Placing order');
             const form = event.target;
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const data = {
                 name: form.name.value,
                 phone_number: form.phone_number.value,
@@ -1312,8 +1474,8 @@
                     country: form.country.value,
                     postal_code: form.postal_code.value,
                 },
-                payment_method: paymentMethod,
-                message_code: paymentMethod === 'immediate' ? form.message_code.value : null
+                payment_method: paymentMethod ? paymentMethod.value : null,
+                message_code: paymentMethod && paymentMethod.value === 'immediate' ? form.message_code.value : null
             };
             fetch('/api/orders', {
                 method: 'POST',
@@ -1328,62 +1490,232 @@
                 if (status >= 400) {
                     throw new Error(body.error || 'Failed to place order');
                 }
-                alert(body.message);
+                showToast(body.message || 'Order placed successfully', 'success');
                 closeModal('checkout-modal');
-                location.reload();
+                setTimeout(() => {
+                    console.log('Reloading page after placing order');
+                    location.reload();
+                }, 3000);
             })
             .catch(error => {
                 console.error('Error placing order:', error);
-                alert('Failed to place order: ' + error.message);
+                showToast('Failed to place order: ' + error.message, 'error');
                 if (error.message.includes('Unauthorized')) {
                     window.location.href = '{{ url_for('user_login') }}';
                 }
             });
         }
-
+        
         // Mobile Navbar Toggle
-        document.getElementById('nav-toggler').addEventListener('click', () => {
+        document.getElementById('nav-toggler')?.addEventListener('click', () => {
+            console.log('Toggling mobile navbar');
             const sidebar = document.getElementById('mobile-sidebar');
             const icon = document.querySelector('#nav-toggler i');
-            sidebar.classList.toggle('-translate-x-full');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            if (sidebar && icon) {
+                sidebar.classList.toggle('-translate-x-full');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+                icon.classList.add('animate-rotateToggle');
+                setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            }
         });
-
+        
         // Close Mobile Sidebar
-        document.getElementById('close-sidebar').addEventListener('click', () => {
+        document.getElementById('close-sidebar')?.addEventListener('click', () => {
+            console.log('Closing mobile sidebar');
             const sidebar = document.getElementById('mobile-sidebar');
             const icon = document.querySelector('#nav-toggler i');
-            sidebar.classList.add('-translate-x-full');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            if (sidebar && icon) {
+                sidebar.classList.add('-translate-x-full');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-times');
+                icon.classList.add('animate-rotateToggle');
+                setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            }
         });
-
+        
         // Mobile Search Toggle
-        document.getElementById('mobile-search-icon').addEventListener('click', () => {
+        document.getElementById('mobile-search-icon')?.addEventListener('click', () => {
+            console.log('Toggling mobile search');
             const searchBar = document.getElementById('mobile-search-bar');
-            searchBar.classList.toggle('active');
             const icon = document.getElementById('mobile-search-icon');
-            icon.classList.add('animate-bounce');
-            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+            if (searchBar && icon) {
+                searchBar.classList.toggle('active');
+                icon.classList.add('animate-bounce');
+                setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+            }
         });
-
+        
         // Close Modals on Outside Click
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
+                    console.log(`Closing modal ${modal.id} on outside click`);
                     closeModal(modal.id);
                 }
             });
         });
-
-        // Initialize Prices and Message Code Visibility
-        updatePrices();
-        toggleMessageCode();
+        
+        // Toggle Password Visibility
+        function togglePassword(inputId) {
+            console.log(`Toggling password visibility for ${inputId}`);
+            const input = document.getElementById(inputId);
+            const icon = input?.nextElementSibling;
+            if (!input || !icon) {
+                console.error(`Input or icon not found for ${inputId}`);
+                return;
+            }
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+            icon.classList.add('animate-pulse');
+            setTimeout(() => icon.classList.remove('animate-pulse'), 300);
+        }
+        
+        // Change Password
+        async function changePassword(event) {
+            event.preventDefault();
+            console.log('Change password function called');
+            const form = document.getElementById('password-form');
+            if (!form) {
+                console.error('Password form not found');
+                showToast('Form error, please try again', 'error');
+                return;
+            }
+            const oldPassword = form.querySelector('#old-password')?.value;
+            const newPassword = form.querySelector('#new-password')?.value;
+            const confirmPassword = form.querySelector('#confirm-password')?.value;
+        
+            // Client-side validation
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                console.log('Validation failed: Missing password fields');
+                showToast('All password fields are required', 'error');
+                return;
+            }
+            if (newPassword.length < 8) {
+                console.log('Validation failed: New password too short');
+                showToast('New password must be at least 8 characters long', 'error');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                console.log('Validation failed: Passwords do not match');
+                showToast('New passwords do not match', 'error');
+                return;
+            }
+        
+            try {
+                console.log('Sending request to /api/change_password');
+                const response = await fetch('/api/change_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        old_password: oldPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    }),
+                    credentials: 'include'
+                });
+                console.log(`Response from /api/change_password: ${response.status}`);
+                const data = await response.json();
+                console.log('Response data:', data);
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to change password');
+                }
+                showToast(data.message || 'Password changed successfully', 'success');
+                console.log('Password changed successfully');
+                closeModal('password-modal');
+                setTimeout(() => {
+                    console.log('Reloading page after password change');
+                    location.reload();
+                }, 3000);
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showToast('Failed to change password: ' + error.message, 'error');
+                if (error.message.includes('Unauthorized')) {
+                    window.location.href = '{{ url_for('user_login') }}';
+                }
+            }
+        }
+        
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, initializing account page');
+            try {
+                // Initialize password modal button (for manual opening)
+                const passwordButton = document.getElementById('change-password-btn');
+                if (passwordButton) {
+                    console.log('Change Password button found, adding click listener');
+                    passwordButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('Change Password button clicked, opening password-modal');
+                        openModal('password-modal');
+                    });
+                } else {
+                    console.error('Change Password button (#change-password-btn) not found');
+                    showToast('Change Password button not found', 'error');
+                }
+        
+                // Initialize password form submission
+                function initializePasswordForm() {
+                    const passwordForm = document.getElementById('password-form');
+                    const submitButton = document.getElementById('change-password-submit');
+                    if (passwordForm) {
+                        console.log('Password form found, adding submit listener');
+                        passwordForm.addEventListener('submit', (e) => {
+                            console.log('Password form submit event triggered');
+                            changePassword(e);
+                        });
+                    } else {
+                        console.error('Password form (#password-form) not found');
+                        showToast('Password form not found', 'error');
+                    }
+                    if (submitButton) {
+                        console.log('Change Password submit button found, adding click listener');
+                        submitButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            console.log('Change Password submit button clicked');
+                            if (passwordForm) {
+                                changePassword({ preventDefault: () => {}, target: passwordForm });
+                            } else {
+                                console.error('Password form not found during submit');
+                                showToast('Form error, please try again', 'error');
+                            }
+                        });
+                    } else {
+                        console.error('Change Password submit button (#change-password-submit) not found');
+                        showToast('Submit button not found', 'error');
+                    }
+                }
+        
+                // Initial form initialization
+                initializePasswordForm();
+        
+                // Re-initialize form after modal opens (to handle dynamic DOM changes)
+                const passwordModal = document.getElementById('password-modal');
+                if (passwordModal) {
+                    const observer = new MutationObserver(() => {
+                        if (passwordModal.classList.contains('open')) {
+                            console.log('Password modal opened, re-initializing form listeners');
+                            initializePasswordForm();
+                        }
+                    });
+                    observer.observe(passwordModal, { attributes: true, attributeFilter: ['class'] });
+                }
+        
+                updatePrices();
+                toggleMessageCode();
+                populateOrders();
+            } catch (error) {
+                console.error('Error during page initialization:', error);
+                showToast('Page initialization failed: ' + error.message, 'error');
+            }
+        });
     </script>
 </body>
 </html>
