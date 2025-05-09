@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body class="font-sans">
     <!-- Top Layer (Hidden on Mobile) -->
@@ -173,42 +174,60 @@
     </div>
 
     <!-- Discount Popup -->
-    <div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
-        <div class="p-6 space-y-6">
-            <!-- Close Button -->
-            <div class="flex justify-end">
-                <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-    
-            <!-- Logo -->
-            <div class="flex justify-center">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
-            </div>
-    
-            <!-- About Text -->
-            <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
-                <p class="text-gray-600 text-base leading-relaxed">
-                    At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
-                    <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
-                    Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
-                </p>
-            </div>
-    
-            <!-- Contact Info -->
-            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-                <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
-                <ul class="space-y-1 text-sm">
-                    <li><strong>Phone:</strong> +254 700 123456</li>
-                    <li><strong>Email:</strong> info@ziracollection.com</li>
-                    <li><strong>Location:</strong> Nairobi, Kenya</li>
-                </ul>
-            </div>
+<div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
+    <div class="p-6 space-y-6">
+        <!-- Close Button -->
+        <div class="flex justify-end">
+            <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+        </div>
+
+        <!-- About Text -->
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
+            <p class="text-gray-600 text-base leading-relaxed">
+                At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
+                <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
+                Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
+            </p>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
+            <ul class="space-y-1 text-sm">
+                <li><strong>Phone:</strong> +254 700 123456</li>
+                <li><strong>Email:</strong> info@ziracollection.com</li>
+                <li><strong>Location:</strong> Nairobi, Kenya</li>
+            </ul>
+        </div>
+
+        <!-- Email Form -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
+            <form id="contact-form" class="space-y-4">
+                <div>
+                    <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
+                </div>
+                <div>
+                    <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
+                </div>
+            </form>
         </div>
     </div>
-    
+</div>
+
     <!-- Section 2: Discover and Buy -->
     <section id="features-section" class="py-12 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

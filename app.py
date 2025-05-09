@@ -463,88 +463,105 @@ def handle_product(id):
             logging.error(f"Unexpected error in DELETE /api/discounted_artefacts/{id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
 
-# Order Routes
 @app.route('/api/orders', methods=['GET'])
-def handle_orders():
+def get_orders():
     if 'admin' not in session:
-        logging.debug('Unauthorized: No admin in session')
+        app.logger.debug("No admin in session")
         return jsonify({'error': 'Unauthorized'}), 401
+
     try:
-        orders = Order.query.all()
+        orders = db.session.query(Order).all()
         orders_data = []
-        for o in orders:
-            # Fetch user and handle None case
-            user = User.query.get(o.user_id) if o.user_id else None
-            if not user:
-                logging.warning(f"Order {o.id} has invalid or missing user_id: {o.user_id}")
-                customer = 'Unknown'
-                customer_number = 'N/A'
-                location = 'N/A'
-            else:
-                customer = user.name
-                customer_number = user.phone_number or 'N/A'
-                location = user.address or 'N/A'
-
+        for order in orders:
+            user = User.query.get(order.user_id)
+            # Use user.address as location, default to empty dict if missing
+            location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
+            order_items = OrderItem.query.filter_by(order_id=order.id).all()
+            items_data = [
+                {
+                    'product_id': item.product_id,
+                    'product_name': Product.query.get(item.product_id).name if Product.query.get(item.product_id) else 'Deleted Product',
+                    'quantity': item.quantity
+                } for item in order_items
+            ]
             orders_data.append({
-                'id': o.id,
-                'customer': customer,
-                'customer_number': customer_number,
-                'location': location,
-                'total': o.total if o.total is not None else 0.0,
-                'status': o.status or 'Unknown',
-                'customer_status': o.customer_status or 'Unknown',
-                'payment_method': o.payment_method or 'N/A'
+                'id': order.id,
+                'customer': user.name if user else 'Unknown',
+                'customer_number': user.phone_number if user and user.phone_number else 'N/A',
+                'location': {
+                    'street': location.get('street', ''),
+                    'city': location.get('city', ''),
+                    'country': location.get('country', ''),
+                    'postal_code': location.get('postal_code', '')
+                },
+                'total': float(order.total),
+                'customer_status': order.customer_status,
+                'status': order.status,
+                'payment_method': order.payment_method,
+                'items': items_data
             })
-        return jsonify(orders_data), 200
-    except SQLAlchemyError as e:
-        logging.error(f"Database error in GET /api/orders: {str(e)}")
-        return jsonify([]), 500  # Return empty array to prevent frontend errors
+        return jsonify(orders_data)
     except Exception as e:
-        logging.error(f"Unexpected error in GET /api/orders: {str(e)}")
-        return jsonify([]), 500  # Return empty array to prevent frontend errors
-
+        app.logger.error(f"Error fetching orders: {str(e)}")
+        return jsonify({'error': 'Failed to fetch orders'}), 500
 
 
 
 @app.route('/api/orders/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_order(id):
     if 'admin' not in session:
-        logging.debug('Unauthorized: No admin in session')
+        app.logger.debug('No admin in session')
         return jsonify({'error': 'Unauthorized'}), 401
     try:
         order = Order.query.get_or_404(id)
         if request.method == 'GET':
+            user = User.query.get(order.user_id)
+            # Use user.address as location, default to empty dict if missing
+            location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
+            order_items = OrderItem.query.filter_by(order_id=order.id).all()
+            items_data = [
+                {
+                    'product_id': item.product_id,
+                    'product_name': Product.query.get(item.product_id).name if Product.query.get(item.product_id) else 'Deleted Product',
+                    'quantity': item.quantity
+                } for item in order_items
+            ]
             return jsonify({
                 'id': order.id,
-                'customer': User.query.get(order.user_id).name,
-                'customer_number': User.query.get(order.user_id).phone_number or 'N/A',
-                'location': User.query.get(order.user_id).address or 'N/A',  # Full address JSON
-                'total': order.total,
+                'customer': user.name if user else 'Unknown',
+                'customer_number': user.phone_number or 'N/A',
+                'location': {
+                    'street': location.get('street', ''),
+                    'city': location.get('city', ''),
+                    'country': location.get('country', ''),
+                    'postal_code': location.get('postal_code', '')
+                },
+                'total': float(order.total),
                 'status': order.status,
                 'customer_status': order.customer_status,
-                'payment_method': order.payment_method
+                'payment_method': order.payment_method,
+                'items': items_data
             }), 200
         if request.method == 'PUT':
             data = request.get_json()
-            order.status = data.get('status', order.status)  # Only update admin status
+            order.status = data.get('status', order.status)
             db.session.commit()
-            logging.debug(f'Order {id} status updated to {order.status}')
+            app.logger.debug(f'Order {id} status updated to {order.status}')
             return jsonify({'message': 'Order updated successfully'}), 200
         if request.method == 'DELETE':
             OrderItem.query.filter_by(order_id=id).delete()
             db.session.delete(order)
             db.session.commit()
-            logging.debug(f'Order {id} deleted')
+            app.logger.debug(f'Order {id} deleted')
             return jsonify({'message': 'Order deleted successfully'}), 200
     except SQLAlchemyError as e:
         db.session.rollback()
-        logging.error(f"Database error in /api/orders/{id}: {str(e)}")
+        app.logger.error(f"Database error in /api/orders/{id}: {str(e)}")
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Unexpected error in /api/orders/{id}: {str(e)}")
+        app.logger.error(f"Unexpected error in /api/orders/{id}: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-
 
 # Discount Routes
 @app.route('/api/discounts', methods=['GET', 'POST'])
@@ -1137,52 +1154,143 @@ def change_admin_password():
     db.session.commit()
     return jsonify({'message': 'Password updated successfully'})
 
-@app.route('/api/dashboard_stats')
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
+@app.route('/api/dashboard_stats', methods=['GET'])
 def dashboard_stats():
-    total_sales = db.session.query(func.sum(Order.total)).filter(Order.status == 'Delivered').scalar() or 0
-    new_users = User.query.filter(User.created_at >= datetime.utcnow() - timedelta(days=30)).count()
-    pending_orders = Order.query.filter_by(status='Pending').count()
-    top_product = db.session.query(Product.name)\
-        .join(OrderItem, Product.id == OrderItem.product_id)\
-        .group_by(Product.id)\
-        .order_by(func.count(OrderItem.id).desc())\
-        .first()
-    top_product_name = top_product[0] if top_product else 'N/A'
+    logger.debug('Entering /api/dashboard_stats')
+    
+    # Check session
+    if 'admin' not in session:
+        logger.debug('No admin in session')
+        return jsonify({'error': 'Unauthorized'}), 401
 
-    sales_data = [
-        {'month': (datetime.utcnow() - timedelta(days=30*i)).strftime('%Y-%m'), 'total': 0}
-        for i in range(6, -1, -1)
-    ]
-    sales_query = db.session.query(
-        func.strftime('%Y-%m', Order.created_at).label('month'),
-        func.sum(Order.total).label('total')
-    ).filter(Order.status == 'Delivered').group_by('month').all()
-    for sale in sales_query:
-        for data in sales_data:
-            if data['month'] == sale.month:
-                data['total'] = float(sale.total)
+    try:
+        # Define date range: last 30 days
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=30)
+        logger.debug(f'Date range: {start_date} to {end_date}')
 
-    users_data = [
-        {'month': (datetime.utcnow() - timedelta(days=30*i)).strftime('%Y-%m'), 'count': 0}
-        for i in range(6, -1, -1)
-    ]
-    users_query = db.session.query(
-        func.strftime('%Y-%m', User.created_at).label('month'),
-        func.count(User.id).label('count')
-    ).group_by('month').all()
-    for user in users_query:
-        for data in users_data:
-            if data['month'] == user.month:
-                data['count'] = user.count
+        # Sales data: Aggregate total sales by day
+        try:
+            sales_query = db.session.query(
+                func.date(Order.created_at).label('date'),
+                func.sum(Order.total).label('total')
+            ).filter(
+                Order.created_at >= start_date,
+                Order.status != 'Canceled'
+            ).group_by(
+                func.date(Order.created_at)
+            ).order_by(
+                func.date(Order.created_at)
+            ).all()
+            logger.debug(f'Sales query result: {len(sales_query)} rows')
+        except Exception as e:
+            logger.error(f'Sales query failed: {str(e)}')
+            sales_query = []
 
-    return jsonify({
-        'total_sales': total_sales,
-        'new_users': new_users,
-        'pending_orders': pending_orders,
-        'top_product': top_product_name,
-        'sales_data': sales_data,
-        'users_data': users_data
-    })
+        sales_data = [
+            {'date': str(row.date), 'total': float(row.total or 0.0)}
+            for row in sales_query
+        ]
+
+        # Fill missing days with zero sales
+        all_dates = [(start_date + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(31)]
+        sales_data_dict = {item['date']: item['total'] for item in sales_data}
+        sales_data = [
+            {'date': date, 'total': sales_data_dict.get(date, 0.0)}
+            for date in all_dates
+        ]
+        logger.debug(f'Sales data length: {len(sales_data)}')
+
+        # Users data: Aggregate new users by day
+        try:
+            users_query = db.session.query(
+                func.date(User.created_at).label('date'),
+                func.count(User.id).label('count')
+            ).filter(
+                User.created_at >= start_date
+            ).group_by(
+                func.date(User.created_at)
+            ).order_by(
+                func.date(User.created_at)
+            ).all()
+            logger.debug(f'Users query result: {len(users_query)} rows')
+        except Exception as e:
+            logger.error(f'Users query failed: {str(e)}')
+            users_query = []
+
+        users_data = [
+            {'date': str(row.date), 'count': int(row.count or 0)}
+            for row in users_query
+        ]
+
+        # Fill missing days with zero users
+        users_data_dict = {item['date']: item['count'] for item in users_data}
+        users_data = [
+            {'date': date, 'count': users_data_dict.get(date, 0)}
+            for date in all_dates
+        ]
+        logger.debug(f'Users data length: {len(users_data)}')
+
+        # Total sales (all time)
+        try:
+            total_sales = db.session.query(func.sum(Order.total)).filter(Order.status != 'Canceled').scalar() or 0.0
+            logger.debug(f'Total sales: {total_sales}')
+        except Exception as e:
+            logger.error(f'Total sales query failed: {str(e)}')
+            total_sales = 0.0
+
+        # New users (last 30 days)
+        try:
+            new_users = db.session.query(func.count(User.id)).filter(User.created_at >= start_date).scalar() or 0
+            logger.debug(f'New users: {new_users}')
+        except Exception as e:
+            logger.error(f'New users query failed: {str(e)}')
+            new_users = 0
+
+        # Pending orders
+        try:
+            pending_orders = db.session.query(func.count(Order.id)).filter(Order.status == 'Pending').scalar() or 0
+            logger.debug(f'Pending orders: {pending_orders}')
+        except Exception as e:
+            logger.error(f'Pending orders query failed: {str(e)}')
+            pending_orders = 0
+
+        # Top product (by total sales value in last 30 days)
+        try:
+            top_product_query = db.session.query(
+                Artefact.name,
+                func.sum(Order.total).label('total_sales')
+            ).join(Order, Artefact.id == Order.artefact_id).filter(
+                Order.created_at >= start_date,
+                Order.status != 'Canceled'
+            ).group_by(Artefact.name).order_by(func.sum(Order.total).desc()).first()
+            top_product = top_product_query.name if top_product_query else 'None'
+            logger.debug(f'Top product: {top_product}')
+        except Exception as e:
+            logger.error(f'Top product query failed: {str(e)}')
+            top_product = 'None'
+
+        response = {
+            'total_sales': float(total_sales),
+            'new_users': new_users,
+            'pending_orders': pending_orders,
+            'top_product': top_product,
+            'sales_data': sales_data,
+            'users_data': users_data
+        }
+        logger.debug('Dashboard stats response prepared')
+        return jsonify(response), 200
+
+    except Exception as e:
+        logger.error(f'Unexpected error in dashboard_stats: {str(e)}')
+        return jsonify({'error': 'Internal server error'}), 500
+    
+    
 
 @app.route('/api/orders/<int:id>/cancel', methods=['POST'])
 def cancel_order(id):
