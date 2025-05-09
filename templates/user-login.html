@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Toastify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
         body {
@@ -60,10 +61,12 @@
         }
         .password-toggle {
             position: absolute;
-            right: 10px;
-            top: 70%;
+            right: 12px; /* Adjusted for better alignment */
+            top: 50%; /* Center vertically */
             transform: translateY(-50%);
             cursor: pointer;
+            color: #6b7280; /* Gray for visibility */
+            font-size: 1rem; /* Consistent icon size */
         }
         @media (max-width: 767px) {
             .main-content {
@@ -115,7 +118,7 @@
                 </div>
             </div>
             <div class="md:w-1/2">
-                <img src="https://tacc.co.ke/wp-content/uploads/2024/06/ESOPDS1358_Grey_2-470x470.jpg" alt="Featured Artifact" class="w-full h-auto rounded-lg">
+                <img src="{{ url_for('static', filename='images/pot7.jpg') }}" alt="Featured Artifact" class="w-full h-auto rounded-lg">
             </div>
         </section>
     </main>
@@ -132,8 +135,10 @@
                 </div>
                 <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="login-password">Password</label>
-                    <input type="password" id="login-password" class="w-full border rounded px-3 py-2" required minlength="6" autocomplete="off">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('login-password')"></i>
+                    <div class="relative">
+                        <input type="password" id="login-password" class="w-full border rounded px-3 py-2" required minlength="6" autocomplete="off">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('login-password')"></i>
+                    </div>
                 </div>
                 <div class="mb-4">
                     <a href="#" class="text-yellow-600 hover:underline text-sm" onclick="closeModal('login-modal'); openModal('reset-password-modal')">Forgot Password?</a>
@@ -161,8 +166,10 @@
                 </div>
                 <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="register-password">Password</label>
-                    <input type="password" id="register-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('register-password')"></i>
+                    <div class="relative">
+                        <input type="password" id="register-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('register-password')"></i>
+                    </div>
                     <div id="password-validation" class="text-sm hidden">
                         <div id="length-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least 6 characters</div>
                         <div id="uppercase-check" class="validation-check invalid"><i class="fas fa-circle"></i> At least one uppercase letter</div>
@@ -173,8 +180,10 @@
                 </div>
                 <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="register-confirm-password">Confirm Password</label>
-                    <input type="password" id="register-confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('register-confirm-password')"></i>
+                    <div class="relative">
+                        <input type="password" id="register-confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('register-confirm-password')"></i>
+                    </div>
                     <div id="confirm-password-validation" class="text-sm validation-check invalid hidden">
                         <i class="fas fa-circle"></i> <span id="confirm-password-text">Passwords do not match</span>
                     </div>
@@ -222,13 +231,17 @@
                 </div>
                 <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="new-password">New Password</label>
-                    <input type="password" id="new-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('new-password')"></i>
+                    <div class="relative">
+                        <input type="password" id="new-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('new-password')"></i>
+                    </div>
                 </div>
                 <div class="mb-4 relative">
                     <label class="block text-sm font-medium text-gray-700" for="confirm-password">Confirm Password</label>
-                    <input type="password" id="confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('confirm-password')"></i>
+                    <div class="relative">
+                        <input type="password" id="confirm-password" class="w-full border rounded px-3 py-2" required autocomplete="off">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('confirm-password')"></i>
+                    </div>
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="submit" id="change-password-submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Change Password</button>
@@ -471,7 +484,6 @@
                 }
                 showToast('Reset link sent to your email');
                 closeModal('reset-password-modal');
-                // Open change password modal (user enters token from email)
                 openModal('change-password-modal');
             } catch (error) {
                 console.error('Reset request error:', error);
