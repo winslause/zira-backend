@@ -1293,11 +1293,11 @@ def dashboard_stats():
             logger.error(f'Pending orders query failed: {str(e)}')
             pending_orders = 0
 
-        # Top product (by number of completed orders in last 30 days)
+        # Top product (by total quantity in completed orders in last 30 days)
         try:
             top_product_query = db.session.query(
                 Product.name,
-                func.count(Order.id).label('order_count')
+                func.sum(OrderItem.quantity).label('total_quantity')
             ).join(OrderItem, Product.id == OrderItem.product_id).join(
                 Order, OrderItem.order_id == Order.id
             ).filter(
@@ -1306,10 +1306,10 @@ def dashboard_stats():
             ).group_by(
                 Product.name
             ).order_by(
-                func.count(Order.id).desc()
+                func.sum(OrderItem.quantity).desc()
             ).first()
             top_product = top_product_query.name if top_product_query else 'None'
-            logger.debug(f'Top product: {top_product} (Order count: {top_product_query.order_count if top_product_query else 0})')
+            logger.debug(f'Top product: {top_product} (Total quantity: {top_product_query.total_quantity if top_product_query else 0})')
         except Exception as e:
             logger.error(f'Top product query failed: {str(e)}')
             top_product = 'None'
