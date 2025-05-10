@@ -11,6 +11,8 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jQuery (for popup toggle) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom Styles -->
     <style>
         /* Custom Font */
@@ -46,7 +48,7 @@
             visibility: hidden;
             opacity: 0;
             position: absolute;
-            top: 30px;
+            top: -40px;
             right: -10px;
             background-color: #d97706; /* Tailwind yellow-600 */
             color: white;
@@ -287,18 +289,16 @@
         /* Country Button Fixed Position */
         #country-btn-container {
             position: fixed !important;
-            bottom: 1rem;
+            bottom: 16px; /* Adjusted dynamically by JS */
             left: 1rem;
-            z-index: 50;
+            z-index: 1000;
             pointer-events: auto;
-            transform: none;
-            will-change: auto;
         }
         #country-dropdown {
             position: absolute;
             bottom: 3rem;
             left: 0;
-            z-index: 50;
+            z-index: 1000;
         }
 
         /* Flag Styling */
@@ -325,7 +325,7 @@
         .no-results {
             display: none;
             text-align: center;
-            color: #6b7280;
+            color: #4b5563; /* Tailwind gray-700 */
             font-size: 1rem;
             grid-column: 1 / -1;
         }
@@ -362,6 +362,202 @@
         #quantity-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
+        }
+
+        /* Floating Button Styles */
+        :root {
+            --whatsapp-green: #25D366;
+            --pink: #EC4899;
+            --yellow-600: #d97706;
+            --yellow-700: #b45309;
+            --red: #EF4444;
+            --error-red: #dc2626;
+        }
+
+        /* Custom Animations */
+        @keyframes bounce {
+            0%, prerequisite20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        /* Floating Button Container */
+        .floating-btn-container {
+            position: fixed;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        /* WhatsApp Button */
+        .whatsapp-btn-container {
+            bottom: 16px;
+            right: 16px;
+        }
+        .whatsapp-btn-container .floating-btn {
+            width: 48px;
+            height: 48px;
+            background-color: var(--whatsapp-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        .whatsapp-btn-container .floating-btn i {
+            color: white;
+            font-size: 24px;
+        }
+        .whatsapp-btn-container .floating-btn:hover {
+            transform: scale(1.1);
+        }
+        .whatsapp-btn-container .floating-text {
+            margin-right: 8px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .whatsapp-btn-container .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background-color: var(--red);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+
+        /* Discount Button */
+        .discount-btn-container {
+            bottom: 16px; /* Adjusted dynamically by JS */
+            left: 16px;
+        }
+        .discount-btn-container .floating-btn {
+            background-color: var(--pink);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            height: 48px;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        .discount-btn-container .floating-btn:hover {
+            transform: scale(1.1);
+        }
+        .discount-btn-container .floating-btn img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
+        /* Discount Popup */
+        #discount-page {
+            z-index: 60;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            transition: transform 0.5s ease-in-out;
+        }
+        #discount-page .p-6 {
+            min-height: 100%;
+            box-sizing: border-box;
+        }
+        #close-discount {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 65;
+        }
+
+        /* Email Form Styling */
+        #contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        #contact-form label {
+            font-weight: 500;
+            color: #374151;
+        }
+        #contact-form input,
+        #contact-form textarea {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #1f2937;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #contact-form input:focus,
+        #contact-form textarea:focus {
+            border-color: var(--yellow-600);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+        }
+        #contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        #contact-form button {
+            background: var(--yellow-600);
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #contact-form button:hover {
+            background: var(--yellow-700);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #contact-form button:focus {
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
+        }
+        #contact-form .text-right {
+            text-align: center;
+        }
+
+        /* Flash Messages */
+        #flash-message1 {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            min-width: 200px;
+            text-align: center;
+        }
+        #flash-message1.success {
+            background-color: var(--yellow-600);
+        }
+        #flash-message1.error {
+            background-color: var(--error-red);
+        }
+        #flash-message1.show {
+            opacity: 1;
         }
 
         /* Responsive Adjustments */
@@ -415,6 +611,66 @@
             .navbar-logo {
                 height: 48px;
             }
+            .whatsapp-btn-container .floating-btn {
+                width: 36px;
+                height: 36px;
+            }
+            .whatsapp-btn-container .floating-btn i {
+                font-size: 18px;
+            }
+            .whatsapp-btn-container .floating-text {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            .whatsapp-btn-container .badge {
+                font-size: 8px;
+                padding: 1px 4px;
+                top: -2px;
+                right: -2px;
+            }
+            .discount-btn-container .floating-btn {
+                height: 36px;
+                font-size: 10px;
+                padding: 12px;
+            }
+            .discount-btn-container .floating-btn img {
+                width: 18px;
+                height: 18px;
+                margin-right: 6px;
+            }
+            #discount-page {
+                width: 100%;
+            }
+            #discount-page .p-6 {
+                padding: 1rem;
+            }
+            #discount-page .h-16 {
+                height: 2.5rem;
+            }
+            #discount-page h2 {
+                font-size: 1.5rem;
+            }
+            #discount-page p {
+                font-size: 0.875rem;
+            }
+            #discount-page .text-sm {
+                font-size: 0.75rem;
+            }
+            #contact-form {
+                gap: 1rem;
+            }
+            #contact-form input,
+            #contact-form textarea {
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+            #contact-form button {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
+            #contact-form label {
+                font-size: 0.75rem;
+            }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
             .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
@@ -430,6 +686,9 @@
             }
             .navbar-logo {
                 height: 56px;
+            }
+            #discount-page {
+                width: 50%;
             }
         }
         @media (min-width: 1024px) {
@@ -511,6 +770,75 @@
         </div>
     </section>
 
+    <!-- WhatsApp Floating Button -->
+    <div class="floating-btn-container whatsapp-btn-container">
+        <span class="floating-text">Chat with Us</span>
+        <div class="floating-btn relative" role="button" aria-label="Chat with us on WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+            <span class="badge">1</span>
+        </div>
+    </div>
+
+    <!-- Discount Floating Button -->
+    <div class="floating-btn-container discount-btn-container" id="discount-btn" aria-controls="discount-page">
+        <div class="floating-btn" role="button" aria-label="Open About Zira Collection">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo">
+            <span>About Zira Collection</span>
+        </div>
+    </div>
+
+    <!-- Discount Popup -->
+    <div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
+        <div class="p-6 space-y-6">
+            <!-- Close Button -->
+            <div class="flex justify-end">
+                <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Logo -->
+            <div class="flex justify-center">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+            </div>
+            <!-- About Text -->
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
+                <p class="text-gray-600 text-base leading-relaxed">
+                    At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
+                    <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
+                    Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
+                </p>
+            </div>
+            <!-- Contact Info -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+                <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
+                <ul class="space-y-1 text-sm">
+                    <li><strong>Phone:</strong> +254 700 123456</li>
+                    <li><strong>Email:</strong> info@ziracollection.com</li>
+                    <li><strong>Location:</strong> Nairobi, Kenya</li>
+                </ul>
+            </div>
+            <!-- Email Form -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+                <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
+                <div id="flash-message1" style="display: none;"></div>
+                <form id="contact-form" class="space-y-4">
+                    <div>
+                        <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                        <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
+                    </div>
+                    <div>
+                        <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Products Section -->
     <section id="products-section" class="bg-white py-16 animate-pageLoad">
         <div class="max-w-7xl mx-auto px-4 relative">
@@ -568,8 +896,8 @@
                     {% for product in products if product.discount and product.discount.percent > 1 and product.discount.start_date <= today and product.discount.end_date >= today %}
                     <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}">
                         <div class="relative w-full h-64 overflow-hidden">
-                            <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-                            <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+                            <img src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+                            <img src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
                             <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
@@ -630,447 +958,611 @@
     </div>
 
     <!-- Footer -->
-    <!-- Footer -->
-<footer class="bg-black text-white py-12 px-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Desktop Layout -->
-        <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
-            <!-- Shop -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
-                <ul class="space-y-2">
-                    <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
-                    <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
-                </ul>
-            </div>
-            <!-- Sell -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
-                </ul>
-            </div>
-            <!-- Policies -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
-                </ul>
-            </div>
-            <!-- Company -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
-                <ul class="space-y-2">
-                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
-                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                    <li class="mt-4 text-white font-medium">+254 790 867 733</li>
-                    <li>sales@ziraartifacts.com</li>
-                    <li class="flex gap-4 mt-2 text-xl">
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    </li>
-                </ul>
-            </div>
-            <!-- Subscribe -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
-                <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
-                <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
-                    <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                    <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                </form>
-                <div class="mt-2 flex items-start gap-2">
-                    <input type="checkbox" class="mt-1">
-                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+    <footer class="bg-black text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Desktop Layout -->
+            <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
+                <!-- Shop -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
+                        <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-        <!-- Mobile Dropdowns -->
-        <div class="md:hidden space-y-4">
-            <!-- Shop -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
-                    <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
-                </ul>
-            </details>
-            <!-- Sell -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
-                </ul>
-            </details>
-            <!-- Policies -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
-                </ul>
-            </details>
-            <!-- Company -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
-                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                </ul>
-                <div class="mt-3 text-sm">
-                    <p>+254 790 867 733</p>
-                    <p>sales@ziraartifacts.com</p>
-                    <div class="flex gap-3 mt-2 text-xl">
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <!-- Sell -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
+                    </ul>
+                </div>
+                <!-- Policies -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
+                    </ul>
+                </div>
+                <!-- Company -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
+                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                        <li class="mt-4 text-white font-medium">+254 790 867 733</li>
+                        <li>sales@ziraartifacts.com</li>
+                        <li class="flex gap-4 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Subscribe -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
+                    <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
+                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
                     </div>
                 </div>
-            </details>
-            <!-- Subscribe -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
-                <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
-                <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
-                    <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                    <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                </form>
-                <div class="mt-2 flex items-start gap-2">
-                    <input type="checkbox" class="mt-1">
-                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
-                </div>
-            </details>
+            </div>
+            <!-- Mobile Dropdowns -->
+            <div class="md:hidden space-y-4">
+                <!-- Shop -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
+                        <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
+                    </ul>
+                </details>
+                <!-- Sell -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
+                    </ul>
+                </details>
+                <!-- Policies -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
+                    </ul>
+                </details>
+                <!-- Company -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
+                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                    </ul>
+                    <div class="mt-3 text-sm">
+                        <p>+254 790 867 733</p>
+                        <p>sales@ziraartifacts.com</p>
+                        <div class="flex gap-3 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </details>
+                <!-- Subscribe -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
+                    <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
+                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                    </div>
+                </details>
+            </div>
         </div>
-    </div>
-</footer>
-
+    </footer>
 
     <!-- JavaScript -->
     <script>
-        // Currency Conversion Logic
-        const exchangeRates = {
-            USD: 1,
-            EUR: 0.85,
-            GBP: 0.73,
-            KES: 130
-        };
-        let currentCurrency = '{{ current_currency }}';
+// Currency Conversion Logic (KES as base currency)
+const exchangeRates = {
+    USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
+    EUR: 0.0073, // 1 KES = 0.0073 EUR
+    GBP: 0.0061, // 1 KES = 0.0061 GBP
+    KES: 1       // 1 KES = 1 KES
+};
+let currentCurrency = '{{ current_currency }}';
 
-        // Toggle Country Dropdown
-        document.getElementById('country-btn').addEventListener('click', () => {
-            const dropdown = document.getElementById('country-dropdown');
-            dropdown.classList.toggle('hidden');
-        });
+// Toggle Country Dropdown
+document.getElementById('country-btn').addEventListener('click', () => {
+    const dropdown = document.getElementById('country-dropdown');
+    dropdown.classList.toggle('hidden');
+});
 
-        // Update Currency
-        document.querySelectorAll('.country-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                const country = e.target.getAttribute('data-country');
-                const flag = e.target.getAttribute('data-flag');
-                currentCurrency = e.target.getAttribute('data-currency');
-                document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
-                document.getElementById('country-dropdown').classList.add('hidden');
-                updatePrices();
-            });
-        });
-
-        // Update Prices
-        function updatePrices() {
-            document.querySelectorAll('.price').forEach(priceElement => {
-                const basePrice = parseFloat(priceElement.getAttribute('data-price'));
-                const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
-                priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-            });
-            document.querySelectorAll('.discounted-price').forEach(priceElement => {
-                const basePrice = parseFloat(priceElement.getAttribute('data-discounted-price'));
-                const convertedPrice = (basePrice * exchangeRates[currentCurrency]).toFixed(2);
-                priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-            });
-            // Update Price Filter Options
-            const priceFilter = document.querySelector('.price-filter');
-            const selectedValue = priceFilter.value;
-            priceFilter.innerHTML = `
-                <option value="all">All Prices</option>
-                <option value="0-100">${currentCurrency} 0 - ${(100 * exchangeRates[currentCurrency]).toFixed(2)}</option>
-                <option value="100-200">${currentCurrency} 100 - ${(200 * exchangeRates[currentCurrency]).toFixed(2)}</option>
-                <option value="200+">${currentCurrency} 200+</option>
-            `;
-            priceFilter.value = selectedValue;
-        }
-
-        // Filter Logic
-        let selectedCategory = 'all';
-        let selectedPriceRange = 'all';
-        let searchQuery = '';
-
-        const applyFilters = () => {
-            let visibleProducts = 0;
-            document.querySelectorAll('.product-card').forEach(card => {
-                // Category Filter
-                const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
-                // Price Filter
-                const price = parseFloat(card.querySelector('.price').getAttribute('data-price'));
-                let priceMatch = true;
-                if (selectedPriceRange === '0-100') {
-                    priceMatch = price <= 100;
-                } else if (selectedPriceRange === '100-200') {
-                    priceMatch = price > 100 && price <= 200;
-                } else if (selectedPriceRange === '200+') {
-                    priceMatch = price > 200;
-                }
-                // Search Filter
-                const name = card.getAttribute('data-name');
-                const category = card.getAttribute('data-category').toLowerCase();
-                const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
-
-                // Combined Filter
-                if (categoryMatch && priceMatch && searchMatch) {
-                    card.style.display = 'block';
-                    visibleProducts++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // Toggle No Results Messages
-            const noDiscounts = document.querySelector('.no-results:not(#no-search-results)');
-            const noSearchResults = document.getElementById('no-search-results');
-            if (visibleProducts === 0) {
-                if (searchQuery) {
-                    noSearchResults.style.display = 'block';
-                    if (noDiscounts) noDiscounts.style.display = 'none';
-                } else {
-                    noSearchResults.style.display = 'none';
-                    if (noDiscounts) noDiscounts.style.display = 'block';
-                }
-            } else {
-                noSearchResults.style.display = 'none';
-                if (noDiscounts) noDiscounts.style.display = 'none';
-            }
-        };
-
-        // Live Search
-        document.querySelectorAll('.search-input').forEach(input => {
-            input.addEventListener('input', (e) => {
-                searchQuery = e.target.value.trim().toLowerCase();
-                applyFilters();
-            });
-        });
-
-        // Category Filter
-        document.querySelectorAll('.filter-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                selectedCategory = e.target.getAttribute('data-filter');
-                document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
-                e.target.classList.add('font-bold', 'text-yellow-600');
-                applyFilters();
-            });
-        });
-
-        // Price Range Filter
-        document.querySelector('.price-filter').addEventListener('change', (e) => {
-            selectedPriceRange = e.target.value;
-            applyFilters();
-        });
-
-        // Display Options
-        document.querySelectorAll('.display-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
-                e.target.classList.add('active');
-
-                const grid = document.querySelector('.product-grid');
-                grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
-
-                if (e.target.classList.contains('list-view')) {
-                    grid.classList.add('list-view');
-                } else {
-                    const cols = e.target.getAttribute('data-cols');
-                    grid.classList.add(`cols-${cols}`);
-                }
-            });
-        });
-
-        // Wishlist Button Toggle
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.classList.toggle('active');
-                const icon = btn.querySelector('i');
-                icon.classList.toggle('fas');
-                icon.classList.toggle('far');
-            });
-        });
-
-        // Add to Wishlist
-        function addToWishlist(productId) {
-            fetch('/api/wishlist', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ product_id: productId }),
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error adding to wishlist:', error);
-                alert('Failed to add to wishlist: ' + error.message);
-            });
-        }
-
-        // Add to Cart with Quantity Popup
-        function addToCart(productId) {
-            // Show quantity modal
-            const modal = document.getElementById('quantity-modal');
-            const quantityInput = document.getElementById('quantity-input');
-            const confirmButton = document.getElementById('confirm-quantity');
-            const cancelButton = document.getElementById('cancel-quantity');
-
-            // Reset input
-            quantityInput.value = 1;
-
-            // Show modal
-            modal.classList.remove('hidden');
-
-            // Confirm button handler
-            const confirmHandler = () => {
-                const quantity = parseInt(quantityInput.value);
-                if (isNaN(quantity) || quantity < 1) {
-                    alert('Please enter a valid quantity (1 or more).');
-                    return;
-                }
-
-                fetch('/api/cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ product_id: productId, quantity: quantity }),
-                    credentials: 'include'
-                })
-                .then(response => {
-                    if (response.redirected && response.url.includes('/login')) {
-                        alert('Session expired. Please log in.');
-                        window.location.href = '/login';
-                        return null;
-                    }
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data) {
-                        alert(data.message);
-                        modal.classList.add('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error adding to cart:', error);
-                    alert('Failed to add to cart: ' + error.message);
-                })
-                .finally(() => {
-                    confirmButton.removeEventListener('click', confirmHandler);
-                    cancelButton.removeEventListener('click', cancelHandler);
-                });
-            };
-
-            // Cancel button handler
-            const cancelHandler = () => {
-                modal.classList.add('hidden');
-                confirmButton.removeEventListener('click', confirmHandler);
-                cancelButton.removeEventListener('click', cancelHandler);
-            };
-
-            // Attach event listeners
-            confirmButton.addEventListener('click', confirmHandler);
-            cancelButton.addEventListener('click', cancelHandler);
-        }
-
-        // Mobile Navbar Toggle
-        document.getElementById('nav-toggler').addEventListener('click', () => {
-            const sidebar = document.getElementById('mobile-sidebar');
-            const icon = document.querySelector('#nav-toggler i');
-            sidebar.classList.toggle('-translate-x-full');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-        });
-
-        // Close Mobile Sidebar
-        document.getElementById('close-sidebar').addEventListener('click', () => {
-            const sidebar = document.getElementById('mobile-sidebar');
-            const icon = document.querySelector('#nav-toggler i');
-            sidebar.classList.add('-translate-x-full');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-        });
-
-        // Mobile Search Toggle
-        document.getElementById('mobile-search-icon').addEventListener('click', () => {
-            const searchBar = document.getElementById('mobile-search-bar');
-            searchBar.classList.toggle('active');
-            const icon = document.getElementById('mobile-search-icon');
-            icon.classList.add('animate-bounce');
-            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
-        });
-
-        // Filter Toggler Button (Mobile)
-        document.getElementById('filter-toggler').addEventListener('click', () => {
-            const sidebar = document.querySelector('.sidebar');
-            const button = document.getElementById('filter-toggler');
-            sidebar.classList.toggle('open');
-            button.classList.add('animate-pulse');
-            setTimeout(() => button.classList.remove('animate-pulse'), 300);
-        });
-
-        // Filter Close Button (Mobile)
-        document.getElementById('filter-close-btn').addEventListener('click', () => {
-            const sidebar = document.querySelector('.sidebar');
-            const icon = document.querySelector('#filter-close-btn i');
-            sidebar.classList.remove('open');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-            applyFilters();
-        });
-
-        // Close Filter Sidebar When Clicking Outside (Mobile)
-        document.addEventListener('click', (e) => {
-            const sidebar = document.querySelector('.sidebar');
-            const toggler = document.getElementById('filter-toggler');
-            const closeBtn = document.getElementById('filter-close-btn');
-            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
-                sidebar.classList.remove('open');
-                applyFilters();
-            }
-        });
-
-        // Initialize Prices and Filters
+// Update Currency
+document.querySelectorAll('.country-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+        e.preventDefault();
+        const country = e.target.getAttribute('data-country');
+        const flag = e.target.getAttribute('data-flag');
+        currentCurrency = e.target.getAttribute('data-currency');
+        document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
+        document.getElementById('country-dropdown').classList.add('hidden');
         updatePrices();
+    });
+});
+
+// Update Prices
+function updatePrices() {
+    // Convert product prices from KES to selected currency
+    document.querySelectorAll('.price').forEach(priceElement => {
+        const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+    });
+    document.querySelectorAll('.discounted-price').forEach(priceElement => {
+        const baseDiscountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price'));
+        const convertedPrice = (baseDiscountedPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+    });
+
+    // Update Price Filter Options (convert KES ranges to selected currency)
+    const priceFilter = document.querySelector('.price-filter');
+    const selectedValue = priceFilter.value;
+    const rangeLow = 13000; // Approx 100 USD in KES (100 / 0.0077)
+    const rangeHigh = 26000; // Approx 200 USD in KES (200 / 0.0077)
+    priceFilter.innerHTML = `
+        <option value="all">All Prices</option>
+        <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
+        <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
+        <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
+    `;
+    priceFilter.value = selectedValue;
+}
+
+// Filter Logic
+let selectedCategory = 'all';
+let selectedPriceRange = 'all';
+let searchQuery = '';
+
+const applyFilters = () => {
+    let visibleProducts = 0;
+    document.querySelectorAll('.product-card').forEach(card => {
+        // Category Filter
+        const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
+        // Price Filter (compare in KES)
+        const priceKES = parseFloat(card.querySelector('.price').getAttribute('data-price'));
+        let priceMatch = true;
+        if (selectedPriceRange === '0-13000') {
+            priceMatch = priceKES <= 13000;
+        } else if (selectedPriceRange === '13000-26000') {
+            priceMatch = priceKES > 13000 && priceKES <= 26000;
+        } else if (selectedPriceRange === '26000+') {
+            priceMatch = priceKES > 26000;
+        }
+        // Search Filter
+        const name = card.getAttribute('data-name');
+        const category = card.getAttribute('data-category').toLowerCase();
+        const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
+
+        // Combined Filter
+        if (categoryMatch && priceMatch && searchMatch) {
+            card.style.display = 'block';
+            visibleProducts++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Toggle No Results Messages
+    const noDiscounts = document.querySelector('.no-results:not(#no-search-results)');
+    const noSearchResults = document.getElementById('no-search-results');
+    if (visibleProducts === 0) {
+        if (searchQuery) {
+            noSearchResults.style.display = 'block';
+            if (noDiscounts) noDiscounts.style.display = 'none';
+        } else {
+            noSearchResults.style.display = 'none';
+            if (noDiscounts) noDiscounts.style.display = 'block';
+        }
+    } else {
+        noSearchResults.style.display = 'none';
+        if (noDiscounts) noDiscounts.style.display = 'none';
+    }
+};
+
+// Live Search
+document.querySelectorAll('.search-input').forEach(input => {
+    input.addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim().toLowerCase();
         applyFilters();
-    </script>
+    });
+});
+
+// Category Filter
+document.querySelectorAll('.filter-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedCategory = e.target.getAttribute('data-filter');
+        document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
+        e.target.classList.add('font-bold', 'text-yellow-600');
+        applyFilters();
+    });
+});
+
+// Price Range Filter
+document.querySelector('.price-filter').addEventListener('change', (e) => {
+    selectedPriceRange = e.target.value;
+    applyFilters();
+});
+
+// Display Options
+document.querySelectorAll('.display-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+        document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
+        e.target.classList.add('active');
+
+        const grid = document.querySelector('.product-grid');
+        grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
+
+        if (e.target.classList.contains('list-view')) {
+            grid.classList.add('list-view');
+        } else {
+            const cols = e.target.getAttribute('data-cols');
+            grid.classList.add(`cols-${cols}`);
+        }
+    });
+});
+
+// Wishlist Button Toggle
+document.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Toggle is handled in addToWishlist after successful API call
+    });
+});
+
+// Add to Wishlist
+function addToWishlist(productId) {
+    // Find the product card for the given productId
+    const productCard = document.querySelector(`.product-card .wishlist-btn[onclick="addToWishlist(${productId})"]`).closest('.product-card');
+    const discountedPriceKES = parseFloat(productCard.querySelector('.discounted-price').getAttribute('data-discounted-price'));
+
+    fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            product_id: productId,
+            price: discountedPriceKES // Send discounted price in KES
+        }),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        // Toggle wishlist button state
+        const btn = productCard.querySelector('.wishlist-btn');
+        btn.classList.toggle('active');
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('fas');
+        icon.classList.toggle('far');
+    })
+    .catch(error => {
+        console.error('Error adding to wishlist:', error);
+        alert('Failed to add to wishlist: ' + error.message);
+    });
+}
+
+// Add to Cart with Quantity Popup
+function addToCart(productId) {
+    // Find the product card for the given productId
+    const productCard = document.querySelector(`.product-card .action-btn[onclick="addToCart(${productId})"]`).closest('.product-card');
+    const discountedPriceKES = parseFloat(productCard.querySelector('.discounted-price').getAttribute('data-discounted-price'));
+
+    // Show quantity modal
+    const modal = document.getElementById('quantity-modal');
+    const quantityInput = document.getElementById('quantity-input');
+    const confirmButton = document.getElementById('confirm-quantity');
+    const cancelButton = document.getElementById('cancel-quantity');
+
+    // Reset input
+    quantityInput.value = 1;
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Confirm button handler
+    const confirmHandler = () => {
+        const quantity = parseInt(quantityInput.value);
+        if (isNaN(quantity) || quantity < 1) {
+            alert('Please enter a valid quantity (1 or more).');
+            return;
+        }
+
+        fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                product_id: productId, 
+                quantity: quantity,
+                price: discountedPriceKES // Send discounted price in KES
+            }),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.redirected && response.url.includes('/login')) {
+                alert('Session expired. Please log in.');
+                window.location.href = '/login';
+                return null;
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                alert(data.message);
+                modal.classList.add('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to cart:', error);
+            alert('Failed to add to cart: ' + error.message);
+        })
+        .finally(() => {
+            confirmButton.removeEventListener('click', confirmHandler);
+            cancelButton.removeEventListener('click', cancelHandler);
+        });
+    };
+
+    // Cancel button handler
+    const cancelHandler = () => {
+        modal.classList.add('hidden');
+        confirmButton.removeEventListener('click', confirmHandler);
+        cancelButton.removeEventListener('click', cancelHandler);
+    };
+
+    // Attach event listeners
+    confirmButton.addEventListener('click', confirmHandler);
+    cancelButton.addEventListener('click', cancelHandler);
+}
+
+// Mobile Navbar Toggle
+document.getElementById('nav-toggler').addEventListener('click', () => {
+    const sidebar = document.getElementById('mobile-sidebar');
+    const icon = document.querySelector('#nav-toggler i');
+    sidebar.classList.toggle('-translate-x-full');
+    icon.classList.toggle('fa-bars');
+    icon.classList.toggle('fa-times');
+    icon.classList.add('animate-rotateToggle');
+    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+});
+
+// Close Mobile Sidebar
+document.getElementById('close-sidebar').addEventListener('click', () => {
+    const sidebar = document.getElementById('mobile-sidebar');
+    const icon = document.querySelector('#nav-toggler i');
+    sidebar.classList.add('-translate-x-full');
+    icon.classList.add('fa-bars');
+    icon.classList.remove('fa-times');
+    icon.classList.add('animate-rotateToggle');
+    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+});
+
+// Mobile Search Toggle
+document.getElementById('mobile-search-icon').addEventListener('click', () => {
+    const searchBar = document.getElementById('mobile-search-bar');
+    searchBar.classList.toggle('active');
+    const icon = document.getElementById('mobile-search-icon');
+    icon.classList.add('animate-bounce');
+    setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+});
+
+// Filter Toggler Button (Mobile)
+document.getElementById('filter-toggler').addEventListener('click', () => {
+    const sidebar = document.querySelector('.sidebar');
+    const button = document.getElementById('filter-toggler');
+    sidebar.classList.toggle('open');
+    button.classList.add('animate-pulse');
+    setTimeout(() => button.classList.remove('animate-pulse'), 300);
+});
+
+// Filter Close Button (Mobile)
+document.getElementById('filter-close-btn').addEventListener('click', () => {
+    const sidebar = document.querySelector('.sidebar');
+    const icon = document.querySelector('#filter-close-btn i');
+    sidebar.classList.remove('open');
+    icon.classList.add('animate-rotateToggle');
+    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+    applyFilters();
+});
+
+// Close Filter Sidebar When Clicking Outside (Mobile)
+document.addEventListener('click', (e) => {
+    const sidebar = document.querySelector('.sidebar');
+    const toggler = document.getElementById('filter-toggler');
+    const closeBtn = document.getElementById('filter-close-btn');
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
+        sidebar.classList.remove('open');
+        applyFilters();
+    }
+});
+
+// Floating Button Positioning and Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Adjust positions of floating buttons
+    function adjustFloatingButtonPositions() {
+        const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
+        let aboutOffset = 16; // Default bottom for About Zira button
+        let countryOffset = 16; // Default bottom for Country button
+
+        // Calculate offsets for buttons excluding WhatsApp (right-aligned)
+        floatingButtons.forEach(button => {
+            if (button !== document.querySelector('.discount-btn-container') &&
+                button !== document.querySelector('.whatsapp-btn-container') &&
+                button !== document.querySelector('#country-btn-container')) {
+                const buttonBottom = parseInt(getComputedStyle(button).bottom) || 0;
+                const buttonHeight = button.offsetHeight || 48;
+                aboutOffset = Math.max(aboutOffset, buttonBottom + buttonHeight + 16);
+            }
+        });
+
+        // Set About Zira button position
+        const aboutButton = document.querySelector('.discount-btn-container');
+        if (aboutButton) {
+            aboutButton.style.bottom = `${aboutOffset}px`;
+        }
+
+        // Set Country button above About Zira button
+        const countryButton = document.querySelector('#country-btn-container');
+        if (countryButton && aboutButton) {
+            const aboutHeight = aboutButton.offsetHeight || 48;
+            countryOffset = aboutOffset + aboutHeight + 16; // Place above About Zira
+            countryButton.style.bottom = `${countryOffset}px`;
+        }
+    }
+    adjustFloatingButtonPositions();
+    window.addEventListener('resize', adjustFloatingButtonPositions);
+
+    // Discount Popup Toggle
+    if (typeof jQuery !== 'undefined') {
+        $(document).ready(function() {
+            $('#discount-btn').off('click').on('click', function() {
+                $('#discount-page').removeClass('-translate-x-full');
+                console.log('Discount button clicked');
+            });
+            $('#close-discount').off('click').on('click', function() {
+                $('#discount-page').addClass('-translate-x-full');
+                console.log('Close discount clicked');
+            });
+        });
+    } else {
+        console.error('jQuery is not loaded');
+    }
+
+    // WhatsApp Button Click Handler
+    const whatsappBtn = document.querySelector('.whatsapp-btn-container .floating-btn');
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', () => {
+            const phoneNumber = '+254700123456';
+            const message = 'Hello, I have a question about Zira Collection!';
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            console.log('WhatsApp button clicked');
+        });
+    } else {
+        console.error('WhatsApp button not found');
+    }
+
+    // Contact Form Submission
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted');
+            const formData = new FormData(e.target);
+            const data = {
+                subject: formData.get('subject'),
+                message: formData.get('message'),
+            };
+            console.log('Form data:', data);
+
+            const showFlashMessage = (text, isSuccess) => {
+                console.log('Showing flash message:', text, isSuccess);
+                const flashMessage = document.getElementById('flash-message1');
+                if (flashMessage) {
+                    flashMessage.textContent = text;
+                    flashMessage.className = isSuccess ? 'success' : 'error';
+                    flashMessage.style.display = 'block';
+                    flashMessage.classList.add('show');
+                    setTimeout(() => {
+                        flashMessage.classList.remove('show');
+                        setTimeout(() => {
+                            flashMessage.style.display = 'none';
+                        }, 500);
+                    }, 5000);
+                }
+            };
+
+            try {
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                    credentials: 'include',
+                });
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response data:', result);
+                if (!response.ok) throw new Error(result.error || 'Failed to send message');
+                showFlashMessage('Your message has been sent successfully! We will get back to you shortly', true);
+                e.target.reset();
+            } catch (error) {
+                console.error('Error:', error.message);
+                showFlashMessage(`Error: ${error.message}`, false);
+            }
+        });
+    } else {
+        console.error('Contact form not found');
+    }
+
+    // Keyboard Accessibility for Floating Buttons
+    document.getElementById('discount-btn').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            $('#discount-page').removeClass('-translate-x-full');
+        }
+    });
+    document.getElementById('close-discount').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            $('#discount-page').addClass('-translate-x-full');
+        }
+    });
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const phoneNumber = '+254700123456';
+                const message = 'Hello, I have a question about Zira Collection!';
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            }
+        });
+    }
+});
+
+// Initialize Prices and Filters
+updatePrices();
+applyFilters();
+</script>
 </body>
 </html>

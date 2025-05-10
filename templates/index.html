@@ -424,7 +424,7 @@
         </div>
     </section>
     <style>
-        /* Ensure the container for the cards uses flexbox to align cards */
+/* Ensure the container for the cards uses flexbox to align cards */
 .ftm-tab-content {
     display: flex;
     flex-wrap: wrap;
@@ -516,9 +516,9 @@
     width: 100%;
     background: #d97706;
     color: #fff;
-    padding: 0.5rem;
+    padding: 0.5rem; /* Default padding for desktop */
     border-radius: 0.25rem;
-    font-size: 0.875rem;
+    font-size: 0.875rem; /* Default font size */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -537,12 +537,22 @@
         min-height: 340px; /* Adjust for mobile */
     }
 
+    #featured-this-month .ftm-card:hover .ftm-card-img img {
+    transform: scale(1.1) rotate(360deg);
+}
+
     .ftm-card-img {
         height: 220px; /* Slightly smaller image height for mobile */
     }
 
     .ftm-product-name {
         font-size: 1rem;
+    }
+
+    /* Adjust wishlist button for smaller devices */
+    .wishlist-btn {
+        padding: 0.375rem; /* Reduced padding for compactness */
+        font-size: 0.75rem; /* Smaller font size */
     }
 }
     </style>

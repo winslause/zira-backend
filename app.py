@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import sessionmaker, joinedload
 import os
 import string
 import secrets
@@ -1379,16 +1380,25 @@ def create_order():
     if data['payment_method'] == 'immediate' and not data.get('message_code'):
         return jsonify({'error': 'Message code required for immediate payment'}), 400
     
-    cart_items = Cart.query.filter_by(user_id=user_id).all()
+    # Fetch cart items with products and discounts
+    cart_items = Cart.query.filter_by(user_id=user_id).options(
+        joinedload(Cart.product).joinedload(Product.discount)
+    ).all()
     if not cart_items:
         return jsonify({'error': 'Cart is empty'}), 400
     
     total = 0
     for item in cart_items:
-        product = Product.query.get(item.product_id)
+        product = item.product
         if not product:
             return jsonify({'error': f'Product ID {item.product_id} not found'}), 404
-        total += product.price * item.quantity
+        # Calculate discounted price in KES
+        if product.discount and product.discount.percent > 0:
+            price = product.price * (1 - product.discount.percent / 100)
+        else:
+            price = product.price
+        total += price * item.quantity
+        logging.debug(f"Cart item: product_id={item.product_id}, original_price={product.price}, discounted_price={price}, quantity={item.quantity}")
     
     order = Order(
         user_id=user_id,
@@ -1401,6 +1411,7 @@ def create_order():
     db.session.flush()
     
     for item in cart_items:
+        product = item.product
         order_item = OrderItem(
             order_id=order.id,
             product_id=item.product_id,
@@ -1408,14 +1419,16 @@ def create_order():
         )
         db.session.add(order_item)
     
+    # Clear cart
     Cart.query.filter_by(user_id=user_id).delete()
     
+    # Update user details
     user.address = data['address']
     user.name = data['name']
     user.phone_number = data['phone_number']
     
     db.session.commit()
-    logging.debug(f"Order created: order_id={order.id}, user_id={user_id}, payment_method={data['payment_method']}")
+    logging.debug(f"Order created: order_id={order.id}, user_id={user_id}, total={total}, payment_method={data['payment_method']}")
     return jsonify({'message': 'Order placed successfully', 'order_id': order.id}), 201
 
 @app.route('/user_login', methods=['GET', 'POST'])
