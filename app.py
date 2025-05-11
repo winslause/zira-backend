@@ -334,8 +334,8 @@ def admin_forgot_password():
 
     # Generate random password and reset token
     random_password = generate_random_password()
-    reset_token = generate_reset_token()  # Use existing function
-    token_expiry = datetime.utcnow() + timedelta(hours=1)  # Token valid for 1 hour
+    reset_token = generate_reset_token()
+    token_expiry = datetime.utcnow() + timedelta(hours=1)
 
     # Update user with temporary password and reset token
     user.password = generate_password_hash(random_password)
@@ -343,18 +343,122 @@ def admin_forgot_password():
     user.reset_token_expiry = token_expiry
     db.session.commit()
 
-    # Send email with random password
+    # Create styled HTML email
+    html_body = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zira Collections Admin Password Reset</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+                color: #333;
+            }}
+            .container {{
+                max-width: 600px;
+                margin: 20px auto;
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }}
+            .header {{
+                background-color: #2c3e50;
+                padding: 20px;
+                text-align: center;
+                color: #ffffff;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 24px;
+            }}
+            .content {{
+                padding: 20px;
+                line-height: 1.6;
+            }}
+            .content h2 {{
+                color: #2c3e50;
+                font-size: 20px;
+            }}
+            .content p {{
+                margin: 10px 0;
+            }}
+            .temporary-password {{
+                background-color: #e8f0fe;
+                padding: 15px;
+                border-radius: 5px;
+                font-size: 18px;
+                font-weight: bold;
+                color: #1a73e8;
+                text-align: center;
+                margin: 20px 0;
+            }}
+            .cta-button {{
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: #1a73e8;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+                margin: 20px 0;
+            }}
+            .footer {{
+                background-color: #f4f4f4;
+                padding: 15px;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+            }}
+            .footer a {{
+                color: #1a73e8;
+                text-decoration: none;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Zira Collections</h1>
+            </div>
+            <div class="content">
+                <h2>Admin Password Reset</h2>
+                <p>Hello,</p>
+                <p>We received a request to reset your password for your Zira Collections admin account. Below is your temporary password, which is valid for 1 hour:</p>
+                <div class="temporary-password">{random_password}</div>
+                <p>Please use this temporary password to log in and reset your password immediately. For security reasons, this password will expire after 1 hour.</p>
+                <a href="https://your-domain.com/login" class="cta-button">Log In Now</a>
+                <p>If you did not request a password reset, please contact our support team immediately at <a href="mailto:support@ziracollections.com">support@ziracollections.com</a>.</p>
+                <p>Thank you,<br>The Zira Collections Team</p>
+            </div>
+            <div class="footer">
+                <p>&copy; {datetime.utcnow().year} Zira Collections. All rights reserved.</p>
+                <p><a href="https://your-domain.com">Visit our website</a> | <a href="mailto:support@ziracollections.com">Contact Support</a></p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Send email with styled HTML
     try:
         msg = Message(
-            subject='Zira Artifacts Admin Password Reset',
+            subject='Zira Collections Admin Password Reset',
             recipients=[email],
-            body=f'Your temporary password is: {random_password}\n\nThis password is valid for 1 hour. Please log in and reset your password immediately.'
+            body=f'Your temporary password is: {random_password}\n\nThis password is valid for 1 hour. Please log in and reset your password immediately.',
+            html=html_body  # Include the HTML version
         )
         mail.send(msg)
         return jsonify({'message': 'A temporary password has been sent to your email.'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to send email. Please try again later.'}), 500
+    
 
 # Admin Reset Password Route
 @app.route('/api/admin_reset_password', methods=['POST'])
