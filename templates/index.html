@@ -35,7 +35,7 @@
         <!-- Mobile Navbar -->
         <div class="md:hidden flex items-center justify-between w-full relative">
             <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
             <div class="flex items-center space-x-4">
                 <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
                 <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
@@ -50,7 +50,7 @@
         <div class="hidden md:flex items-center justify-between w-full">
             <!-- Debug -->
             <!-- <p>Session.user: {{ session.user }}, Authenticated: {{ is_authenticated }}, Username: {{ username }}</p> -->
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
             <div class="flex space-x-6">
                 <div class="relative nav-hover">
                     <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
@@ -168,7 +168,7 @@
     <!-- Discount Floating Button -->
     <div class="floating-btn-container discount-btn-container" id="discount-btn">
         <div class="floating-btn">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="">
             <span>About Zira Collection</span>
         </div>
     </div>
@@ -185,7 +185,7 @@
 
         <!-- Logo -->
         <div class="flex justify-center">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
         </div>
 
         <!-- About Text -->
@@ -236,19 +236,19 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <!-- Discover & Buy -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
-                    <img src="{{ url_for('static', filename='images/discover.png') }}" alt="Discover & Buy" class="h-16 w-16">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/discover.png') }}" alt="Discover & Buy" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Discover & Buy</h3>
                     <p class="text-gray-600">Discover and buy from Africa’s most talented craftspeople</p>
                 </a>
                 <!-- Ship & Track -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
-                    <img src="{{ url_for('static', filename='images/ship.png') }}" alt="Ship & Track" class="h-16 w-16">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/ship.png') }}" alt="Ship & Track" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Ship & Track</h3>
                     <p class="text-gray-600">24/7 International & domestic shipping</p>
                 </a>
                 <!-- Wholesale Friendly -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
-                    <img src="{{ url_for('static', filename='images/friendly.png') }}" alt="Wholesale Friendly" class="h-16 w-16">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/friendly.png') }}" alt="Wholesale Friendly" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Wholesale Friendly</h3>
                     <p class="text-gray-600">Guaranteed best pricing & low minimums</p>
                 </a>
@@ -264,56 +264,56 @@
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://www.skydelldesign.com/upload/blog/1693248430_post_image.jpg" alt="Cultural Jewelry" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://www.skydelldesign.com/upload/blog/1693248430_post_image.jpg" alt="Cultural Jewelry" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Cultural Jewelry</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://cdn.shopify.com/s/files/1/1846/7989/files/Artesania_san_jacinto_collectiviste_colombia.jpg?v=1562243047" alt="Handwoven Textiles" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://cdn.shopify.com/s/files/1/1846/7989/files/Artesania_san_jacinto_collectiviste_colombia.jpg?v=1562243047" alt="Handwoven Textiles" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Handwoven Textiles</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://tamara-artefacts.myshopify.com/cdn/shop/products/IMG20220608115904_1024x1024@2x.jpg?v=1654674361" alt="Stone Decor" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://tamara-artefacts.myshopify.com/cdn/shop/products/IMG20220608115904_1024x1024@2x.jpg?v=1654674361" alt="Stone Decor" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Stone Decor</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://i.ebayimg.com/images/g/cLMAAOSwGKJkgpsK/s-l1200.jpg" alt="Ceremonial Tools" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://i.ebayimg.com/images/g/cLMAAOSwGKJkgpsK/s-l1200.jpg" alt="Ceremonial Tools" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Ceremonial Tools</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://usercontent.one/wp/combonimissionaries.co.uk/wp-content/uploads/2024/04/photo-news-3-46.jpg" alt="Woven Baskets" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://usercontent.one/wp/combonimissionaries.co.uk/wp-content/uploads/2024/04/photo-news-3-46.jpg" alt="Woven Baskets" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Woven Baskets</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfuYoU3TbWglIjY6Q8yxiNe4vF7DON3HNCgyLeQnYgVYg0TKZfYUGYCSdJmMz0Wwtxeco&usqp=CAU" alt="Cultural Footwear" class="w-full h-full object-cover">
+                        <img loading="lazy" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfuYoU3TbWglIjY6Q8yxiNe4vF7DON3HNCgyLeQnYgVYg0TKZfYUGYCSdJmMz0Wwtxeco&usqp=CAU" alt="Cultural Footwear" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Cultural Footwear</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="{{ url_for('static', filename='images/travel.jpg') }}" alt="Travel Souvenirs" class="w-full h-full object-cover">
+                        <img loading="lazy" src="{{ url_for('static', filename='images/travel.jpg') }}" alt="Travel Souvenirs" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Travel Souvenirs</p>
                 </div>
                 <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
-                        <img src="{{ url_for('static', filename='images/art.jpg') }}" alt="Stone Artifacts" class="w-full h-full object-cover">
+                        <img loading="lazy" src="{{ url_for('static', filename='images/art.jpg') }}" alt="Stone Artifacts" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Stone Artifacts</p>
                 </div>
@@ -338,7 +338,7 @@
                     {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
                     <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
                     {% endif %}
-                    <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
@@ -369,7 +369,7 @@
             <div class="ftm-card">
                 <div class="ftm-card-img">
                     <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
-                    <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
@@ -398,7 +398,7 @@
                     {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
                     <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
                     {% endif %}
-                    <img src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
@@ -584,7 +584,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 max-w-7xl mx-auto">
             <!-- Card 1 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[100ms]">
-                <img src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Stone Sculpture Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
+                <img loading="lazy" src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Stone Sculpture Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
                     <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
                         Stone Sculpture Collection
@@ -593,7 +593,7 @@
             </div>
             <!-- Card 2 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[200ms]">
-                <img src="https://images.stockcake.com/public/0/a/c/0ac572f5-0e4b-4eb1-a834-5d544a7827b8_large/tribal-decor-galore-stockcake.jpg" alt="Cultural Decor Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
+                <img loading="lazy" src="https://images.stockcake.com/public/0/a/c/0ac572f5-0e4b-4eb1-a834-5d544a7827b8_large/tribal-decor-galore-stockcake.jpg" alt="Cultural Decor Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
                     <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
                         Cultural Decor Collection
@@ -602,7 +602,7 @@
             </div>
             <!-- Card 3 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[300ms]">
-                <img src="https://sites.duke.edu/downhome/files/2014/01/Down-Home_007.png" alt="Ceremonial Artifacts Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
+                <img loading="lazy" src="https://sites.duke.edu/downhome/files/2014/01/Down-Home_007.png" alt="Ceremonial Artifacts Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
                     <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
                         Ceremonial Artifacts Collection
@@ -611,7 +611,7 @@
             </div>
             <!-- Card 4 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[400ms]">
-                <img src="https://images.squarespace-cdn.com/content/v1/65a77c25c2e955035c0fc7a4/3f515310-c533-48ae-b9ed-81196f14d072/cultural-wedding-gift-ideas.jpg" alt="Cultural Gifting Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
+                <img loading="lazy" src="https://images.squarespace-cdn.com/content/v1/65a77c25c2e955035c0fc7a4/3f515310-c533-48ae-b9ed-81196f14d072/cultural-wedding-gift-ideas.jpg" alt="Cultural Gifting Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
                     <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
                         Cultural Gifting Collection
@@ -630,7 +630,7 @@
             <!-- Card 1 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[100ms]">
                 <div class="flex justify-center mb-4">
-                    <img src="{{ url_for('static', filename='images/craft.jpg') }}" alt="Artifacts icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/craft.jpg') }}" alt="Artifacts icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
                 </div>
                 <h3 class="text-xl font-semibold text-yellow-600 mb-2 transition-colors duration-300 group-hover:text-yellow-700">
                     The Global Market for Artifacts & Cultural Items
@@ -642,7 +642,7 @@
             <!-- Card 2 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[200ms]">
                 <div class="flex justify-center mb-4">
-                    <img src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Artisans icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Artisans icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
                 </div>
                 <h3 class="text-xl font-semibold text-yellow-600 mb-2 transition-colors duration-300 group-hover:text-yellow-700">
                     Crafted by Skilled Artisans
@@ -654,7 +654,7 @@
             <!-- Card 3 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[300ms]">
                 <div class="flex justify-center mb-4">
-                    <img src="{{ url_for('static', filename='images/craftt.jpg') }}" alt="Cultural Preservation icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <img loading="lazy" src="{{ url_for('static', filename='images/craftt.jpg') }}" alt="Cultural Preservation icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
                 </div>
                 <h3 class="text-xl font-semibold text-yellow-600 mb-2 transition-colors duration-300 group-hover:text-yellow-700">
                     Preserving Culture for a Sustainable Future
@@ -810,7 +810,7 @@
                 <!-- Dynamic Story Card -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp" data-delay="[{{ loop.index0 * 100 + 200 }}ms]" onclick="openStoryModal({{ story.id }})">
                     <div class="overflow-hidden rounded-lg">
-                        <img src="{{ url_for('static', filename='uploads/' + story.image) if story.image else url_for('static', filename='images/craft.jpg') }}" alt="{{ story.title }}" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
+                        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + story.image) if story.image else url_for('static', filename='images/craft.jpg') }}" alt="{{ story.title }}" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
                     </div>
                     <h3 class="text-lg font-semibold text-yellow-700 mt-4">{{ story.title }}</h3>
                     <p class="text-gray-600 mt-2 text-sm">{{ story.content | truncate(100, True) }}</p>
@@ -819,7 +819,7 @@
                 <!-- Fallback if no stories -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp delay-[200ms]">
                     <div class="overflow-hidden rounded-lg">
-                        <img src="{{ url_for('static', filename='images/craft.jpg') }}" alt="No Stories" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
+                        <img loading="lazy" src="{{ url_for('static', filename='images/craft.jpg') }}" alt="No Stories" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
                     </div>
                     <h3 class="text-lg font-semibold text-yellow-700 mt-4">No Stories Available</h3>
                     <p class="text-gray-600 mt-2 text-sm">Check back later for more heritage stories!</p>
@@ -836,68 +836,79 @@
 </section>
 
 <!-- Story Modal -->
-<div id="story-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
-    <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl animate-slideIn">
+<div id="story-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-start justify-center z-50 transition-opacity duration-300">
+    <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl mt-4 sm:mt-8 animate-slideIn">
         <span class="modal-close absolute top-4 right-4 text-gray-600 hover:text-yellow-600 cursor-pointer transition-colors" onclick="closeModal('story-modal')"><i class="fas fa-times text-xl"></i></span>
         <div id="story-content">
-            <img id="story-image" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4">
+            <img loading="lazy" id="story-image" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4">
             <h2 id="story-title" class="text-2xl font-semibold text-yellow-600 mb-4"></h2>
             <p id="story-text" class="text-gray-600 text-sm"></p>
         </div>
     </div>
 </div>
+
 <style>
     .modal {
-        display: none; /* Hidden by default */
-        position: fixed;
-        inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
-        background: rgba(0, 0, 0, 0.6);
-        align-items: center;
-        justify-content: center;
-        z-index: 1000; /* Increased to ensure modal is above navbar */
-        transition: opacity 0.3s ease;
-        opacity: 0;
-    }
-    
-    .modal.hidden {
-        display: none; /* Ensure hidden class hides the modal */
-    }
-    
-    .modal.open {
-        display: flex; /* Show modal when open class is added */
-        opacity: 1;
-    }
-    
+    display: none; /* Hidden by default */
+    position: fixed;
+    inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
+    background: rgba(0, 0, 0, 0.6);
+    align-items: flex-start; /* Align to top instead of center */
+    justify-content: center;
+    z-index: 1000; /* Above navbar */
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    overflow-y: auto; /* Allow scrolling if modal content exceeds viewport */
+}
+
+.modal.hidden {
+    display: none; /* Ensure hidden class hides the modal */
+}
+
+.modal.open {
+    display: flex; /* Show modal when open class is added */
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    max-width: 32rem;
+    width: 100%;
+    position: relative;
+    margin-top: 1rem; /* Default top margin for spacing */
+    margin-bottom: 1rem; /* Ensure bottom spacing */
+    animation: slideIn 0.3s ease;
+    z-index: 1001; /* Higher than backdrop */
+}
+
+.modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    cursor: pointer;
+    z-index: 1002; /* Ensure close button is clickable */
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Ensure modal text is not truncated */
+#story-text {
+    white-space: pre-wrap; /* Preserve line breaks and wrap text */
+    overflow: auto; /* Allow scrolling if content is long */
+    max-height: 50vh; /* Limit height to avoid overflow */
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
     .modal-content {
-        background: white;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        max-width: 32rem;
-        width: 100%;
-        position: relative;
-        animation: slideIn 0.3s ease;
-        z-index: 1001; /* Slightly higher than modal backdrop for content */
+        margin-top: 2rem; /* Larger top margin for desktop */
     }
-    
-    .modal-close {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        cursor: pointer;
-        z-index: 1002; /* Ensure close button is clickable */
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateY(-20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    
-    /* Ensure modal text is not truncated */
-    #story-text {
-        white-space: pre-wrap; /* Preserve line breaks and wrap text */
-        overflow: auto; /* Allow scrolling if content is long */
-        max-height: 50vh; /* Limit height to avoid overflow */
-    }
+}
 </style>
 
     <!-- Footer -->
