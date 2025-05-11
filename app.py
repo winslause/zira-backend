@@ -104,12 +104,15 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='Pending')
-    customer_status = db.Column(db.String(20), default='Active')  # Added column
+    customer_status = db.Column(db.String(20), default='Active')
     payment_method = db.Column(db.String(20), nullable=False)
     message_code = db.Column(db.String(50), nullable=True)
+    customer_name = db.Column(db.String(100), nullable=True)  # New field
+    customer_number = db.Column(db.String(15), nullable=True)  # New field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     order_items = db.relationship('OrderItem', backref='order', lazy=True)
-
+    
+    
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
@@ -508,6 +511,9 @@ def get_orders():
         orders_data = []
         for order in orders:
             user = User.query.get(order.user_id)
+            # Use customer_name and customer_number if available, else fall back to user details
+            customer_name = order.customer_name or (user.name if user else 'Unknown')
+            customer_number = order.customer_number or (user.phone_number if user and user.phone_number else 'N/A')
             # Use user.address as location, default to empty dict if missing
             location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
             order_items = OrderItem.query.filter_by(order_id=order.id).all()
@@ -520,8 +526,8 @@ def get_orders():
             ]
             orders_data.append({
                 'id': order.id,
-                'customer': user.name if user else 'Unknown',
-                'customer_number': user.phone_number if user and user.phone_number else 'N/A',
+                'customer': customer_name,
+                'customer_number': customer_number,
                 'location': {
                     'street': location.get('street', ''),
                     'city': location.get('city', ''),
@@ -550,6 +556,9 @@ def handle_order(id):
         order = Order.query.get_or_404(id)
         if request.method == 'GET':
             user = User.query.get(order.user_id)
+            # Use customer_name and customer_number if available, else fall back to user details
+            customer_name = order.customer_name or (user.name if user else 'Unknown')
+            customer_number = order.customer_number or (user.phone_number if user and user.phone_number else 'N/A')
             # Use user.address as location, default to empty dict if missing
             location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
             order_items = OrderItem.query.filter_by(order_id=order.id).all()
@@ -562,8 +571,8 @@ def handle_order(id):
             ]
             return jsonify({
                 'id': order.id,
-                'customer': user.name if user else 'Unknown',
-                'customer_number': user.phone_number or 'N/A',
+                'customer': customer_name,
+                'customer_number': customer_number,
                 'location': {
                     'street': location.get('street', ''),
                     'city': location.get('city', ''),
@@ -595,6 +604,136 @@ def handle_order(id):
     except Exception as e:
         db.session.rollback()
         app.logger.error(f"Unexpected error in /api/orders/{id}: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+    
+@app.route('/api/manual_orders', methods=['POST'])
+def create_manual_order():
+    if 'admin' not in session:
+        logging.debug('Unauthorized: No admin in session')
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        logging.debug(f"Received manual order data: {data}")
+
+        # Required fields for manual order
+        required_fields = ['customer_name', 'customer_number', 'payment_method', 'products']
+        missing_fields = [field for field in required_fields if field not in data or not data[field]]
+        if missing_fields:
+            logging.error(f"Missing required fields: {missing_fields}")
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+        customer_name = data['customer_name']
+        customer_number = data['customer_number']
+        payment_method = data['payment_method']
+        message_code = data.get('message_code')
+        products = data['products']  # List of {product_id, quantity}
+
+        # Validate payment method
+        if payment_method not in ['immediate', 'delivery']:
+            logging.error(f"Invalid payment method: {payment_method}")
+            return jsonify({'error': 'Invalid payment method'}), 400
+        if payment_method == 'immediate' and not message_code:
+            logging.error("Message code required for immediate payment")
+            return jsonify({'error': 'Message code required for immediate payment'}), 400
+
+        # Validate customer details
+        if len(customer_name) > 100:
+            logging.error("Customer name too long")
+            return jsonify({'error': 'Customer name must be 100 characters or less'}), 400
+        if customer_number and len(customer_number) > 15:
+            logging.error("Customer number too long")
+            return jsonify({'error': 'Customer number must be 15 characters or less'}), 400
+
+        # Validate products
+        if not isinstance(products, list) or not products:
+            logging.error("Products must be a non-empty list")
+            return jsonify({'error': 'Products must be a non-empty list'}), 400
+
+        total = 0
+        order_items_data = []
+        for item in products:
+            product_id = item.get('product_id')
+            quantity = item.get('quantity')
+            if not product_id or not isinstance(quantity, int) or quantity < 1:
+                logging.error(f"Invalid product data: product_id={product_id}, quantity={quantity}")
+                return jsonify({'error': 'Each product must have a valid product_id and positive quantity'}), 400
+
+            product = Product.query.get(product_id)
+            if not product:
+                logging.error(f"Product not found: product_id={product_id}")
+                return jsonify({'error': f'Product ID {product_id} not found'}), 404
+
+            # Calculate price with discount if applicable
+            price = product.price
+            if product.discount and product.discount.start_date <= datetime.utcnow().date() <= product.discount.end_date:
+                price = price * (1 - product.discount.percent / 100)
+                logging.debug(f"Applied discount for product {product_id}: {product.discount.percent}%")
+
+            total += price * quantity
+            order_items_data.append({'product_id': product_id, 'quantity': quantity})
+            logging.debug(f"Processed product: product_id={product_id}, price={price}, quantity={quantity}, subtotal={price * quantity}")
+
+        # Find or create a user for manual orders
+        # We'll use a default user for manual orders or create a guest user
+        user_email = f"manual_{customer_number.replace('+', '')}@zira.com"
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            username = f"manual_{customer_number.replace('+', '')}_{datetime.now().timestamp()}"
+            user = User(
+                username=username,
+                name=customer_name,
+                email=user_email,
+                phone_number=customer_number,
+                password=generate_password_hash('manual_order_default'),
+                role='buyer'
+            )
+            db.session.add(user)
+            db.session.flush()
+            logging.debug(f"Created new user for manual order: email={user_email}")
+
+        # Create the order
+        order = Order(
+            user_id=user.id,
+            total=total,
+            status='Pending',
+            customer_status='Active',
+            payment_method=payment_method,
+            message_code=message_code,
+            customer_name=customer_name,
+            customer_number=customer_number,
+            created_at=datetime.utcnow()
+        )
+        db.session.add(order)
+        db.session.flush()
+        logging.debug(f"Created order: order_id={order.id}, total={total}")
+
+        # Create order items
+        for item in order_items_data:
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item['product_id'],
+                quantity=item['quantity']
+            )
+            db.session.add(order_item)
+            logging.debug(f"Added order item: product_id={item['product_id']}, quantity={item['quantity']}")
+
+        db.session.commit()
+        logging.info(f"Manual order created successfully: order_id={order.id}, customer={customer_name}")
+
+        return jsonify({
+            'message': 'Manual order created successfully',
+            'order_id': order.id,
+            'total': float(total)
+        }), 201
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Database error in POST /api/manual_orders: {str(e)}")
+        return jsonify({'error': 'Database error'}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error in POST /api/manual_orders: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 # Discount Routes

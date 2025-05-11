@@ -496,6 +496,7 @@ document.getElementById('close-sidebar').addEventListener('click', () => {
             <section id="orders" class="section hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-4 max-w-full mx-auto">
                     <h3 class="text-xl font-semibold">Manage Orders</h3>
+                    <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700" onclick="openModal('manual-order-modal')">Create an Order</button>
                     <input type="text" id="orders-search" placeholder="Search orders..." class="w-full max-w-md border rounded px-3 py-2 mt-2 sm:mt-0">
                 </div>
                 <div class="table-container">
@@ -517,6 +518,7 @@ document.getElementById('close-sidebar').addEventListener('click', () => {
                         <tbody id="orders-table"></tbody>
                     </table>
                 </div>
+                
             </section>
 
 
@@ -843,8 +845,193 @@ document.getElementById('close-sidebar').addEventListener('click', () => {
             </form>
         </div>
     </div>
+    <!-- Manual Order Modal -->
+<div id="manual-order-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
+    <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl animate-slideIn max-h-[85vh] overflow-y-auto">
+        <span class="modal-close absolute top-4 right-4 text-gray-600 hover:text-yellow-600 cursor-pointer transition-colors" onclick="closeModal('manual-order-modal')"><i class="fas fa-times text-xl"></i></span>
+        <h2 class="text-xl font-semibold mb-4 text-yellow-600" id="manual-order-modal-title">Create Manual Order</h2>
+        <form id="manual-order-form">
+            <!-- Customer Details -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Customer Name</label>
+                <input type="text" id="order-customer-name" name="customer_name" class="w-full border rounded px-3 py-2" required maxlength="100">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Customer Phone Number</label>
+                <input type="tel" id="order-customer-number" name="customer_number" class="w-full border rounded px-3 py-2" maxlength="15" pattern="[0-9+]{0,15}" title="Phone number should be up to 15 digits, may include '+'">
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                <select id="order-payment-method" name="payment_method" class="w-full border rounded px-3 py-2" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="immediate">Immediate</option>
+                    <option value="delivery">On Delivery</option>
+                </select>
+            </div>
+
+            <!-- Message Code (Hidden by Default) -->
+            <div class="mb-4 hidden" id="message-code-group">
+                <label class="block text-sm font-medium text-gray-700">Message Code</label>
+                <input type="text" id="order-message-code" name="message_code" class="w-full border rounded px-3 py-2">
+            </div>
+
+            <!-- Product Selection -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Products</label>
+                <div id="product-list" class="space-y-2"></div>
+                <button type="button" id="add-product-btn" class="mt-2 inline-flex items-center px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">
+                    <i class="fas fa-plus mr-1"></i> Add Product
+                </button>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onclick="closeModal('manual-order-modal')">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Create Order</button>
+            </div>
+        </form>
+    </div>
+</div>
 
     <script>
+// Manual Order Modal Functions
+async function initializeManualOrderModal() {
+    const productList = document.getElementById('product-list');
+    const addProductBtn = document.getElementById('add-product-btn');
+    const paymentMethodSelect = document.getElementById('order-payment-method');
+    const messageCodeGroup = document.getElementById('message-code-group');
+    const manualOrderForm = document.getElementById('manual-order-form');
+    let productsData = [];
+
+    // Fetch products
+    try {
+        productsData = await fetchData('discounted_artefacts');
+        if (productsData.length === 0) {
+            showToast('No products available', 'error');
+        }
+    } catch (error) {
+        showToast('Failed to load products', 'error');
+        console.error('Error fetching products:', error);
+    }
+
+    // Add product row
+    function addProductRow() {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 product-row';
+        row.innerHTML = `
+            <select name="product_id" class="w-3/5 border rounded px-3 py-2" required>
+                <option value="">Select Product</option>
+                ${productsData.map(product => `<option value="${product.id}">${product.name} (KSh ${product.price.toFixed(2)}${product.discount ? `, ${product.discount}% off` : ''})</option>`).join('')}
+            </select>
+            <input type="number" name="quantity" min="1" value="1" class="w-1/5 border rounded px-3 py-2" required>
+            <button type="button" class="remove-product-btn inline-flex items-center px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        productList.appendChild(row);
+
+        // Handle remove button
+        row.querySelector('.remove-product-btn').addEventListener('click', () => {
+            if (productList.children.length > 1) {
+                row.remove();
+            } else {
+                showToast('At least one product is required', 'error');
+            }
+        });
+    }
+
+    // Initialize with one product row
+    if (productsData.length > 0) {
+        addProductRow();
+    }
+
+    // Handle add product button
+    addProductBtn.addEventListener('click', addProductRow);
+
+    // Show/hide message code field
+    paymentMethodSelect.addEventListener('change', () => {
+        const isImmediate = paymentMethodSelect.value === 'immediate';
+        messageCodeGroup.classList.toggle('hidden', !isImmediate);
+        document.getElementById('order-message-code').required = isImmediate;
+    });
+
+    // Handle form submission
+    manualOrderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(manualOrderForm);
+        const products = [];
+        const productRows = productList.querySelectorAll('.product-row');
+
+        // Collect products
+        productRows.forEach(row => {
+            const productId = row.querySelector('select[name="product_id"]').value;
+            const quantity = parseInt(row.querySelector('input[name="quantity"]').value);
+            if (productId && quantity > 0) {
+                products.push({ product_id: parseInt(productId), quantity });
+            }
+        });
+
+        if (products.length === 0) {
+            showToast('At least one valid product is required', 'error');
+            return;
+        }
+
+        // Prepare data
+        const data = {
+            customer_name: formData.get('customer_name').trim(),
+            customer_number: formData.get('customer_number').trim(),
+            payment_method: formData.get('payment_method'),
+            message_code: formData.get('message_code') || '',
+            products
+        };
+
+        try {
+            const response = await fetch('/api/manual_orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+                credentials: 'include'
+            });
+
+            if (response.redirected && response.url.includes('/login')) {
+                showToast('Session expired. Please log in.', 'error');
+                window.location.href = '/login';
+                return;
+            }
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Failed to create order');
+
+            showToast(`Order created successfully! Order ID: ${result.order_id}`);
+            closeModal('manual-order-modal');
+            await populateOrders(); // Refresh orders table
+            await fetchDashboardStats(); // Update pending orders count
+        } catch (error) {
+            showToast(error.message, 'error');
+            console.error('Error creating order:', error);
+        }
+    });
+}
+
+// Reset Manual Order Form
+function resetManualOrderForm() {
+    const form = document.getElementById('manual-order-form');
+    const productList = document.getElementById('product-list');
+    if (form && productList) {
+        form.reset();
+        productList.innerHTML = ''; // Clear product rows
+        document.getElementById('message-code-group').classList.add('hidden');
+        document.getElementById('order-message-code').required = false;
+
+        // Re-add one product row
+        const addProductBtn = document.getElementById('add-product-btn');
+        if (addProductBtn) {
+            addProductBtn.click(); // Trigger add product to create one row
+        }
+    }
+}
         // Initialize Charts
 let salesChart, usersChart;
 
@@ -1022,6 +1209,10 @@ function closeModal(modalId) {
 }
 
 function resetForm(modalId) {
+    if (modalId === 'manual-order-modal') {
+        resetManualOrderForm();
+        return;
+    }
     const form = document.getElementById(modalId.replace('modal', 'form'));
     if (form) {
         form.reset();
@@ -1034,6 +1225,7 @@ function resetForm(modalId) {
         document.getElementById(modalId + '-title').textContent = `Add ${modalId.split('-')[0].charAt(0).toUpperCase() + modalId.split('-')[0].slice(1)}`;
     }
 }
+
 
 // Close Modal on Outside Click
 document.querySelectorAll('.modal').forEach(modal => {
@@ -2069,6 +2261,7 @@ async function initialize() {
         ]);
         startPolling(); // Start real-time updates
         pollOrders(); // Continue existing order polling
+        initializeManualOrderModal(); // Initialize manual order modal
     } catch (error) {
         console.error('Initialization failed:', error);
         showToast('Initialization failed: ' + error.message, 'error');
