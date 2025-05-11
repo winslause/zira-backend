@@ -456,7 +456,7 @@ document.getElementById('close-sidebar').addEventListener('click', () => {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Name</th>
+                                <th>Username</th>
                                 <th>Email</th>
                                 <th>Phone Number</th>
                                 <th>Role</th>
@@ -1322,7 +1322,7 @@ async function populateUsers(data) {
         tbody.innerHTML = users.map(user => `
             <tr>
                 <td>${user.id}</td>
-                <td>${user.name}</td>
+                <td>${user.username}</td>
                 <td>${user.email}</td>
                 <td>${user.phone_number || 'N/A'}</td>
                 <td>${user.role}</td>

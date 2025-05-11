@@ -7,6 +7,8 @@ import os
 import string
 import secrets
 import random
+import string
+import uuid
 # from models import Story
 from datetime import datetime, timedelta
 from sqlalchemy import func
@@ -55,6 +57,11 @@ app.config['MAIL_DEFAULT_SENDER'] = 'wenbusale383@gmail.com'
 db = SQLAlchemy(app)
 mail = Mail(app)
 # logger.debug("Flask-Mail initialized with mail object: %s", mail)
+
+# Generate random password
+def generate_random_password(length=12):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(characters) for _ in range(length))
 
 # Token generation and validation helpers
 def generate_reset_token():
@@ -313,20 +320,111 @@ def admin():
         return redirect(url_for('login'))
     return render_template('admin.html')
 
+# Admin Forgot Password Route
+@app.route('/api/admin_forgot_password', methods=['POST'])
+def admin_forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user or user.role != 'admin':
+        return jsonify({'error': 'No admin account found with this email'}), 404
+
+    # Generate random password and reset token
+    random_password = generate_random_password()
+    reset_token = generate_reset_token()  # Use existing function
+    token_expiry = datetime.utcnow() + timedelta(hours=1)  # Token valid for 1 hour
+
+    # Update user with temporary password and reset token
+    user.password = generate_password_hash(random_password)
+    user.reset_token = reset_token
+    user.reset_token_expiry = token_expiry
+    db.session.commit()
+
+    # Send email with random password
+    try:
+        msg = Message(
+            subject='Zira Artifacts Admin Password Reset',
+            recipients=[email],
+            body=f'Your temporary password is: {random_password}\n\nThis password is valid for 1 hour. Please log in and reset your password immediately.'
+        )
+        mail.send(msg)
+        return jsonify({'message': 'A temporary password has been sent to your email.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to send email. Please try again later.'}), 500
+
+# Admin Reset Password Route
+@app.route('/api/admin_reset_password', methods=['POST'])
+def admin_reset_password():
+    data = request.get_json()
+    username = data.get('username')
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+
+    if not username or not current_password or not new_password:
+        return jsonify({'error': 'Username, current password, and new password are required'}), 400
+
+    user = User.query.filter_by(username=username).first()
+    if not user or user.role != 'admin':
+        return jsonify({'error': 'Admin user not found'}), 404
+
+    # Verify current password
+    if not check_password_hash(user.password, current_password):
+        return jsonify({'error': 'Current password is incorrect'}), 400
+
+    #fellVerify reset token and expiry
+    if not user.reset_token or not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+        return jsonify({'error': 'Invalid or expired reset token'}), 400
+
+    # Update password and clear reset token
+    user.password = generate_password_hash(new_password)
+    user.reset_token = None
+    user.reset_token_expiry = None
+    db.session.commit()
+
+    return jsonify({'message': 'Password updated successfully'})
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         data = request.get_json()
         username = data.get('username')
         password = data.get('password')
+
+        # Validate input
         if not username or not password:
             return jsonify({'error': 'Username and password are required'}), 400
+
+        # Query user by username
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password) and user.role == 'admin':
-            session['admin'] = user.id
-            return jsonify({'message': 'Login successful'})
-        return jsonify({'error': 'Invalid credentials or not an admin'}), 401
+        
+        # Check if user exists, password is correct, and role is 'admin'
+        if not user:
+            return jsonify({'error': 'Invalid username'}), 401
+        if not check_password_hash(user.password, password):
+            return jsonify({'error': 'Invalid password'}), 401
+        if user.role != 'admin':
+            return jsonify({'error': 'Access denied: Admin role required'}), 403
+
+        # Check if reset token exists and is valid
+        if user.reset_token and user.reset_token_expiry and user.reset_token_expiry > datetime.utcnow():
+            return jsonify({
+                'message': 'Password reset required',
+                'reset_required': True,
+                'username': user.username
+            }), 200
+
+        # Successful login for admin
+        session['admin'] = user.id
+        return jsonify({'message': 'Login successful'}), 200
+
+    # Render login page for GET requests
     return render_template('admin-login.html')
+
 
 @app.route('/logout')
 def logout():

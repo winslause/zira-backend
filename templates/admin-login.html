@@ -12,85 +12,206 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
-        /* Custom Styles */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .login-card {
             background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .login-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
         .input-group {
             position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            display: block;
+            margin-bottom: 0.5rem;
         }
         .input-group input {
-            transition: all 0.3s ease;
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .input-group input:focus {
-            border-color: #d97706;
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
         }
         .toggle-password {
             position: absolute;
-            right: 1rem;
-            top: 50%;
+            right: 0.75rem;
+            top: 65%;
             transform: translateY(-50%);
             cursor: pointer;
             color: #6b7280;
+            font-size: 1rem;
+            transition: color 0.2s ease;
         }
         .toggle-password:hover {
-            color: #d97706;
+            color: #f59e0b;
         }
         .btn-primary {
-            background: #d97706;
-            transition: background 0.3s ease;
+            background: #f59e0b;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            width: 100%;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-primary:hover {
-            background: #b45309;
+            background: #d97706;
+            transform: scale(1.02);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-content h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 1.25rem;
+            transition: color 0.2s ease;
+        }
+        .close-modal:hover {
+            color: #f59e0b;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
         }
         @media (max-width: 640px) {
-            .login-card {
-                margin: 1rem;
+            .login-card, .modal-content {
+                margin: 1.5rem;
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
-    <div class="login-card w-full max-w-md p-6">
-        <div class="flex items-center justify-center mb-6">
-            <img src="/static/images/logo.png" alt="Zira Artifacts Logo" class="h-12 mr-2">
-            <h1 class="text-2xl font-bold text-gray-800">Zira Admin Login</h1>
+<body>
+    <div class="login-card">
+        <div class="flex items-center justify-center mb-8">
+            <img src="/static/images/logo.png" alt="Zira Artifacts Logo" class="h-14 mr-3">
+            <h1 class="text-3xl font-bold text-gray-800">Zira Admin Login</h1>
         </div>
-        <form id="login-form" class="space-y-4">
+        <form id="login-form" class="space-y-6">
             <div class="input-group">
-                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                <input type="text" id="username" name="username" class="w-full border rounded px-3 py-2 mt-1 focus:outline-none" placeholder="admin" required aria-describedby="username-error">
-                <p id="username-error" class="text-red-600 text-sm mt-1 hidden">Please enter a valid username.</p>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="admin" required aria-describedby="username-error">
+                <p id="username-error" class="error-message">Please enter a valid username.</p>
             </div>
             <div class="input-group">
-                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" name="password" class="w-full border rounded px-3 py-2 mt-1 focus:outline-none" placeholder="••••••••" required aria-describedby="password-error">
-                <i class="fas fa-eye toggle-password" id="toggle-password" aria-label="Toggle password visibility"></i>
-                <p id="password-error" class="text-red-600 text-sm mt-1 hidden">Password is required.</p>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required aria-describedby="password-error">
+                <i class="fas fa-eye toggle-password" id="toggle-password-login" aria-label="Toggle password visibility"></i>
+                <p id="password-error" class="error-message">Password is required.</p>
             </div>
             <div class="flex items-center justify-between">
                 <label class="flex items-center">
-                    <input type="checkbox" id="remember-me" class="mr-2">
+                    <input type="checkbox" id="remember-me" class="mr-2 rounded text-amber-500 focus:ring-amber-500">
                     <span class="text-sm text-gray-600">Remember Me</span>
                 </label>
-                <a href="#" class="text-sm text-yellow-600 hover:underline">Forgot Password?</a>
+                <a href="#" id="forgot-password-link" class="text-sm text-amber-600 hover:underline">Forgot Password?</a>
             </div>
-            <button type="submit" class="btn-primary w-full text-white px-4 py-2 rounded font-semibold">Login</button>
+            <button type="submit" class="btn-primary">Login</button>
         </form>
-        <p class="text-center text-sm text-gray-600 mt-4">
-            Don't have an account? <a href="#" class="text-yellow-600 hover:underline">Contact Support</a>
-        </p>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal fas fa-times" id="close-forgot-modal"></span>
+            <h2>Forgot Password</h2>
+            <form id="forgot-password-form" class="space-y-6">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required aria-describedby="email-error">
+                    <p id="email-error" class="error-message">Please enter a valid email.</p>
+                </div>
+                <button type="submit" class="btn-primary">Send Temporary Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="reset-password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal fas fa-times" id="close-reset-modal"></span>
+            <h2>Reset Password</h2>
+            <form id="reset-password-form" class="space-y-6">
+                <div class="input-group">
+                    <label for="username-reset">Username</label>
+                    <input type="text" id="username-reset" name="username" required aria-describedby="username-reset-error">
+                    <p id="username-reset-error" class="error-message">Username is required.</p>
+                </div>
+                <div class="input-group">
+                    <label for="current-password">Current (Temporary) Password</label>
+                    <input type="password" id="current-password" name="current_password" required aria-describedby="current-password-error">
+                    <i class="fas fa-eye toggle-password" id="toggle-password-current" aria-label="Toggle password visibility"></i>
+                    <p id="current-password-error" class="error-message">Current password is required.</p>
+                </div>
+                <div class="input-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="new_password" required aria-describedby="new-password-error">
+                    <i class="fas fa-eye toggle-password" id="toggle-password-new" aria-label="Toggle password visibility"></i>
+                    <p id="new-password-error" class="error-message">New password must be at least 8 characters long and include a number and special character.</p>
+                </div>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -100,7 +221,28 @@
         const passwordInput = document.getElementById('password');
         const usernameError = document.getElementById('username-error');
         const passwordError = document.getElementById('password-error');
-        const togglePassword = document.getElementById('toggle-password');
+        const togglePasswordLogin = document.getElementById('toggle-password-login');
+
+        // Forgot Password Modal Elements
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('email-error');
+        const closeForgotModal = document.getElementById('close-forgot-modal');
+
+        // Reset Password Modal Elements
+        const resetPasswordModal = document.getElementById('reset-password-modal');
+        const resetPasswordForm = document.getElementById('reset-password-form');
+        const usernameResetInput = document.getElementById('username-reset');
+        const currentPasswordInput = document.getElementById('current-password');
+        const newPasswordInput = document.getElementById('new-password');
+        const usernameResetError = document.getElementById('username-reset-error');
+        const currentPasswordError = document.getElementById('current-password-error');
+        const newPasswordError = document.getElementById('new-password-error');
+        const closeResetModal = document.getElementById('close-reset-modal');
+        const togglePasswordCurrent = document.getElementById('toggle-password-current');
+        const togglePasswordNew = document.getElementById('toggle-password-new');
 
         // Toast Notification
         function showToast(message, type = 'success') {
@@ -108,45 +250,121 @@
                 text: message,
                 duration: 3000,
                 style: {
-                    background: type === 'success' ? '#d97706' : '#dc2626'
+                    background: type === 'success' ? '#f59e0b' : '#dc2626'
                 }
             }).showToast();
         }
 
-        // Password Toggle
-        togglePassword.addEventListener('click', () => {
-            const isPassword = passwordInput.type === 'password';
-            passwordInput.type = isPassword ? 'text' : 'password';
-            togglePassword.classList.toggle('fa-eye', isPassword);
-            togglePassword.classList.toggle('fa-eye-slash', !isPassword);
+        // Password Toggle Functionality
+        function setupPasswordToggle(toggle, input) {
+            toggle.addEventListener('click', () => {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                toggle.classList.toggle('fa-eye', isPassword);
+                toggle.classList.toggle('fa-eye-slash', !isPassword);
+            });
+        }
+
+        setupPasswordToggle(togglePasswordLogin, passwordInput);
+        setupPasswordToggle(togglePasswordCurrent, currentPasswordInput);
+        setupPasswordToggle(togglePasswordNew, newPasswordInput);
+
+        // Modal Handlers
+        function openModal(modal) {
+            modal.style.display = 'flex';
+        }
+
+        function closeModal(modal) {
+            modal.style.display = 'none';
+        }
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal(forgotPasswordModal);
         });
 
-        // Form Validation
-        function validateForm() {
+        closeForgotModal.addEventListener('click', () => {
+            closeModal(forgotPasswordModal);
+        });
+
+        closeResetModal.addEventListener('click', () => {
+            closeModal(resetPasswordModal);
+        });
+
+        // Click outside to close modals
+        window.addEventListener('click', (e) => {
+            if (e.target === forgotPasswordModal) {
+                closeModal(forgotPasswordModal);
+            }
+            if (e.target === resetPasswordModal) {
+                closeModal(resetPasswordModal);
+            }
+        });
+
+        // Login Form Validation
+        function validateLoginForm() {
             let isValid = true;
-            usernameError.classList.add('hidden');
-            passwordError.classList.add('hidden');
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
 
             if (!usernameInput.value.trim()) {
-                usernameError.textContent = 'Username is required.';
-                usernameError.classList.remove('hidden');
+                usernameError.style.display = 'block';
                 isValid = false;
             }
 
             if (!passwordInput.value) {
-                passwordError.textContent = 'Password is required.';
-                passwordError.classList.remove('hidden');
+                passwordError.style.display = 'block';
                 isValid = false;
             }
 
             return isValid;
         }
 
-        // Form Submission
+        // Forgot Password Form Validation
+        function validateForgotPasswordForm() {
+            let isValid = true;
+            emailError.style.display = 'none';
+
+            if (!emailInput.value.trim() || !/^\S+@\S+\.\S+$/.test(emailInput.value)) {
+                emailError.style.display = 'block';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Reset Password Form Validation
+        function validateResetPasswordForm() {
+            let isValid = true;
+            usernameResetError.style.display = 'none';
+            currentPasswordError.style.display = 'none';
+            newPasswordError.style.display = 'none';
+
+            if (!usernameResetInput.value.trim()) {
+                usernameResetError.style.display = 'block';
+                isValid = false;
+            }
+
+            if (!currentPasswordInput.value) {
+                currentPasswordError.style.display = 'block';
+                isValid = false;
+            }
+
+            // Password strength: at least 8 characters, 1 number, 1 special character
+            const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+            if (!newPasswordInput.value || !passwordRegex.test(newPasswordInput.value)) {
+                newPasswordError.style.display = 'block';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Login Form Submission
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!validateForm()) {
+            if (!validateLoginForm()) {
                 showToast('Please fix the errors in the form.', 'error');
                 return;
             }
@@ -162,10 +380,16 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    showToast(data.message || 'Login successful! Redirecting...');
-                    setTimeout(() => {
-                        window.location.href = '/admin';
-                    }, 1000);
+                    if (data.reset_required) {
+                        showToast('Please reset your password.');
+                        usernameResetInput.value = data.username; // Pre-fill username
+                        openModal(resetPasswordModal);
+                    } else {
+                        showToast(data.message || 'Login successful! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '/admin';
+                        }, 1000);
+                    }
                 } else {
                     showToast(data.error || 'Login failed.', 'error');
                 }
@@ -174,10 +398,87 @@
             }
         });
 
-        // Handle Enter Key
+        // Forgot Password Form Submission
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateForgotPasswordForm()) {
+                showToast('Please fix the errors in the form.', 'error');
+                return;
+            }
+
+            const email = emailInput.value.trim();
+
+            try {
+                const response = await fetch('/api/admin_forgot_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showToast(data.message || 'Temporary password sent!');
+                    closeModal(forgotPasswordModal);
+                } else {
+                    showToast(data.error || 'Failed to send temporary password.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Reset Password Form Submission
+        resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateResetPasswordForm()) {
+                showToast('Please fix the errors in the form.', 'error');
+                return;
+            }
+
+            const username = usernameResetInput.value.trim();
+            const current_password = currentPasswordInput.value;
+            const new_password = newPasswordInput.value;
+
+            try {
+                const response = await fetch('/api/admin_reset_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, current_password, new_password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showToast(data.message || 'Password updated successfully! Redirecting...');
+                    closeModal(resetPasswordModal);
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 1000);
+                } else {
+                    showToast(data.error || 'Failed to update password.', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Handle Enter Key for Login Form
         loginForm.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && document.activeElement !== loginForm.querySelector('button')) {
                 loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Handle Enter Key for Forgot Password Form
+        forgotPasswordForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.activeElement !== forgotPasswordForm.querySelector('button')) {
+                forgotPasswordForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Handle Enter Key for Reset Password Form
+        resetPasswordForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.activeElement !== resetPasswordForm.querySelector('button')) {
+                resetPasswordForm.dispatchEvent(new Event('submit'));
             }
         });
     </script>

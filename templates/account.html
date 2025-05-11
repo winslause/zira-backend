@@ -389,7 +389,7 @@
             <!-- Mobile Navbar -->
             <div class="md:hidden flex items-center justify-between w-full relative">
                 <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
                 <div class="flex items-center space-x-4">
                     <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
@@ -401,7 +401,7 @@
             </div>
             <!-- Desktop Navbar -->
             <div class="hidden md:flex items-center justify-between w-full">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
                 <div class="flex space-x-6">
                     <div class="relative nav-hover">
                         <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
@@ -456,7 +456,7 @@
                 <div class="custom-card profile-card p-8 animate-slideIn delay-[100ms]">
                     <div class="flex flex-col sm:flex-row items-center gap-6 mb-8">
                         <div class="profile-pic-container w-32 h-32">
-                            <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) if user.profile_picture else 'https://via.placeholder.com/150' }}" alt="Profile Picture" id="profile-pic" class="object-cover w-full h-full">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) if user.profile_picture else 'https://via.placeholder.com/150' }}" alt="Profile Picture" id="profile-pic" class="object-cover w-full h-full">
                         </div>
                         <div class="text-center sm:text-left">
                             <h2 class="text-3xl font-bold text-gray-800">{{ user.name }}</h2>
@@ -482,7 +482,7 @@
     {% for item in wishlist_items %}
         {% if item.product %}
             <div class="wishlist-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card" data-wishlist-id="{{ item.id }}">
-                <img src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
+                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
                 <div class="flex-1 text-center sm:text-left">
                     <h3 class="text-xl font-semibold text-gray-800">{{ item.product.name }}</h3>
                     {% if item.product.discount and item.product.discount.percent > 0 %}
@@ -517,7 +517,7 @@
                         <div id="cart-items" class="space-y-4">
                             {% for item in cart_items %}
     <div class="cart-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card" data-product-id="{{ item.product_id }}">
-        <img src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
+        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
         <div class="flex-1 text-center sm:text-left">
             <h3 class="text-xl font-semibold text-gray-800">{{ item.product.name }}</h3>
             {% if item.product.discount and item.product.discount.percent > 0 %}
@@ -567,7 +567,7 @@
                 {% for item in order.order_items %}
                     <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
                         {% if item.product %}
-                            <img src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}" class="w-20 h-20 object-cover rounded">
+                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}" class="w-20 h-20 object-cover rounded">
                             <div class="flex-1">
                                 <p class="text-gray-800 font-medium">{{ item.product.name }}</p>
                                 <p class="text-gray-600">Quantity: {{ item.quantity }}</p>
@@ -1499,7 +1499,7 @@ async function populateOrders() {
                             ${order.order_items.map(item => `
                                 <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
                                     ${item.product ? `
-                                        <img src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
+                                        <img loading="lazy" src="/static/uploads/${item.product.image || 'placeholder.jpg'}" alt="${item.product.name}" class="w-20 h-20 object-cover rounded">
                                         <div class="flex-1">
                                             <p class="text-gray-800 font-medium">${item.product.name}</p>
                                             <p class="text-gray-600">Quantity: ${item.quantity}</p>

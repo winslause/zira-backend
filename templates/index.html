@@ -29,70 +29,65 @@
     </div>
 
     <!-- Navbar -->
-    <!-- Navbar -->
-<nav class="navbar bg-white shadow-md fixed w-full z-20">
-    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Mobile Navbar -->
-        <div class="md:hidden flex items-center justify-between w-full relative">
-            <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
-            <div class="flex items-center space-x-4">
-                <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
-                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                
-            </div>
-            <!-- Mobile Search Bar -->
-            <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1">
-                <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700">
-            </div>
-        </div>
-        <!-- Desktop Navbar -->
-        <div class="hidden md:flex items-center justify-between w-full">
-            <!-- Debug -->
-            <!-- <p>Session.user: {{ session.user }}, Authenticated: {{ is_authenticated }}, Username: {{ username }}</p> -->
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
-            <div class="flex space-x-6">
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
+    <nav class="navbar bg-white shadow-md fixed w-full z-20">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Mobile Navbar -->
+            <div class="md:hidden flex items-center justify-between w-full relative">
+                <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
+                <div class="flex items-center space-x-4">
+                    <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
+                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
                 </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700">Products</a>
-                </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
+                <!-- Mobile Search Bar -->
+                <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1">
+                    <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700">
                 </div>
             </div>
-            <!-- Search and Icons -->
-            <div class="flex items-center space-x-4">
-                <div class="search-container">
-                    <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1">
-                    <i class="fas fa-search"></i>
+            <!-- Desktop Navbar -->
+            <div class="hidden md:flex items-center justify-between w-full">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
+                <div class="flex space-x-6">
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
+                    </div>
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700">Products</a>
+                    </div>
+                    <div class="relative nav-hover">
+                        <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
+                    </div>
                 </div>
-                <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
-                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                
+                <!-- Search and Icons -->
+                <div class="flex items-center space-x-4">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
+                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<!-- Mobile Sidebar -->
-<div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
-    <div class="p-4">
-        <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
-        <div class="space-y-4">
-            <div>
-                <a href="{{ url_for('index') }}" class="block text-gray-700 hover:text-gray-900">Home</a>
-            </div>
-            <div>
-                <a href="{{ url_for('our_products') }}" class="block text-gray-700 hover:text-gray-900">Products</a>
-            </div>
-            <div>
-                <a href="{{ url_for('discounted_artefacts') }}" class="block text-gray-700 hover:text-gray-900">Special Discount</a>
+    <!-- Mobile Sidebar -->
+    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
+        <div class="p-4">
+            <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
+            <div class="space-y-4">
+                <div>
+                    <a href="{{ url_for('index') }}" class="block text-gray-700 hover:text-gray-900">Home</a>
+                </div>
+                <div>
+                    <a href="{{ url_for('our_products') }}" class="block text-gray-700 hover:text-gray-900">Products</a>
+                </div>
+                <div>
+                    <a href="{{ url_for('discounted_artefacts') }}" class="block text-gray-700 hover:text-gray-900">Special Discount</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Hero Section -->
     <section class="relative h-screen">
@@ -164,6 +159,19 @@
             <span class="badge">1</span>
         </div>
     </div>
+    <!-- Currency Floating Button -->
+    <div id="country-btn-container">
+        <button id="country-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-yellow-700 transition flex items-center">
+            <span class="flag">🇰🇪</span> Kenya
+        </button>
+        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32">
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+        </div>
+    </div>
+    <br>
 
     <!-- Discount Floating Button -->
     <div class="floating-btn-container discount-btn-container" id="discount-btn">
@@ -174,61 +182,194 @@
     </div>
 
     <!-- Discount Popup -->
-<div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
-    <div class="p-6 space-y-6">
-        <!-- Close Button -->
-        <div class="flex justify-end">
-            <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+    <div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
+        <div class="p-6 space-y-6">
+            <!-- Close Button -->
+            <div class="flex justify-end">
+                <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-        <!-- Logo -->
-        <div class="flex justify-center">
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
-        </div>
+            <!-- Logo -->
+            <div class="flex justify-center">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+            </div>
 
-        <!-- About Text -->
-        <div class="text-center">
-            <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
-            <p class="text-gray-600 text-base leading-relaxed">
-                At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
-                <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
-                Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
-            </p>
-        </div>
+            <!-- About Text -->
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
+                <p class="text-gray-600 text-base leading-relaxed">
+                    At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
+                    <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
+                    Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
+                </p>
+            </div>
 
-        <!-- Contact Info -->
-        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-            <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
-            <ul class="space-y-1 text-sm">
-                <li><strong>Phone:</strong> +254 700 123456</li>
-                <li><strong>Email:</strong> info@ziracollection.com</li>
-                <li><strong>Location:</strong> Nairobi, Kenya</li>
-            </ul>
-        </div>
+            <!-- Contact Info -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+                <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
+                <ul class="space-y-1 text-sm">
+                    <li><strong>Phone:</strong> +254 700 123456</li>
+                    <li><strong>Email:</strong> info@ziracollection.com</li>
+                    <li><strong>Location:</strong> Nairobi, Kenya</li>
+                </ul>
+            </div>
 
-        <!-- Email Form -->
-        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-            <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
-            <div id="flash-message1" style="display: none;"></div>
-            <form id="contact-form" class="space-y-4">
-                <div>
-                    <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                    <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
-                </div>
-                <div>
-                    <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
-                    <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
-                </div>
-                <div class="text-right">
-                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
-                </div>
-            </form>
-            <div id="flash-message1" style="display: none;"></div> <!-- Flash message container -->
+            <!-- Email Form -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+                <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
+                <div id="flash-message1" style="display: none;"></div>
+                <form id="contact-form" class="space-y-4">
+                    <div>
+                        <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                        <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
+                    </div>
+                    <div>
+                        <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
+                    </div>
+                </form>
+                <div id="flash-message1" style="display: none;"></div> <!-- Flash message container -->
+            </div>
         </div>
     </div>
-</div>
+
+    <style>
+        /* Country Button Fixed Position */
+        #country-btn-container {
+            position: fixed !important;
+            bottom: 80px; /* Initial value, adjusted by JS to be above About Zira */
+            left: 1rem;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+        #country-dropdown {
+            position: absolute;
+            bottom: 3rem;
+            left: 0;
+            z-index: 1000;
+        }
+
+        /* Flag Styling */
+        .flag {
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+    <script>
+        // static/js/currency.js
+        const exchangeRates = {
+            USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
+            EUR: 0.0073, // 1 KES = 0.0073 EUR
+            GBP: 0.0061, // 1 KES = 0.0061 GBP
+            KES: 1       // 1 KES = 1 KES
+        };
+        let currentCurrency = localStorage.getItem('currency') || 'KES';
+
+        function initializeCurrencyButton() {
+            const storedCountry = localStorage.getItem('country') || 'Kenya';
+            const storedFlag = localStorage.getItem('flag') || '🇰🇪';
+            const storedCurrency = localStorage.getItem('currency') || 'KES';
+            currentCurrency = storedCurrency;
+            const countryBtn = document.getElementById('country-btn');
+            if (countryBtn) {
+                countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCountry}`;
+            }
+            updatePrices();
+        }
+
+        function updatePrices() {
+            document.querySelectorAll('.ftm-card').forEach(card => {
+                const priceElement = card.querySelector('.ftm-price');
+                const oldPriceElement = card.querySelector('.ftm-old-price');
+
+                // Get base price from data-price attribute (in KES)
+                const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+                if (!isNaN(basePriceKES)) {
+                    const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+
+                    // Preserve the HTML structure
+                    if (oldPriceElement) {
+                        // Product has a discount, update both discounted and original prices
+                        const baseOldPriceKES = parseFloat(oldPriceElement.getAttribute('data-old-price'));
+                        if (!isNaN(baseOldPriceKES)) {
+                            const convertedOldPrice = (baseOldPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                            priceElement.innerHTML = `${currentCurrency} ${convertedPrice} <span class="ftm-old-price" data-old-price="${baseOldPriceKES}">${currentCurrency} ${convertedOldPrice}</span>`;
+                        } else {
+                            // Fallback if data-old-price is missing
+                            priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
+                        }
+                    } else {
+                        // No discount, update only the main price
+                        priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
+                    }
+                }
+            });
+        }
+
+        function adjustFloatingButtonPositions() {
+            const aboutButton = document.querySelector('.discount-btn-container');
+            const countryButton = document.querySelector('#country-btn-container');
+
+            // Set About Zira button position
+            if (aboutButton) {
+                aboutButton.style.bottom = '16px'; // Fixed position for About Zira
+            }
+
+            // Position currency button above About Zira
+            if (countryButton && aboutButton) {
+                const aboutHeight = aboutButton.offsetHeight || 48;
+                const countryOffset = 16 + aboutHeight + 16; // 16px gap above About Zira
+                countryButton.style.bottom = `${countryOffset}px`;
+            } else if (countryButton) {
+                countryButton.style.bottom = '16px'; // Fallback if no About Zira button
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const countryBtn = document.getElementById('country-btn');
+            if (countryBtn) {
+                countryBtn.addEventListener('click', () => {
+                    const dropdown = document.getElementById('country-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+
+            document.querySelectorAll('.country-option').forEach(option => {
+                option.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const country = e.target.getAttribute('data-country');
+                    const flag = e.target.getAttribute('data-flag');
+                    currentCurrency = e.target.getAttribute('data-currency');
+                    document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
+                    document.getElementById('country-dropdown').classList.add('hidden');
+                    localStorage.setItem('currency', currentCurrency);
+                    localStorage.setItem('country', country);
+                    localStorage.setItem('flag', flag);
+                    // Optional: Sync with backend
+                    try {
+                        await fetch('/api/set_currency', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ currency: currentCurrency }),
+                            credentials: 'include'
+                        });
+                    } catch (error) {
+                        console.error('Failed to sync currency with backend:', error);
+                    }
+                    updatePrices();
+                });
+            });
+
+            adjustFloatingButtonPositions();
+            window.addEventListener('resize', adjustFloatingButtonPositions);
+            initializeCurrencyButton();
+        });
+    </script>
 
     <!-- Section 2: Discover and Buy -->
     <section id="features-section" class="py-12 bg-white">
@@ -342,10 +483,10 @@
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price">
+                    <div class="ftm-price" data-price="{{ product.price }}" aria-live="polite">
                         {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
                         KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price">KSh{{ "%.2f" % product.price }}</span>
+                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
                         {% else %}
                         KSh{{ "%.2f" % product.price }}
                         {% endif %}
@@ -373,9 +514,9 @@
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price">
+                    <div class="ftm-price" data-price="{{ product.price * (1 - product.discount.percent / 100) }}" aria-live="polite">
                         KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price">KSh{{ "%.2f" % product.price }}</span>
+                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
                     </div>
                     <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
                         <i class="fas fa-heart mr-2"></i> Add to Wishlist
@@ -402,10 +543,10 @@
                 </div>
                 <div class="ftm-card-content">
                     <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price">
+                    <div class="ftm-price" data-price="{{ product.price }}" aria-live="polite">
                         {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
                         KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price">KSh{{ "%.2f" % product.price }}</span>
+                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
                         {% else %}
                         KSh{{ "%.2f" % product.price }}
                         {% endif %}
@@ -424,137 +565,133 @@
         </div>
     </section>
     <style>
-/* Ensure the container for the cards uses flexbox to align cards */
-.ftm-tab-content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem; /* Adjust gap as needed */
-}
+        /* Ensure the container for the cards uses flexbox to align cards */
+        .ftm-tab-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem; /* Adjust gap as needed */
+        }
 
-/* Style for each card to have the same height */
-.ftm-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 360px; /* Fixed minimum height for all cards */
-    width: 240px; /* Maintain existing width */
-    background: #fff;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
+        /* Style for each card to have the same height */
+        .ftm-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 360px; /* Fixed minimum height for all cards */
+            width: 240px; /* Maintain existing width */
+            background: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
 
-/* Image container with fixed height, no extra padding */
-.ftm-card-img {
-    position: relative;
-    width: 100%;
-    height: 240px; /* Fixed height for uniformity */
-    overflow: hidden;
-}
+        /* Image container with fixed height, no extra padding */
+        .ftm-card-img {
+            position: relative;
+            width: 100%;
+            height: 240px; /* Fixed height for uniformity */
+            overflow: hidden;
+        }
 
-/* Ensure the entire image is visible, filling the container vertically */
-.ftm-card-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Use cover to fill container, avoiding white space */
-    object-position: center; /* Center the image */
-}
+        /* Ensure the entire image is visible, filling the container vertically */
+        .ftm-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Use cover to fill container, avoiding white space */
+            object-position: center; /* Center the image */
+        }
 
-/* Style for the discount badge */
-.ftm-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #d97706;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-}
+        /* Style for the discount badge */
+        .ftm-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #d97706;
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
 
-/* Content area takes remaining space and aligns content */
-.ftm-card-content {
-    flex: 1; /* Take remaining space */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Space out content evenly */
-    padding: 1rem;
-    text-align: center;
-}
+        /* Content area takes remaining space and aligns content */
+        .ftm-card-content {
+            flex: 1; /* Take remaining space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Space out content evenly */
+            padding: 1rem;
+            text-align: center;
+        }
 
-/* Ensure product name doesn't overflow and wraps */
-.ftm-product-name {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limit to 2 lines */
-    -webkit-box-orient: vertical;
-    margin-bottom: 0.5rem;
-}
+        /* Ensure product name doesn't overflow and wraps */
+        .ftm-product-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Limit to 2 lines */
+            -webkit-box-orient: vertical;
+            margin-bottom: 0.5rem;
+        }
 
-/* Price styling */
-.ftm-price {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #d97706;
-    margin-bottom: 0.5rem;
-}
+        /* Price styling */
+        .ftm-price {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d97706;
+            margin-bottom: 0.5rem;
+        }
 
-.ftm-old-price {
-    font-size: 0.875rem;
-    color: #6b7280;
-    text-decoration: line-through;
-    margin-left: 0.5rem;
-}
+        .ftm-old-price {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
 
-/* Wishlist button styling */
-.wishlist-btn {
-    width: 100%;
-    background: #d97706;
-    color: #fff;
-    padding: 0.5rem; /* Default padding for desktop */
-    border-radius: 0.25rem;
-    font-size: 0.875rem; /* Default font size */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
-}
+        /* Wishlist button styling */
+        .wishlist-btn {
+            width: 100%;
+            background: #d97706;
+            color: #fff;
+            padding: 0.5rem; /* Default padding for desktop */
+            border-radius: 0.25rem;
+            font-size: 0.875rem; /* Default font size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
 
-.wishlist-btn:hover {
-    background: #b45309;
-}
+        .wishlist-btn:hover {
+            background: #b45309;
+        }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .ftm-card {
-        width: 100%;
-        max-width: 280px; /* Slightly smaller for mobile */
-        min-height: 340px; /* Adjust for mobile */
-    }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .ftm-card {
+                width: 100%;
+                max-width: 280px; /* Slightly smaller for mobile */
+                min-height: 340px; /* Adjust for mobile */
+            }
 
-    #featured-this-month .ftm-card:hover .ftm-card-img img {
-    transform: scale(1.1) rotate(360deg);
-}
+            .ftm-card-img {
+                height: 220px; /* Slightly smaller image height for mobile */
+            }
 
-    .ftm-card-img {
-        height: 220px; /* Slightly smaller image height for mobile */
-    }
+            .ftm-product-name {
+                font-size: 1rem;
+            }
 
-    .ftm-product-name {
-        font-size: 1rem;
-    }
-
-    /* Adjust wishlist button for smaller devices */
-    .wishlist-btn {
-        padding: 0.375rem; /* Reduced padding for compactness */
-        font-size: 0.75rem; /* Smaller font size */
-    }
-}
+            /* Adjust wishlist button for smaller devices */
+            .wishlist-btn {
+                padding: 0.375rem; /* Reduced padding for compactness */
+                font-size: 0.75rem; /* Smaller font size */
+            }
+        }
     </style>
 
     <style>
@@ -798,15 +935,14 @@
     </section>
 
     <!-- Our Heritage Stories -->
-<!-- Our Heritage Stories -->
-<section id="craft-stories" class="bg-white py-20">
-    <div class="text-center mb-10 px-4">
-        <h2 class="text-4xl font-semibold text-yellow-600 animate-fadeInUp">Our Heritage Stories</h2>
-        <p class="text-gray-600 mt-2 animate-fadeInUp delay-[100ms]">Unearth amazing crafts and stories that carry centuries of the colorful and rich African heritage!</p>
-    </div>
-    <div class="overflow-x-auto">
-        <div class="flex gap-6 px-4 md:justify-center md:flex-wrap">
-            {% for story in stories %}
+    <section id="craft-stories" class="bg-white py-20">
+        <div class="text-center mb-10 px-4">
+            <h2 class="text-4xl font-semibold text-yellow-600 animate-fadeInUp">Our Heritage Stories</h2>
+            <p class="text-gray-600 mt-2 animate-fadeInUp delay-[100ms]">Unearth amazing crafts and stories that carry centuries of the colorful and rich African heritage!</p>
+        </div>
+        <div class="overflow-x-auto">
+            <div class="flex gap-6 px-4 md:justify-center md:flex-wrap">
+                {% for story in stories %}
                 <!-- Dynamic Story Card -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp" data-delay="[{{ loop.index0 * 100 + 200 }}ms]" onclick="openStoryModal({{ story.id }})">
                     <div class="overflow-hidden rounded-lg">
@@ -815,7 +951,7 @@
                     <h3 class="text-lg font-semibold text-yellow-700 mt-4">{{ story.title }}</h3>
                     <p class="text-gray-600 mt-2 text-sm">{{ story.content | truncate(100, True) }}</p>
                 </div>
-            {% else %}
+                {% else %}
                 <!-- Fallback if no stories -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp delay-[200ms]">
                     <div class="overflow-hidden rounded-lg">
@@ -824,220 +960,213 @@
                     <h3 class="text-lg font-semibold text-yellow-700 mt-4">No Stories Available</h3>
                     <p class="text-gray-600 mt-2 text-sm">Check back later for more heritage stories!</p>
                 </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Modal -->
+    <div id="story-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-start justify-center z-50 transition-opacity duration-300">
+        <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl mt-4 sm:mt-8 animate-slideIn">
+            <span class="modal-close absolute top-4 right-4 text-gray-600 hover:text-yellow-600 cursor-pointer transition-colors" onclick="closeModal('story-modal')"><i class="fas fa-times text-xl"></i></span>
+            <div id="story-content">
+                <img loading="lazy" id="story-image" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h2 id="story-title" class="text-2xl font-semibold text-yellow-600 mb-4"></h2>
+                <p id="story-text" class="text-gray-600 text-sm"></p>
+            </div>
         </div>
     </div>
-    <!-- Read More Button -->
-    <!-- <div class="flex justify-center mt-12 animate-fadeInUp delay-[500ms]">
-        <a href="/stories" class="px-6 py-3 bg-yellow-600 text-white font-semibold rounded-full shadow-md hover:bg-yellow-700 transition-all duration-300">
-            Read More Stories
-        </a>
-    </div> -->
-</section>
 
-<!-- Story Modal -->
-<div id="story-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-60 flex items-start justify-center z-50 transition-opacity duration-300">
-    <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-2xl mt-4 sm:mt-8 animate-slideIn">
-        <span class="modal-close absolute top-4 right-4 text-gray-600 hover:text-yellow-600 cursor-pointer transition-colors" onclick="closeModal('story-modal')"><i class="fas fa-times text-xl"></i></span>
-        <div id="story-content">
-            <img loading="lazy" id="story-image" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4">
-            <h2 id="story-title" class="text-2xl font-semibold text-yellow-600 mb-4"></h2>
-            <p id="story-text" class="text-gray-600 text-sm"></p>
-        </div>
-    </div>
-</div>
+    <style>
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
+            background: rgba(0, 0, 0, 0.6);
+            align-items: flex-start; /* Align to top instead of center */
+            justify-content: center;
+            z-index: 1000; /* Above navbar */
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            overflow-y: auto; /* Allow scrolling if modal content exceeds viewport */
+        }
 
-<style>
-    .modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
-    background: rgba(0, 0, 0, 0.6);
-    align-items: flex-start; /* Align to top instead of center */
-    justify-content: center;
-    z-index: 1000; /* Above navbar */
-    transition: opacity 0.3s ease;
-    opacity: 0;
-    overflow-y: auto; /* Allow scrolling if modal content exceeds viewport */
-}
+        .modal.hidden {
+            display: none; /* Ensure hidden class hides the modal */
+        }
 
-.modal.hidden {
-    display: none; /* Ensure hidden class hides the modal */
-}
+        .modal.open {
+            display: flex; /* Show modal when open class is added */
+            opacity: 1;
+        }
 
-.modal.open {
-    display: flex; /* Show modal when open class is added */
-    opacity: 1;
-}
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 32rem;
+            width: 100%;
+            position: relative;
+            margin-top: 1rem; /* Default top margin for spacing */
+            margin-bottom: 1rem; /* Ensure bottom spacing */
+            animation: slideIn 0.3s ease;
+            z-index: 1001; /* Higher than backdrop */
+        }
 
-.modal-content {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    max-width: 32rem;
-    width: 100%;
-    position: relative;
-    margin-top: 1rem; /* Default top margin for spacing */
-    margin-bottom: 1rem; /* Ensure bottom spacing */
-    animation: slideIn 0.3s ease;
-    z-index: 1001; /* Higher than backdrop */
-}
+        .modal-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            cursor: pointer;
+            z-index: 1002; /* Ensure close button is clickable */
+        }
 
-.modal-close {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    cursor: pointer;
-    z-index: 1002; /* Ensure close button is clickable */
-}
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
-@keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
+        /* Ensure modal text is not truncated */
+        #story-text {
+            white-space: pre-wrap; /* Preserve line breaks and wrap text */
+            overflow: auto; /* Allow scrolling if content is long */
+            max-height: 50vh; /* Limit height to avoid overflow */
+        }
 
-/* Ensure modal text is not truncated */
-#story-text {
-    white-space: pre-wrap; /* Preserve line breaks and wrap text */
-    overflow: auto; /* Allow scrolling if content is long */
-    max-height: 50vh; /* Limit height to avoid overflow */
-}
-
-/* Responsive adjustments */
-@media (min-width: 640px) {
-    .modal-content {
-        margin-top: 2rem; /* Larger top margin for desktop */
-    }
-}
-</style>
+        /* Responsive adjustments */
+        @media (min-width: 640px) {
+            .modal-content {
+                margin-top: 2rem; /* Larger top margin for desktop */
+            }
+        }
+    </style>
 
     <!-- Footer -->
-<footer class="bg-black text-white py-12 px-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Desktop Layout -->
-        <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
-            <!-- Shop -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
-                <ul class="space-y-2">
-                    <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifacts</a></li>
-                    <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
-                </ul>
-            </div>
-            <!-- Sell -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Become a Seller</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
-                </ul>
-            </div>
-            <!-- Policies -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Returns & Refunds</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
-                </ul>
-            </div>
-            <!-- Company -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">About Us</a></li>
-                    <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                    <li class="mt-4 text-white font-medium">+254 790 867 733</li>
-                    <li>sales@ziraartifacts.com</li>
-                    <li class="flex gap-4 mt-2 text-xl">
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    </li>
-                </ul>
-            </div>
-            <!-- Subscribe -->
-            <div>
-                <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
-                <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
-                <a href="#" id="discount-btn" class="text-white hover:text-yellow-400">
-                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
-                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                    </form>
-                </a>
-                <div class="mt-2 flex items-start gap-2">
-                    <input type="checkbox" class="mt-1">
-                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+    <footer class="bg-black text-white py-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Desktop Layout -->
+            <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
+                <!-- Shop -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifacts</a></li>
+                        <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-        <!-- Mobile Dropdowns -->
-        <div class="md:hidden space-y-4">
-            <!-- Shop -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifacts</a></li>
-                    <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
-                </ul>
-            </details>
-            <!-- Sell -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="#" class="text-white hover:text-yellow-400">Become a Seller</a></li>
-                    <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
-                </ul>
-            </details>
-            <!-- Policies -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <!-- <li><a href="#" class="text-white hover:text-yellow-400">Returns & Refunds</a></li> -->
-                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
-                </ul>
-            </details>
-            <!-- Company -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
-                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                    <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">About Us</a></li>
-                    <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                </ul>
-                <div class="mt-3 text-sm">
-                    <p>+254 790 867 733</p>
-                    <p>sales@ziraartifacts.com</p>
-                    <div class="flex gap-3 mt-2 text-xl">
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <!-- Sell -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Become a Seller</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
+                    </ul>
+                </div>
+                <!-- Policies -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Returns & Refunds</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <!-- Company -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">About Us</a></li>
+                        <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                        <li class="mt-4 text-white font-medium">+254 790 867 733</li>
+                        <li>sales@ziraartifacts.com</li>
+                        <li class="flex gap-4 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Subscribe -->
+                <div>
+                    <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
+                    <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <a href="#" id="discount-btn" class="text-white hover:text-yellow-400">
+                        <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
+                            <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                            <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                        </form>
+                    </a>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
                     </div>
                 </div>
-            </details>
-            <!-- Subscribe -->
-            <details class="bg-gray-900 rounded-md p-4">
-                <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
-                <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
-                <a href="#" id="discount-btn" class="text-white hover:text-yellow-400">
-                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
-                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                    </form>
-                </a>
-                <div class="mt-2 flex items-start gap-2">
-                    <input type="checkbox" class="mt-1">
-                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
-                </div>
-            </details>
+            </div>
+            <!-- Mobile Dropdowns -->
+            <div class="md:hidden space-y-4">
+                <!-- Shop -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifacts</a></li>
+                        <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
+                    </ul>
+                </details>
+                <!-- Sell -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Become a Seller</a></li>
+                        <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
+                    </ul>
+                </details>
+                <!-- Policies -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
+                    </ul>
+                </details>
+                <!-- Company -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                        <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">About Us</a></li>
+                        <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                    </ul>
+                    <div class="mt-3 text-sm">
+                        <p>+254 790 867 733</p>
+                        <p>sales@ziraartifacts.com</p>
+                        <div class="flex gap-3 mt-2 text-xl">
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </details>
+                <!-- Subscribe -->
+                <details class="bg-gray-900 rounded-md p-4">
+                    <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
+                    <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
+                    <a href="#" id="discount-btn" class="text-white hover:text-yellow-400">
+                        <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
+                            <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                            <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                        </form>
+                    </a>
+                    <div class="mt-2 flex items-start gap-2">
+                        <input type="checkbox" class="mt-1">
+                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                    </div>
+                </details>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

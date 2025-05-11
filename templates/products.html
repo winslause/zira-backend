@@ -48,7 +48,7 @@
             visibility: hidden;
             opacity: 0;
             position: absolute;
-            top: -40px;
+            top: 20px;
             right: -10px;
             background-color: #d97706; /* Tailwind yellow-600 */
             color: white;
@@ -706,7 +706,7 @@
             <!-- Mobile Navbar -->
             <div class="md:hidden flex items-center justify-between w-full relative">
                 <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
                 <div class="flex items-center space-x-4">
                     <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
@@ -718,7 +718,7 @@
             </div>
             <!-- Desktop Navbar -->
             <div class="hidden md:flex items-center justify-between w-full">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
                 <div class="flex space-x-6">
                     <div class="relative nav-hover">
                         <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
@@ -782,7 +782,7 @@
     <!-- Discount Floating Button -->
     <div class="floating-btn-container discount-btn-container" id="discount-btn" aria-controls="discount-page">
         <div class="floating-btn" role="button" aria-label="Open About Zira Collection">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo">
             <span>About Zira Collection</span>
         </div>
     </div>
@@ -798,7 +798,7 @@
             </div>
             <!-- Logo -->
             <div class="flex justify-center">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
             </div>
             <!-- About Text -->
             <div class="text-center">
@@ -896,8 +896,8 @@
                     {% for product in products if product.discount and product.discount.percent > 1 and product.discount.start_date <= today and product.discount.end_date >= today %}
                     <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}">
                         <div class="relative w-full h-64 overflow-hidden">
-                            <img src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-                            <img src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
                             <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
