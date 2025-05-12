@@ -1920,17 +1920,22 @@ def account():
 
 @app.route('/our_products')
 def our_products():
-   # if 'user' not in session:
-     #   return redirect(url_for('user_login'))
-    
     all_products = Product.query.order_by(Product.created_at.desc()).all()
     products = [
         p for p in all_products
         if not p.discount or p.discount.percent == 0
     ]
-    
+
+    # Validate and log product data
+    for p in products:
+        p.name = p.name.strip() if p.name else "Unnamed Product"
+        p.category = p.category.strip() if p.category else "Uncategorized"
+        p.price = float(p.price) if p.price is not None else 0.0
+        p.description = p.description if p.description else "No description available."
+        p.image = p.image if p.image else "default.jpg"
+        print(f"Product: id={p.id}, name={p.name}, category={p.category}, price={p.price}, description={p.description}, image={p.image}")
+
     categories = Category.query.all()
-    
     return render_template(
         'artefacts.html',
         products=products,

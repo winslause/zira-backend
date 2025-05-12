@@ -345,23 +345,47 @@
         }
 
         /* Quantity Modal */
-        #quantity-modal {
+#quantity-modal {
+    transition: opacity 0.3s ease;
+    z-index: 60; /* Increased to appear above product-detail-modal */
+}
+#quantity-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+#quantity-modal:not(.hidden) {
+    opacity: 1;
+}
+#quantity-input {
+    appearance: textfield;
+}
+#quantity-input::-webkit-outer-spin-button,
+#quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+        /* Product Detail Modal */
+        #product-detail-modal {
             transition: opacity 0.3s ease;
         }
-        #quantity-modal.hidden {
+        #product-detail-modal.hidden {
             opacity: 0;
             pointer-events: none;
         }
-        #quantity-modal:not(.hidden) {
+        #product-detail-modal:not(.hidden) {
             opacity: 1;
         }
-        #quantity-input {
-            appearance: textfield;
+        #product-detail-image {
+            width: 100%;
+            max-height: 300px; /* Set max height to prevent overly tall images */
+            object-fit: contain; /* Ensure full image is visible without cropping */
+            border-radius: 8px;
         }
-        #quantity-input::-webkit-outer-spin-button,
-        #quantity-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        @media (max-width: 767px) {
+            #product-detail-image {
+                max-height: 200px; /* Smaller height for mobile */
+            }
         }
 
         /* Floating Button Styles */
@@ -376,7 +400,7 @@
 
         /* Custom Animations */
         @keyframes bounce {
-            0%, prerequisite20%, 50%, 80%, 100% { transform: translateY(0); }
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-15px); }
             60% { transform: translateY(-7px); }
         }
@@ -894,13 +918,24 @@
                 <!-- Product Cards -->
                 <div class="product-grid grid gap-8 flex-1 cols-3" id="product-grid">
                     {% for product in products if product.discount and product.discount.percent > 1 and product.discount.start_date <= today and product.discount.end_date >= today %}
-                    <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}">
+                    <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card cursor-pointer" 
+                         data-category="{{ product.category }}" 
+                         data-name="{{ product.name | lower }}"
+                         data-product-id="{{ product.id }}"
+                         data-product-name="{{ product.name }}"
+                         data-product-category="{{ product.category }}"
+                         data-product-description="{{ product.description }}"
+                         data-product-image="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}"
+                         data-product-price="{{ product.price }}"
+                         data-product-discounted-price="{{ (product.price * (1 - product.discount.percent / 100)) | round(2) }}"
+                         data-product-discount-percent="{{ product.discount.percent }}"
+                         onclick="openProductModal(this)">
                         <div class="relative w-full h-64 overflow-hidden">
                             <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
                             <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
-                            <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
+                            <button class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist({{ product.id }})">
                                 <i class="far fa-heart"></i>
                                 <span class="tooltip">Add to Wishlist</span>
                             </button>
@@ -917,7 +952,7 @@
                                 {{ current_currency }} {{ (product.price * (1 - product.discount.percent / 100)) | round(2) }}
                             </p>
                             <div class="flex justify-center gap-2 mt-4">
-                                <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="addToCart({{ product.id }})">
+                                <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="event.stopPropagation(); addToCart({{ product.id }})">
                                     <i class="fas fa-cart-plus mr-2"></i> Add to Cart
                                 </button>
                             </div>
@@ -956,6 +991,30 @@
             </div>
         </div>
     </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div>
+      <div class="flex justify-end">
+        <button id="close-product-modal" class="text-gray-600 text-2xl hover:text-red-600 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <img id="product-detail-image" src="" alt="Product Image" class="mb-4">
+      <h3 id="product-detail-name" class="text-2xl font-semibold text-gray-800 mb-2"></h3>
+      <p id="product-detail-category" class="text-gray-600 text-sm mb-2"></p>
+      <p id="product-detail-description" class="text-gray-700 text-base mb-4"></p>
+      <p id="product-detail-price" class="text-gray-600 line-through mb-2"></p>
+      <p id="product-detail-discounted-price" class="text-red-500 font-semibold mb-4"></p>
+      <div class="flex justify-center">
+        <button id="product-detail-add-to-cart" class="action-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center">
+          <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
@@ -1113,7 +1172,6 @@ document.querySelectorAll('.country-option').forEach(option => {
 
 // Update Prices
 function updatePrices() {
-    // Convert product prices from KES to selected currency
     document.querySelectorAll('.price').forEach(priceElement => {
         const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
@@ -1125,11 +1183,10 @@ function updatePrices() {
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
     });
 
-    // Update Price Filter Options (convert KES ranges to selected currency)
     const priceFilter = document.querySelector('.price-filter');
     const selectedValue = priceFilter.value;
-    const rangeLow = 13000; // Approx 100 USD in KES (100 / 0.0077)
-    const rangeHigh = 26000; // Approx 200 USD in KES (200 / 0.0077)
+    const rangeLow = 13000;
+    const rangeHigh = 26000;
     priceFilter.innerHTML = `
         <option value="all">All Prices</option>
         <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
@@ -1147,9 +1204,7 @@ let searchQuery = '';
 const applyFilters = () => {
     let visibleProducts = 0;
     document.querySelectorAll('.product-card').forEach(card => {
-        // Category Filter
         const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
-        // Price Filter (compare in KES)
         const priceKES = parseFloat(card.querySelector('.price').getAttribute('data-price'));
         let priceMatch = true;
         if (selectedPriceRange === '0-13000') {
@@ -1159,12 +1214,10 @@ const applyFilters = () => {
         } else if (selectedPriceRange === '26000+') {
             priceMatch = priceKES > 26000;
         }
-        // Search Filter
         const name = card.getAttribute('data-name');
         const category = card.getAttribute('data-category').toLowerCase();
         const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
 
-        // Combined Filter
         if (categoryMatch && priceMatch && searchMatch) {
             card.style.display = 'block';
             visibleProducts++;
@@ -1173,7 +1226,6 @@ const applyFilters = () => {
         }
     });
 
-    // Toggle No Results Messages
     const noDiscounts = document.querySelector('.no-results:not(#no-search-results)');
     const noSearchResults = document.getElementById('no-search-results');
     if (visibleProducts === 0) {
@@ -1233,70 +1285,116 @@ document.querySelectorAll('.display-option').forEach(option => {
     });
 });
 
-// Wishlist Button Toggle
-document.querySelectorAll('.wishlist-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Toggle is handled in addToWishlist after successful API call
-    });
+// Open Product Detail Modal
+function openProductModal(card) {
+    const modal = document.getElementById('product-detail-modal');
+    const image = document.getElementById('product-detail-image');
+    const name = document.getElementById('product-detail-name');
+    const category = document.getElementById('product-detail-category');
+    const description = document.getElementById('product-detail-description');
+    const price = document.getElementById('product-detail-price');
+    const discountedPrice = document.getElementById('product-detail-discounted-price');
+    const addToCartButton = document.getElementById('product-detail-add-to-cart');
+
+    const productId = card.getAttribute('data-product-id');
+    const productImage = card.getAttribute('data-product-image');
+    const productName = card.getAttribute('data-product-name');
+    const productCategory = card.getAttribute('data-product-category');
+    const productDescription = card.getAttribute('data-product-description');
+    const productPrice = parseFloat(card.getAttribute('data-product-price'));
+    const productDiscountedPrice = parseFloat(card.getAttribute('data-product-discounted-price'));
+
+    image.src = productImage;
+    image.alt = productName;
+    name.textContent = productName;
+    category.textContent = `Category: ${productCategory}`;
+    description.textContent = productDescription || 'No description available.';
+    price.textContent = `${currentCurrency} ${(productPrice * exchangeRates[currentCurrency]).toFixed(2)}`;
+    discountedPrice.textContent = `${currentCurrency} ${(productDiscountedPrice * exchangeRates[currentCurrency]).toFixed(2)}`;
+
+    addToCartButton.setAttribute('onclick', `addToCart(${productId})`);
+
+    modal.classList.remove('hidden');
+}
+
+// Close Product Detail Modal
+document.getElementById('close-product-modal').addEventListener('click', () => {
+    const modal = document.getElementById('product-detail-modal');
+    modal.classList.add('hidden');
+});
+
+// Close Product Detail Modal When Clicking Outside
+document.getElementById('product-detail-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('product-detail-modal')) {
+        document.getElementById('product-detail-modal').classList.add('hidden');
+    }
 });
 
 // Add to Wishlist
 function addToWishlist(productId) {
-    // Find the product card for the given productId
-    const productCard = document.querySelector(`.product-card .wishlist-btn[onclick="addToWishlist(${productId})"]`).closest('.product-card');
+    const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    const wishlistBtn = productCard.querySelector('.wishlist-btn');
+    const icon = wishlistBtn.querySelector('i');
     const discountedPriceKES = parseFloat(productCard.querySelector('.discounted-price').getAttribute('data-discounted-price'));
 
-    fetch('/api/wishlist', {
-        method: 'POST',
+    // Check current state
+    const isActive = wishlistBtn.classList.contains('active');
+    const method = isActive ? 'DELETE' : 'POST';
+    const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
+
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: method === 'POST' ? JSON.stringify({ 
             product_id: productId,
-            price: discountedPriceKES // Send discounted price in KES
-        }),
+            price: discountedPriceKES
+        }) : null,
         credentials: 'include'
     })
     .then(response => {
+        if (response.redirected && response.url.includes('/login')) {
+            alert('Session expired. Please log in.');
+            window.location.href = '/login';
+            return null;
+        }
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        alert(data.message);
-        // Toggle wishlist button state
-        const btn = productCard.querySelector('.wishlist-btn');
-        btn.classList.toggle('active');
-        const icon = btn.querySelector('i');
-        icon.classList.toggle('fas');
-        icon.classList.toggle('far');
+        if (data) {
+            alert(data.message);
+            // Toggle button state
+            wishlistBtn.classList.toggle('active');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+            // Update tooltip text
+            const tooltip = wishlistBtn.querySelector('.tooltip');
+            tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+        }
     })
     .catch(error => {
-        console.error('Error adding to wishlist:', error);
-        alert('Failed to add to wishlist: ' + error.message);
+        console.error('Error managing wishlist:', error);
+        alert('Failed to update wishlist: ' + error.message);
     });
 }
 
 // Add to Cart with Quantity Popup
 function addToCart(productId) {
-    // Find the product card for the given productId
-    const productCard = document.querySelector(`.product-card .action-btn[onclick="addToCart(${productId})"]`).closest('.product-card');
+    const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
     const discountedPriceKES = parseFloat(productCard.querySelector('.discounted-price').getAttribute('data-discounted-price'));
 
-    // Show quantity modal
     const modal = document.getElementById('quantity-modal');
     const quantityInput = document.getElementById('quantity-input');
     const confirmButton = document.getElementById('confirm-quantity');
     const cancelButton = document.getElementById('cancel-quantity');
 
-    // Reset input
     quantityInput.value = 1;
-
-    // Show modal
     modal.classList.remove('hidden');
 
-    // Confirm button handler
     const confirmHandler = () => {
         const quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1) {
@@ -1312,7 +1410,7 @@ function addToCart(productId) {
             body: JSON.stringify({ 
                 product_id: productId, 
                 quantity: quantity,
-                price: discountedPriceKES // Send discounted price in KES
+                price: discountedPriceKES
             }),
             credentials: 'include'
         })
@@ -1343,14 +1441,12 @@ function addToCart(productId) {
         });
     };
 
-    // Cancel button handler
     const cancelHandler = () => {
         modal.classList.add('hidden');
         confirmButton.removeEventListener('click', confirmHandler);
         cancelButton.removeEventListener('click', cancelHandler);
     };
 
-    // Attach event listeners
     confirmButton.addEventListener('click', confirmHandler);
     cancelButton.addEventListener('click', cancelHandler);
 }
@@ -1418,13 +1514,11 @@ document.addEventListener('click', (e) => {
 
 // Floating Button Positioning and Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Adjust positions of floating buttons
     function adjustFloatingButtonPositions() {
         const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
-        let aboutOffset = 16; // Default bottom for About Zira button
-        let countryOffset = 16; // Default bottom for Country button
+        let aboutOffset = 16;
+        let countryOffset = 16;
 
-        // Calculate offsets for buttons excluding WhatsApp (right-aligned)
         floatingButtons.forEach(button => {
             if (button !== document.querySelector('.discount-btn-container') &&
                 button !== document.querySelector('.whatsapp-btn-container') &&
@@ -1435,24 +1529,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Set About Zira button position
         const aboutButton = document.querySelector('.discount-btn-container');
         if (aboutButton) {
             aboutButton.style.bottom = `${aboutOffset}px`;
         }
 
-        // Set Country button above About Zira button
         const countryButton = document.querySelector('#country-btn-container');
         if (countryButton && aboutButton) {
             const aboutHeight = aboutButton.offsetHeight || 48;
-            countryOffset = aboutOffset + aboutHeight + 16; // Place above About Zira
+            countryOffset = aboutOffset + aboutHeight + 16;
             countryButton.style.bottom = `${countryOffset}px`;
         }
     }
     adjustFloatingButtonPositions();
     window.addEventListener('resize', adjustFloatingButtonPositions);
 
-    // Discount Popup Toggle
     if (typeof jQuery !== 'undefined') {
         $(document).ready(function() {
             $('#discount-btn').off('click').on('click', function() {
@@ -1468,7 +1559,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('jQuery is not loaded');
     }
 
-    // WhatsApp Button Click Handler
     const whatsappBtn = document.querySelector('.whatsapp-btn-container .floating-btn');
     if (whatsappBtn) {
         whatsappBtn.addEventListener('click', () => {
@@ -1482,7 +1572,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('WhatsApp button not found');
     }
 
-    // Contact Form Submission
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
@@ -1534,7 +1623,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Contact form not found');
     }
 
-    // Keyboard Accessibility for Floating Buttons
     document.getElementById('discount-btn').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

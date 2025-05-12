@@ -699,6 +699,43 @@
                 height: 64px;
             }
         }
+        /* Product Details Modal */
+#product-details-modal {
+    transition: opacity 0.3s ease;
+}
+
+#product-details-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#product-details-modal:not(.hidden) {
+    opacity: 1;
+}
+
+#product-details-modal .bg-white {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+#product-details-modal img {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    max-height: 400px; /* Optional: Limit max height to prevent oversized images */
+    object-fit: contain; /* Display full image without cropping */
+    transition: none; /* Remove hover scaling effect */
+}
+
+#product-details-modal img:hover {
+    transform: scale(1.05);
+}
+
+#product-details-modal button {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#product-details-modal button:hover {
+    transform: scale(1.05);
+}
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -897,34 +934,34 @@
                 <!-- Product Cards -->
                 <div class="product-grid grid gap-8 flex-1 cols-3" id="product-grid">
                     {% for product in products %}
-                    <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}">
-                        <div class="relative w-full h-64 overflow-hidden">
-                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
-                            <!-- Wishlist Button -->
-                            <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})">
-                                <i class="far fa-heart"></i>
-                                <span class="tooltip">Add to Wishlist</span>
-                            </button>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
-                                {{ product.name }}
-                            </h3>
-                            <p class="text-center text-gray-600 text-sm mt-2">{{ product.category }}</p>
-                            <p class="text-center text-gray-600 mt-2 price" data-price="{{ product.price }}">
-                                {{ current_currency }} {{ product.price | round(2) }}
-                            </p>
-                            <div class="flex justify-center gap-2 mt-4">
-                                <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="addToCart({{ product.id }})">
-                                    <i class="fas fa-cart-plus mr-2"></i> Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p class="no-results text-gray-600 col-span-full text-center">No full price products available.</p>
-                    {% endfor %}
+<div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}" data-description="{{ product.description | e }}">
+    <div class="relative w-full h-64 overflow-hidden cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
+        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+        <!-- Wishlist Button -->
+        <button class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist({{ product.id }})">
+            <i class="far fa-heart"></i>
+            <span class="tooltip">Add to Wishlist</span>
+        </button>
+    </div>
+    <div class="p-4">
+        <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
+            {{ product.name }}
+        </h3>
+        <p class="text-center text-gray-600 text-sm mt-2">{{ product.category }}</p>
+        <p class="text-center text-gray-600 mt-2 price" data-price="{{ product.price }}">
+            {{ current_currency }} {{ product.price | round(2) }}
+        </p>
+        <div class="flex justify-center gap-2 mt-4">
+            <button class="action-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition flex items-center" onclick="event.stopPropagation(); addToCart({{ product.id }})">
+                <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<p class="no-results text-gray-600 col-span-full text-center">No full price products available.</p>
+{% endfor %}
                     <p class="no-results text-gray-600 col-span-full text-center" id="no-search-results">No matching products found.</p>
                 </div>
             </div>
@@ -955,7 +992,27 @@
             </div>
         </div>
     </div>
-
+    
+<!-- Product Details Modal -->
+<div id="product-details-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative">
+        <button id="close-product-modal" class="absolute top-4 right-4 text-gray-600 hover:text-red-600 transition">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+        <div id="modal-content" class="space-y-4">
+            <img id="modal-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-md">
+            <h3 id="modal-name" class="text-2xl font-semibold text-gray-800"></h3>
+            <p id="modal-category" class="text-gray-600"></p>
+            <p id="modal-price" class="text-gray-800 font-medium"></p>
+            <p id="modal-description" class="text-gray-600"></p>
+            <div class="flex justify-end gap-2">
+                <button id="modal-add-to-cart" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition flex items-center">
+                    <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
         <div class="max-w-7xl mx-auto">
@@ -1541,9 +1598,61 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+// Open Product Details Modal
+function openProductModal(id, name, category, price, description, image) {
+    const modal = document.getElementById('product-details-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalName = document.getElementById('modal-name');
+    const modalCategory = document.getElementById('modal-category');
+    const modalPrice = document.getElementById('modal-price');
+    const modalDescription = document.getElementById('modal-description');
+    const addToCartButton = document.getElementById('modal-add-to-cart');
+
+    // Set modal content
+    modalImage.src = image;
+    modalImage.alt = name;
+    modalName.textContent = name;
+    modalCategory.textContent = `Category: ${category}`;
+    modalPrice.textContent = `${currentCurrency} ${(price * exchangeRates[currentCurrency]).toFixed(2)}`;
+    modalDescription.textContent = description || 'No description available.';
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Add to Cart button handler
+    addToCartButton.onclick = () => {
+        modal.classList.add('hidden'); // Close details modal
+        addToCart(id); // Open quantity modal
+    };
+}
+
+// Close Product Details Modal
+document.getElementById('close-product-modal').addEventListener('click', () => {
+    const modal = document.getElementById('product-details-modal');
+    modal.classList.add('hidden');
+});
+
+// Close Modal on Outside Click
+document.getElementById('product-details-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('product-details-modal')) {
+        document.getElementById('product-details-modal').classList.add('hidden');
+    }
+});
+
+// Keyboard Accessibility for Modal Close
+document.getElementById('close-product-modal').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        document.getElementById('product-details-modal').classList.add('hidden');
+    }
+});
+
+
 // Initialize Prices and Filters
 updatePrices();
 applyFilters();
+
 </script>
 </body>
 </html>
