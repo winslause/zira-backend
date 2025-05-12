@@ -784,18 +784,18 @@
                     <label class="block text-gray-700 mb-1">Payment Method</label>
                     <div class="radio-group">
                         <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="immediate" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" checked>
+                            <input type="radio" name="payment_method" value="immediate" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" disabled checked>
                             Pay Immediately
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="delivery" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();">
+                            <input type="radio" name="payment_method" value="delivery" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" >
                             Pay on Delivery
                         </label>
                     </div>
                 </div>
                 <div id="message-code-section">
                     <label class="block text-gray-700 mb-1">Message Code</label>
-                    <input type="text" name="message_code" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600">
+                    <input type="text" name="message_code" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" disabled>
                 </div>
                 <div class="flex gap-4">
                     <button type="submit" class="action-btn bg-yellow-600 text-white px-4 py-2 rounded flex-1 hover:bg-yellow-700">Place Order</button>
@@ -805,21 +805,21 @@
         </div>
         <!-- Floating Payment Details Card -->
         <div class="custom-card p-6 bg-white rounded-lg shadow-lg w-full max-w-md mt-4 animate-slideIn delay-[100ms] md:absolute md:top-4 md:right-4 md:w-80 md:mt-0">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details(Currently not available. Only pay on Delivery at the moment)</h3>
             <div id="payment-details" class="space-y-4">
                 <!-- Default content for Pay Immediately -->
                 <div id="immediate-payment-details">
                     <div class="mb-4">
-                        <h4 class="text-lg font-medium text-gray-700">PayPal</h4>
-                        <p class="text-gray-600 text-sm">Send payment to: <a href="mailto:payments@ziraartifacts.com" class="text-yellow-600 hover:underline">payments@ziraartifacts.com</a></p>
-                        <p class="text-gray-600 text-sm mt-1">Include your order ID in the payment note.</p>
+                        <h4 class="text-lg font-medium text-gray-700">contact us</h4>
+                        <p class="text-gray-600 text-sm">Email: <a href="mailto:payments@ziraartifacts.com" class="text-yellow-600 hover:underline">payments@ziraartifacts.com</a></p>
+                        <p class="text-gray-600 text-sm mt-1">Thank you</p>
                     </div>
                     <div>
                         <h4 class="text-lg font-medium text-gray-700">Bank Transfer</h4>
                         <p class="text-gray-600 text-sm">Bank: Zira Bank</p>
-                        <p class="text-gray-600 text-sm">Account: 1234-5678-9012-3456</p>
-                        <p class="text-gray-600 text-sm">SWIFT: ZIRAUS33</p>
-                        <p class="text-gray-600 text-sm mt-1">Reference: Your order ID</p>
+                        <p class="text-gray-600 text-sm">Account: </p>
+                        <p class="text-gray-600 text-sm">SWIFT: </p>
+                        <p class="text-gray-600 text-sm mt-1">Reference:</p>
                     </div>
                 </div>
                 <!-- Content for Pay on Delivery (hidden by default) -->
