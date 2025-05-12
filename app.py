@@ -37,7 +37,7 @@ def validate_reset_token(token):
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['SECRET_KEY'] = 'zira_collection'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -257,32 +257,34 @@ with app.app_context():
                 product.discount_id = discount.id
         db.session.commit()
 
-    # Temporarily disable Order initialization to allow schema update
     if not Order.query.first():
         user = User.query.filter_by(email='john.doe@example.com').first()
-        orders = [
-            Order(
-                user_id=user.id,
-                total=3600.00,
-                status='Pending',
-                customer_status='Active',
-                payment_method='immediate',
-                created_at=datetime(2025, 5, 1)
-            ),
-            Order(
-                user_id=user.id,
-                total=1500.00,
-                status='Delivered',
-                customer_status='Active',
-                payment_method='delivery',
-                created_at=datetime(2025, 5, 2)
-            ),
-        ]
-        db.session.bulk_save_objects(orders)
-        db.session.commit()
+        if user:  # Only proceed if user exists
+            orders = [
+                Order(
+                    user_id=user.id,
+                    total=3600.00,
+                    status='Pending',
+                    customer_status='Active',
+                    payment_method='immediate',
+                    created_at=datetime(2025, 5, 1)
+                ),
+                Order(
+                    user_id=user.id,
+                    total=1500.00,
+                    status='Delivered',
+                    customer_status='Active',
+                    payment_method='delivery',
+                    created_at=datetime(2025, 5, 2)
+                ),
+            ]
+            db.session.bulk_save_objects(orders)
+            db.session.commit()
+
     # Ensure existing orders have customer_status
     Order.query.filter_by(customer_status=None).update({'customer_status': 'Active'})
     db.session.commit()
+    
     
 @app.route('/')
 def index():
@@ -704,12 +706,19 @@ def handle_product(id):
 
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
-    if 'admin' not in session:
-        app.logger.debug("No admin in session")
+    # Check for admin or user session
+    if 'admin' not in session and 'user' not in session:
+        app.logger.debug("No admin or user in session")
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        orders = db.session.query(Order).all()
+        # If admin, fetch all orders; if user, fetch only their orders
+        if 'admin' in session:
+            orders = db.session.query(Order).all()
+        else:  # user in session
+            user_id = session['user']['id']  # Assuming session['user'] contains user ID
+            orders = db.session.query(Order).filter_by(user_id=user_id).all()
+
         orders_data = []
         for order in orders:
             user = User.query.get(order.user_id)
