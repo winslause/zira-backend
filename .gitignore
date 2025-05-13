@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+/venv__pycache__/
+__pycache__/
+venv/
+=======
 /venv
 /instance/database.db
 /__pycache__
+>>>>>>> a75eee54f869ca021deaff7733c6424134204ee4
