@@ -1893,8 +1893,25 @@ def reset_password():
     
 @app.route('/api/check_session', methods=['GET'])
 def check_session():
-    if 'user' in session:
-        return jsonify({'message': 'Session valid', 'email': session['user']}), 200
+    # Check for admin session
+    if 'admin' in session:
+        user = User.query.get(session['admin'])
+        if user and user.role == 'admin':
+            return jsonify({
+                'message': 'Session valid',
+                'username': user.username,
+                'role': user.role
+            }), 200
+    # Check for normal user session
+    elif 'user' in session:
+        user = User.query.get(session['user'])
+        if user:
+            return jsonify({
+                'message': 'Session valid',
+                'username': user.username,
+                'role': user.role
+            }), 200
+    # No valid session
     return jsonify({'error': 'Unauthorized'}), 401
 
 @app.route('/account')

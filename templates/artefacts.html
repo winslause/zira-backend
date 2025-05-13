@@ -939,9 +939,9 @@
                 <div class="product-grid grid gap-8 flex-1 cols-3" id="product-grid">
                     {% for product in products %}
 <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card" data-category="{{ product.category }}" data-name="{{ product.name | lower }}" data-description="{{ product.description | e }}">
-    <div class="relative w-full h-64 overflow-hidden cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
-        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+    <div class="relative w-full h-64 overflow-hidden cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
+        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }} Hover" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
         <!-- Wishlist Button -->
         <button class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist({{ product.id }})">
             <i class="far fa-heart"></i>
@@ -949,7 +949,7 @@
         </button>
     </div>
     <div class="p-4">
-        <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
+        <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block cursor-pointer" onclick="openProductModal({{ product.id }}, '{{ product.name | e }}', '{{ product.category | e }}', '{{ product.price }}', '{{ product.description | e }}', '{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}')">
             {{ product.name }}
         </h3>
         <p class="text-center text-gray-600 text-sm mt-2">{{ product.category }}</p>
