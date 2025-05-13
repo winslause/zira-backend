@@ -168,12 +168,20 @@ document.addEventListener('DOMContentLoaded', () => {
 function addToWishlist(productId) {
     const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`) || 
                        document.querySelector(`[data-product-id="${productId}"]`);
-    const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`);
-    const icon = wishlistBtn.querySelector('i');
-    const tooltip = wishlistBtn.querySelector('.tooltip');
-    const isActive = wishlistBtn.classList.contains('active');
+    const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : 
+                       document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`) || 
+                       document.querySelector(`button[onclick="addToWishlist(${productId})"]`);
+    const icon = wishlistBtn ? wishlistBtn.querySelector('i') : null;
+    const tooltip = wishlistBtn ? wishlistBtn.querySelector('.tooltip') : null;
+    const isActive = wishlistBtn && wishlistBtn.classList.contains('active');
     const method = isActive ? 'DELETE' : 'POST';
     const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
+
+    if (!wishlistBtn || !icon) {
+        console.error('Wishlist button or icon not found for productId:', productId);
+        alert('Error: Wishlist button not found.');
+        return;
+    }
 
     fetch(url, {
         method: method,
@@ -196,12 +204,15 @@ function addToWishlist(productId) {
     })
     .then(data => {
         if (data) {
-            alert(data.message); // Show success or error message
+            alert(data.message); // Show success message (e.g., "Added to wishlist successfully")
             // Toggle button state
             wishlistBtn.classList.toggle('active');
             icon.classList.toggle('fas');
             icon.classList.toggle('far');
-            tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+            // Update tooltip if it exists
+            if (tooltip) {
+                tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+            }
         }
     })
     .catch(error => {
