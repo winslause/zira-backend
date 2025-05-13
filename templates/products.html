@@ -929,14 +929,14 @@
                          data-product-name="{{ product.name }}"
                          data-product-category="{{ product.category }}"
                          data-product-description="{{ product.description }}"
-                         data-product-image="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}"
+                         data-product-image="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}"
                          data-product-price="{{ product.price }}"
                          data-product-discounted-price="{{ (product.price * (1 - product.discount.percent / 100)) | round(2) }}"
                          data-product-discount-percent="{{ product.discount.percent }}"
                          onclick="openProductModal(this)">
                         <div class="relative w-full h-64 overflow-hidden">
-                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
                             <button class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist({{ product.id }})">
