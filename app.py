@@ -1155,7 +1155,7 @@ def handle_users():
 
 @app.route('/api/users/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_user(id):
-    if 'admin' not in session:
+    if 'user' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     user = User.query.get_or_404(id)
     if request.method == 'GET':
