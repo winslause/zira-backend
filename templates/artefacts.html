@@ -1305,44 +1305,62 @@ document.querySelectorAll('.wishlist-btn').forEach(btn => {
 
 // Add to Wishlist
 function addToWishlist(productId) {
-    fetch('/api/wishlist', {
-        method: 'POST',
+    const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`) || 
+                       document.querySelector(`[data-product-id="${productId}"]`);
+    const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`);
+    const icon = wishlistBtn.querySelector('i');
+    const tooltip = wishlistBtn.querySelector('.tooltip');
+    const isActive = wishlistBtn.classList.contains('active');
+    const method = isActive ? 'DELETE' : 'POST';
+    const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
+
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ product_id: productId }),
+        body: method === 'POST' ? JSON.stringify({ product_id: productId }) : null,
         credentials: 'include'
     })
     .then(response => {
+        if (response.status === 401) {
+            alert('Please login to add any item to your wishlist.');
+            window.location.href = '/user_login';
+            return null;
+        }
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Failed to update wishlist: ${response.statusText}`);
         }
         return response.json();
     })
     .then(data => {
-        alert(data.message);
+        if (data) {
+            alert(data.message);
+            // Toggle button state
+            wishlistBtn.classList.toggle('active');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+            tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+        }
     })
     .catch(error => {
-        console.error('Error adding to wishlist:', error);
-        alert('Failed to add to wishlist: ' + error.message);
+        if (error.message !== 'Failed to update wishlist: Unauthorized') {
+            console.error('Error managing wishlist:', error);
+            alert('Failed to update wishlist: ' + error.message);
+        }
     });
 }
 
 // Add to Cart with Quantity Popup
 function addToCart(productId) {
-    // Show quantity modal
     const modal = document.getElementById('quantity-modal');
     const quantityInput = document.getElementById('quantity-input');
     const confirmButton = document.getElementById('confirm-quantity');
     const cancelButton = document.getElementById('cancel-quantity');
 
-    // Reset input
     quantityInput.value = 1;
-
-    // Show modal
     modal.classList.remove('hidden');
 
-    // Confirm button handler
     const confirmHandler = () => {
         const quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1) {
@@ -1359,13 +1377,20 @@ function addToCart(productId) {
             credentials: 'include'
         })
         .then(response => {
+            if (response.status === 401) {
+                alert('Please login to add any item to your cart.');
+                modal.classList.add('hidden');
+                window.location.href = '/user_login';
+                return null;
+            }
             if (response.redirected && response.url.includes('/login')) {
                 alert('Session expired. Please log in.');
-                window.location.href = '/login';
+                modal.classList.add('hidden');
+                window.location.href = '/user_login';
                 return null;
             }
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Failed to add to cart: ${response.statusText}`);
             }
             return response.json();
         })
@@ -1376,8 +1401,10 @@ function addToCart(productId) {
             }
         })
         .catch(error => {
-            console.error('Error adding to cart:', error);
-            alert('Failed to add to cart: ' + error.message);
+            if (error.message !== 'Failed to add to cart: Unauthorized') {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart: ' + error.message);
+            }
         })
         .finally(() => {
             confirmButton.removeEventListener('click', confirmHandler);
@@ -1385,14 +1412,12 @@ function addToCart(productId) {
         });
     };
 
-    // Cancel button handler
     const cancelHandler = () => {
         modal.classList.add('hidden');
         confirmButton.removeEventListener('click', confirmHandler);
         cancelButton.removeEventListener('click', cancelHandler);
     };
 
-    // Attach event listeners
     confirmButton.addEventListener('click', confirmHandler);
     cancelButton.addEventListener('click', cancelHandler);
 }

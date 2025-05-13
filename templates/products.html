@@ -1358,13 +1358,13 @@ function addToWishlist(productId) {
         credentials: 'include'
     })
     .then(response => {
-        if (response.redirected && response.url.includes('/login')) {
-            alert('Session expired. Please log in.');
-            window.location.href = '/login';
+        if (response.status === 401) {
+            alert('Please login to add any item to your wishlist.');
+            window.location.href = '/user_login';
             return null;
         }
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Failed to update wishlist: ${response.statusText}`);
         }
         return response.json();
     })
@@ -1381,8 +1381,10 @@ function addToWishlist(productId) {
         }
     })
     .catch(error => {
-        console.error('Error managing wishlist:', error);
-        alert('Failed to update wishlist: ' + error.message);
+        if (error.message !== 'Failed to update wishlist: Unauthorized') {
+            console.error('Error managing wishlist:', error);
+            alert('Failed to update wishlist: ' + error.message);
+        }
     });
 }
 
@@ -1419,13 +1421,14 @@ function addToCart(productId) {
             credentials: 'include'
         })
         .then(response => {
-            if (response.redirected && response.url.includes('/login')) {
-                alert('Session expired. Please log in.');
-                window.location.href = '/login';
+            if (response.status === 401) {
+                alert('Please login to add any item to your cart.');
+                modal.classList.add('hidden'); // Close modal before redirect
+                window.location.href = '/user_login';
                 return null;
             }
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Failed to add to cart: ${response.statusText}`);
             }
             return response.json();
         })
@@ -1436,8 +1439,10 @@ function addToCart(productId) {
             }
         })
         .catch(error => {
-            console.error('Error adding to cart:', error);
-            alert('Failed to add to cart: ' + error.message);
+            if (error.message !== 'Failed to add to cart: Unauthorized') {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart: ' + error.message);
+            }
         })
         .finally(() => {
             confirmButton.removeEventListener('click', confirmHandler);

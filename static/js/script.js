@@ -166,24 +166,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add to Wishlist
 function addToWishlist(productId) {
-    fetch('/api/wishlist', {
-        method: 'POST',
+    const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`) || 
+                       document.querySelector(`[data-product-id="${productId}"]`);
+    const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`);
+    const icon = wishlistBtn.querySelector('i');
+    const tooltip = wishlistBtn.querySelector('.tooltip');
+    const isActive = wishlistBtn.classList.contains('active');
+    const method = isActive ? 'DELETE' : 'POST';
+    const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
+
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ product_id: productId }),
-        credentials: 'include'  // Ensure session cookie is sent
+        body: method === 'POST' ? JSON.stringify({ product_id: productId }) : null,
+        credentials: 'include' // Ensure session cookie is sent
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status === 401) {
+            alert('Please login to add any item to your wishlist.');
+            window.location.href = '/user_login';
+            return null;
+        }
+        if (!response.ok) {
+            throw new Error(`Failed to update wishlist: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        alert(data.message); // Show success or error message
+        if (data) {
+            alert(data.message); // Show success or error message
+            // Toggle button state
+            wishlistBtn.classList.toggle('active');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+            tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+        }
     })
     .catch(error => {
-        console.error('Error adding to wishlist:', error);
-        alert('Failed to add to wishlist');
+        if (error.message !== 'Failed to update wishlist: Unauthorized') {
+            console.error('Error managing wishlist:', error);
+            alert('Failed to update wishlist: ' + error.message);
+        }
     });
 }
-
 // Apply dynamic animation delays to story cards
 document.querySelectorAll('#craft-stories [data-delay]').forEach(card => {
     const delay = card.getAttribute('data-delay');
