@@ -558,7 +558,7 @@
     {% for item in wishlist_items %}
         {% if item.product %}
             <div class="wishlist-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card" data-wishlist-id="{{ item.id }}">
-                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
                 <div class="flex-1 text-center sm:text-left">
                     <h3 class="text-xl font-semibold text-gray-800">{{ item.product.name }}</h3>
                     {% if item.product.discount and item.product.discount.percent > 0 %}
@@ -593,7 +593,7 @@
                         <div id="cart-items" class="space-y-4">
                             {% for item in cart_items %}
     <div class="cart-card flex flex-col sm:flex-row items-center gap-4 p-6 custom-card" data-product-id="{{ item.product_id }}">
-        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
+        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/120x120') }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover">
         <div class="flex-1 text-center sm:text-left">
             <h3 class="text-xl font-semibold text-gray-800">{{ item.product.name }}</h3>
             {% if item.product.discount and item.product.discount.percent > 0 %}
@@ -643,7 +643,7 @@
                 {% for item in order.order_items %}
                     <div class="flex flex-col sm:flex-row items-center gap-4 mb-2">
                         {% if item.product %}
-                            <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}" class="w-20 h-20 object-cover rounded">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}" class="w-20 h-20 object-cover rounded">
                             <div class="flex-1">
                                 <p class="text-gray-800 font-medium">{{ item.product.name }}</p>
                                 <p class="text-gray-600">Quantity: {{ item.quantity }}</p>
@@ -1602,7 +1602,7 @@ async function populateOrders() {
     } catch (error) {
         console.error('Error fetching orders:', error);
         if (error.message.includes('Failed to fetch orders') || error.message.includes('Unauthorized')) {
-            showToast('Failed to load orders: ' + error.message, 'error');
+            showToast('welcome');
         }
         if (error.message.includes('Unauthorized')) {
             window.location.href = '{{ url_for('user_login') }}';

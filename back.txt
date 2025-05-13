@@ -10,3 +10,7 @@ class Order(db.Model):
     customer_number = db.Column(db.String(15), nullable=True)  # New field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     order_items = db.relationship('OrderItem', backref='order', lazy=True)
+
+
+
+    Wenny@github1 
