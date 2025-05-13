@@ -11,6 +11,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <!-- Include Toastify CSS & JS (only once per page) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Custom Styles -->
     <style>
         /* Custom Font */
@@ -1531,14 +1534,36 @@ function showToast(message, type = 'success') {
         }, 3000);
         setTimeout(() => {
             if (!document.body.contains(toast)) {
-                console.warn('Toast not found in DOM, falling back to alert');
-                window.alert(message);
-            }
+    console.warn('Toast not found in DOM, falling back to toastify');
+    
+    // Show toast notification as fallback
+    Toastify({
+        text: message,  // Use the same message as in the alert
+        duration: 4000,  // Duration of the toast (4 seconds)
+        close: true,
+        gravity: "top", // Position the toast at the top of the screen
+        position: "right", // Position the toast to the right side
+        backgroundColor: "#f87171", // Red for warning/error messages
+        stopOnFocus: true
+    }).showToast();
+} else {
+    console.warn('Toast already in the DOM, skipping fallback.');
+}
         }, 100);
     } catch (error) {
-        console.error('Error displaying toast:', error);
-        window.alert(message);
-    }
+    console.error('Error displaying toast:', error);
+
+    // Show fallback toast notification in case of an error
+    Toastify({
+        text: 'An error occurred: ' + error.message || 'Unknown error',  // Display the error message
+        duration: 4000,  // Toast duration (4 seconds)
+        close: true,
+        gravity: "top", // Position at the top
+        position: "right", // Position on the right
+        backgroundColor: "#f87171", // Red color for error messages
+        stopOnFocus: true
+    }).showToast();
+}
 }
 
 // Populate Orders

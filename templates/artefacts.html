@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- jQuery (for popup toggle) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Custom Styles -->
 
     <!-- our css styling -->
@@ -792,9 +794,9 @@
                 <a href="{{ url_for('index') }}" class="mobile-sidebar-item" style="padding-top: 40px;">Home</a>
                 <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item active">Products</a>
                 <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item">Special Discount</a>
-                <a href="{{ url_for('user_login') }}" class="mobile-sidebar-item">Login</a>
+               
                 <a href="{{ url_for('account') }}" class="mobile-sidebar-item">My Account</a>
-                <a href="{{ url_for('logout') }}" class="mobile-sidebar-item">Logout</a>
+             
             </div>
         </div>
     </div>
@@ -1326,10 +1328,24 @@ function addToWishlist(productId) {
     })
     .then(response => {
         if (response.status === 401) {
-            alert('Please login to add any item to your wishlist.');
-            window.location.href = '/user_login';
-            return null;
-        }
+    // Show toast notification
+    Toastify({
+        text: "Please login to add any item to your wishlist.",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#f87171", // red-400
+        stopOnFocus: true
+    }).showToast();
+
+    // Redirect after toast duration
+    setTimeout(() => {
+        window.location.href = '/user_login';
+    }, 3000);
+
+    return null;
+}
         if (!response.ok) {
             throw new Error(`Failed to update wishlist: ${response.statusText}`);
         }
@@ -1337,19 +1353,45 @@ function addToWishlist(productId) {
     })
     .then(data => {
         if (data) {
-            alert(data.message);
-            // Toggle button state
-            wishlistBtn.classList.toggle('active');
-            icon.classList.toggle('fas');
-            icon.classList.toggle('far');
-            tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
-        }
+    // Show toast
+    Toastify({
+        text: data.message,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#4ade80", // green for success
+        stopOnFocus: true
+    }).showToast();
+
+    // Toggle button state
+    wishlistBtn.classList.toggle('active');
+    icon.classList.toggle('fas');
+    icon.classList.toggle('far');
+
+    // Determine current active state after toggle
+    const isActive = wishlistBtn.classList.contains('active');
+
+    // Update tooltip text
+    const tooltip = wishlistBtn.querySelector('.tooltip');
+    tooltip.textContent = isActive ? 'Remove from Wishlist' : 'Add to Wishlist';
+}
     })
     .catch(error => {
         if (error.message !== 'Failed to update wishlist: Unauthorized') {
-            console.error('Error managing wishlist:', error);
-            alert('Failed to update wishlist: ' + error.message);
-        }
+    console.error('Error managing wishlist:', error);
+
+    // Show error toast notification
+    Toastify({
+        text: 'Failed to update wishlist: ' + error.message,
+        duration: 4000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#f87171", // red for error
+        stopOnFocus: true
+    }).showToast();
+}
     });
 }
 
@@ -1366,9 +1408,19 @@ function addToCart(productId) {
     const confirmHandler = () => {
         const quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1) {
-            alert('Please enter a valid quantity (1 or more).');
-            return;
-        }
+    // Show toast notification
+    Toastify({
+        text: "Please enter a valid quantity (1 or more).",
+        duration: 3000,  // 3 seconds
+        close: true,
+        gravity: "top", // Position at top
+        position: "right", // Position on the right
+        backgroundColor: "#f87171", // red color for error
+        stopOnFocus: true
+    }).showToast();
+
+    return;
+}
 
         fetch('/api/cart', {
             method: 'POST',
@@ -1380,17 +1432,46 @@ function addToCart(productId) {
         })
         .then(response => {
             if (response.status === 401) {
-                alert('Please login to add any item to your cart.');
-                modal.classList.add('hidden');
-                window.location.href = '/user_login';
-                return null;
-            }
+    // Show the toast notification
+    Toastify({
+        text: "Please login to add any item to your cart.",
+        duration: 3000,  // 3 seconds
+        close: true,
+        gravity: "top", // Position at top
+        position: "right", // Position on the right
+        backgroundColor: "#f87171", // red color for error
+        stopOnFocus: true
+    }).showToast();
+
+    // Hide modal and redirect after toast is shown
+    modal.classList.add('hidden');
+    setTimeout(() => {
+        window.location.href = '/user_login';
+    }, 3000); // Wait for the toast to disappear before redirecting
+
+    return null;
+}
+
             if (response.redirected && response.url.includes('/login')) {
-                alert('Session expired. Please log in.');
-                modal.classList.add('hidden');
-                window.location.href = '/user_login';
-                return null;
-            }
+    // Show the toast notification
+    Toastify({
+        text: "Session expired. Please log in.",
+        duration: 4000,  // 4 seconds
+        close: true,
+        gravity: "top", // Position at the top
+        position: "right", // Position on the right
+        backgroundColor: "#f87171", // Red color for error
+        stopOnFocus: true
+    }).showToast();
+
+    // Hide modal and redirect after toast is shown
+    modal.classList.add('hidden');
+    setTimeout(() => {
+        window.location.href = '/user_login';
+    }, 4000); // Wait for the toast to disappear before redirecting
+
+    return null;
+}
             if (!response.ok) {
                 throw new Error(`Failed to add to cart: ${response.statusText}`);
             }
@@ -1398,15 +1479,36 @@ function addToCart(productId) {
         })
         .then(data => {
             if (data) {
-                alert(data.message);
-                modal.classList.add('hidden');
-            }
+    // Show toast notification
+    Toastify({
+        text: data.message,
+        duration: 3000,  // Duration of the toast in milliseconds (3 seconds)
+        close: true,
+        gravity: "top", // Position the toast at the top of the screen
+        position: "right", // Position the toast to the right
+        backgroundColor: "#4ade80", // Green background for success messages
+        stopOnFocus: true
+    }).showToast();
+
+    // Hide the modal
+    modal.classList.add('hidden');
+}
         })
         .catch(error => {
             if (error.message !== 'Failed to add to cart: Unauthorized') {
-                console.error('Error adding to cart:', error);
-                alert('Failed to add to cart: ' + error.message);
-            }
+    console.error('Error adding to cart:', error);
+
+    // Show toast notification
+    Toastify({
+        text: 'Failed to add to cart: ' + error.message,
+        duration: 4000,  // Duration of the toast in milliseconds (4 seconds)
+        close: true,
+        gravity: "top", // Position the toast at the top
+        position: "right", // Position the toast to the right
+        backgroundColor: "#f87171", // Red background for errors
+        stopOnFocus: true
+    }).showToast();
+}
         })
         .finally(() => {
             confirmButton.removeEventListener('click', confirmHandler);

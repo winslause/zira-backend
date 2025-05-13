@@ -178,10 +178,21 @@ function addToWishlist(productId) {
     const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
 
     if (!wishlistBtn || !icon) {
-        console.error('Wishlist button or icon not found for productId:', productId);
-        alert('Error: Wishlist button not found.');
-        return;
-    }
+    console.error('Wishlist button or icon not found for productId:', productId);
+
+    // Show error toast notification
+    Toastify({
+        text: 'Error: Wishlist button not found.',
+        duration: 4000,  // Duration of the toast in milliseconds (4 seconds)
+        close: true,
+        gravity: "top", // Position at the top
+        position: "right", // Position on the right side
+        backgroundColor: "#f87171", // Red color for error messages
+        stopOnFocus: true
+    }).showToast();
+
+    return;
+}
 
     fetch(url, {
         method: method,
@@ -193,10 +204,24 @@ function addToWishlist(productId) {
     })
     .then(response => {
         if (response.status === 401) {
-            alert('Please login to add any item to your wishlist.');
-            window.location.href = '/user_login';
-            return null;
-        }
+    // Show the toast notification
+    Toastify({
+        text: "Please login to add any item to your wishlist.",
+        duration: 4000,  // Duration of the toast in milliseconds (4 seconds)
+        close: true,
+        gravity: "top", // Position at the top of the screen
+        position: "right", // Position on the right side
+        backgroundColor: "#f87171", // Red color for error messages
+        stopOnFocus: true
+    }).showToast();
+
+    // Redirect to login after the toast
+    setTimeout(() => {
+        window.location.href = '/user_login';
+    }, 4000); // Wait for the toast to disappear before redirecting
+
+    return null;
+}
         if (!response.ok) {
             throw new Error(`Failed to update wishlist: ${response.statusText}`);
         }
@@ -204,22 +229,43 @@ function addToWishlist(productId) {
     })
     .then(data => {
         if (data) {
-            alert(data.message); // Show success message (e.g., "Added to wishlist successfully")
-            // Toggle button state
-            wishlistBtn.classList.toggle('active');
-            icon.classList.toggle('fas');
-            icon.classList.toggle('far');
-            // Update tooltip if it exists
-            if (tooltip) {
-                tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
-            }
-        }
+    // Show success toast notification
+    Toastify({
+        text: data.message,  // Success message (e.g., "Added to wishlist successfully")
+        duration: 3000,  // Duration of the toast in milliseconds (3 seconds)
+        close: true,
+        gravity: "top", // Position at the top of the screen
+        position: "right", // Position on the right side
+        backgroundColor: "#4ade80", // Green color for success messages
+        stopOnFocus: true
+    }).showToast();
+
+    // Toggle button state
+    wishlistBtn.classList.toggle('active');
+    icon.classList.toggle('fas');
+    icon.classList.toggle('far');
+
+    // Update tooltip if it exists
+    if (tooltip) {
+        tooltip.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+    }
+}
     })
     .catch(error => {
         if (error.message !== 'Failed to update wishlist: Unauthorized') {
-            console.error('Error managing wishlist:', error);
-            alert('Failed to update wishlist: ' + error.message);
-        }
+    console.error('Error managing wishlist:', error);
+
+    Toastify({
+        text: 'Failed to update wishlist: ' + error.message,
+        duration: 4000,  // Toast duration in milliseconds
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#f87171",  // Red for error
+        stopOnFocus: true
+    }).showToast();
+}
+
     });
 }
 // Apply dynamic animation delays to story cards
@@ -253,15 +299,28 @@ function openStoryModal(storyId) {
         openModal('story-modal');
     })
     .catch(error => {
-        console.error('Error loading story:', error);
-        alert('Failed to load story: ' + error.message);
-        // Fallback: Open modal with error message
-        document.getElementById('story-title').textContent = 'Error';
-        document.getElementById('story-text').textContent = 'Failed to load story. Please try again.';
-        document.getElementById('story-image').src = '/static/images/craft.jpg';
-        document.getElementById('story-image').alt = 'Error';
-        openModal('story-modal');
-    });
+    console.error('Error loading story:', error);
+
+    // Show error toast notification
+    Toastify({
+        text: 'Failed to load story: ' + error.message,
+        duration: 4000,  // Toast duration in milliseconds (4 seconds)
+        close: true,
+        gravity: "top", // Position at the top
+        position: "right", // Position on the right side
+        backgroundColor: "#f87171", // Red background for error messages
+        stopOnFocus: true
+    }).showToast();
+
+    // Fallback: Open modal with error message
+    document.getElementById('story-title').textContent = 'Error';
+    document.getElementById('story-text').textContent = 'Failed to load story. Please try again.';
+    document.getElementById('story-image').src = '/static/images/craft.jpg';
+    document.getElementById('story-image').alt = 'Error';
+    
+    // Open the error modal
+    openModal('story-modal');
+});
 }
 
 // Open modal
