@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body class="font-sans">
     <!-- Top Layer (Hidden on Mobile) -->
@@ -23,7 +23,7 @@
                 <a href="#" class="hover:text-yellow-400"><i class="fab fa-facebook-f"></i></a>
                 <a href="#" class="hover:text-yellow-400"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="hover:text-yellow-400"><i class="fab fa-twitter"></i></a>
-                <a href="#" id="" class="hover:text-yellow-400">Help</a>
+                <a href="#" class="hover:text-yellow-400">Help</a>
                 <a href="{{ url_for('account') }}" class="hover:text-yellow-400">My Account</a>
                 <a href="{{ url_for('account') }}" class="hover:text-yellow-400">Track Order</a>
             </div>
@@ -31,15 +31,28 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="navbar bg-white shadow-md fixed w-full z-20">
+    <nav class="navbar bg-white shadow-md fixed w-full z-50">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Mobile Navbar -->
             <div class="md:hidden flex items-center justify-between w-full relative">
                 <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
                 <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
                     <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                    <!-- Mobile Currency Button -->
+                    <div id="mobile-country-btn-container" class="relative">
+                        <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
+                        <button id="mobile-country-btn" class="bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
+                            <span class="flag">🇰🇪</span> KES
+                        </button>
+                        <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Mobile Search Bar -->
                 <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1">
@@ -68,6 +81,19 @@
                     </div>
                     <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                    <!-- Desktop Currency Button -->
+                    <div id="country-btn-container" class="relative">
+                        <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
+                        <button style="border-radius: 35px;" id="country-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
+                            <span class="flag">🇰🇪</span> KES
+                        </button>
+                        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,7 +105,7 @@
             <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
             <div class="space-y-4">
                 <div>
-                    <a href="{{ url_for('index') }}" class="block text-gray-700 hover:text-gray-900">Home</a>
+                    <a href="{{ url_for('index') }}" class="block text-gray-700 hover:text-gray-900" style="margin-top: 20px; padding-top:20px">Home</a>
                 </div>
                 <div>
                     <a href="{{ url_for('our_products') }}" class="block text-gray-700 hover:text-gray-900">Products</a>
@@ -95,14 +121,13 @@
     <section class="relative h-screen">
         <div id="hero-slider" class="w-full h-full relative">
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/pot1.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100%;
-"
->
+                background-image: url('{{ url_for('static', filename='images/pot1.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100%;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Stone Artifacts</h1>
@@ -111,14 +136,13 @@
                 </div>
             </div>
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/curve6.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100%;
-"
->
+                background-image: url('{{ url_for('static', filename='images/curve6.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100%;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Cultural Treasures</h1>
@@ -127,13 +151,13 @@
                 </div>
             </div>
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/curv1.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100vh;
-">
+                background-image: url('{{ url_for('static', filename='images/curv1.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100vh;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Woven Heritage</h1>
@@ -142,13 +166,13 @@
                 </div>
             </div>
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/craft.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100vh;
-">
+                background-image: url('{{ url_for('static', filename='images/craft.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100vh;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Cultural Gifts</h1>
@@ -157,13 +181,13 @@
                 </div>
             </div>
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/curve5.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100vh;
-">
+                background-image: url('{{ url_for('static', filename='images/curve5.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100vh;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Exclusive Artifacts</h1>
@@ -172,13 +196,13 @@
                 </div>
             </div>
             <div class="hero-slide absolute inset-0 bg-cover bg-center" style="
-    background-image: url('{{ url_for('static', filename='images/pot7.jpg') }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 100vh;
-">
+                background-image: url('{{ url_for('static', filename='images/pot7.jpg') }}');
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                width: 100%;
+                height: 100vh;
+            ">
                 <div class="container mx-auto h-full flex items-center px-4">
                     <div class="bg-white bg-opacity-80 p-6 rounded pulse">
                         <h1 class="text-4xl font-bold">Ancient Pottery</h1>
@@ -201,24 +225,11 @@
     <!-- WhatsApp Floating Button -->
 <div class="floating-btn-container whatsapp-btn-container">
     <span class="floating-text">Chat with Us</span>
-    <a href="https://wa.me/254769525570" target="_blank" class="floating-btn relative">
+    <a href="https://wa.me/254701539003" target="_blank" class="floating-btn relative">
         <span class="badge">1</span>
     </a>
 </div>
 
-    <!-- Currency Floating Button -->
-    <div id="country-btn-container">
-        <button id="country-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-yellow-700 transition flex items-center">
-            <span class="flag">🇰🇪</span> Kenya
-        </button>
-        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32">
-            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-        </div>
-    </div>
-    <br>
 
     <!-- Discount Floating Button -->
     <div class="floating-btn-container discount-btn-container" id="discount-btn">
@@ -229,213 +240,90 @@
     </div>
 
     <!-- Discount Popup -->
-    <div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
-        <div class="p-6 space-y-6">
-            <!-- Close Button -->
-            <div class="flex justify-end">
-                <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+<div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full" style="z-index: 100;">
+    <div class="p-6 space-y-6">
+        <!-- Close Button -->
+        <div class="flex justify-end">
+            <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-            <!-- Logo -->
-            <div class="flex justify-center">
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
-            </div>
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+        </div>
 
-            <!-- About Text -->
-            <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
-                <p class="text-gray-600 text-base leading-relaxed">
-                    At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
-                    <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
-                    Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
-                </p>
-            </div>
+        <!-- About Text -->
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
+            <p class="text-gray-600 text-base leading-relaxed">
+                At <span class="font-semibold text-yellow-600">Zira Collection</span>, we offer a curated celebration of Africa’s rich artistic heritage — showcasing 
+                <span class="italic">handcrafted artefacts</span>, <span class="italic">intricate beadwork</span>, 
+                <span class="italic">elegant soapstone carvings</span>, <span class="italic">beautifully done wooden products</span>, and 
+                <span class="italic">vibrant woven rugs</span>. Each piece is <span class="font-medium text-gray-800">authentically made</span> by 
+                <span class="font-medium text-gray-800">skilled African artisans</span>, blending traditional techniques with contemporary design.
+                Whether you're looking for <span class="font-semibold">meaningful souvenirs</span>, <span class="font-semibold">distinctive home décor</span>, 
+                or <span class="font-semibold">wearable cultural regalia</span>, our collection offers <span class="italic">timeless treasures that tell a story</span>.
+                By supporting this initiative, you’re not only bringing <span class="text-yellow-700 font-semibold">beauty into your space</span> but also 
+                <span class="text-yellow-700 font-semibold">empowering local communities</span> across the continent.
+            </p>
+        </div>
 
-            <!-- Contact Info -->
-            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-                <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
-                <ul class="space-y-1 text-sm">
-                    <li><strong>Phone:</strong> <a href="tel:+254700123456">+254 700 123456</a></li>
-<li><strong>Email:</strong> <a href="mailto:info@ziracollection.com">info@ziracollection.com</a></li>
+        <!-- Contact Info -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
+            <ul class="space-y-1 text-sm">
+                <li><strong>Phone:</strong> <a href="tel:+254701539003">0701 539003</a></li>
+                <li><strong>Email:</strong> <a href="mailto:info@ziracollection.com">vickiebmochama@gmail.com</a></li>
+                <li><strong>Location:</strong> Nairobi, Kenya</li>
+            </ul>
+        </div>
 
-                    <li><strong>Location:</strong> Nairobi, Kenya</li>
-                </ul>
-            </div>
-
-            <!-- Email Form -->
-            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-                <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
-                <div id="flash-message1" style="display: none;"></div>
-                <form id="contact-form" class="space-y-4">
-                    <div>
-                        <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                        <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
-                    </div>
-                    <div>
-                        <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
-                    </div>
-                    <div class="text-right">
-                        <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
-                    </div>
-                </form>
-                <div id="flash-message1" style="display: none;"></div> <!-- Flash message container -->
-            </div>
+        <!-- Email Form -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
+            <div id="flash-message1" style="display: none;"></div>
+            <form id="contact-form" class="space-y-4">
+                <div>
+                    <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
+                </div>
+                <div>
+                    <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+<style>
+    #discount-page {
+  max-height: 100vh;       /* limit height to viewport */
+  overflow-y: auto;        /* enable vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+}
 
-    <style>
-        /* Country Button Fixed Position */
-        #country-btn-container {
-            position: fixed !important;
-            bottom: 80px; /* Initial value, adjusted by JS to be above About Zira */
-            left: 1rem;
-            z-index: 1000;
-            pointer-events: auto;
-        }
-        #country-dropdown {
-            position: absolute;
-            bottom: 3rem;
-            left: 0;
-            z-index: 1000;
-        }
+</style>
 
-        /* Flag Styling */
-        .flag {
-            font-size: 0.875rem;
-            margin-right: 0.5rem;
-        }
-    </style>
-    <script>
-        // static/js/currency.js
-        const exchangeRates = {
-            USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
-            EUR: 0.0073, // 1 KES = 0.0073 EUR
-            GBP: 0.0061, // 1 KES = 0.0061 GBP
-            KES: 1       // 1 KES = 1 KES
-        };
-        let currentCurrency = localStorage.getItem('currency') || 'KES';
-
-        function initializeCurrencyButton() {
-            const storedCountry = localStorage.getItem('country') || 'Kenya';
-            const storedFlag = localStorage.getItem('flag') || '🇰🇪';
-            const storedCurrency = localStorage.getItem('currency') || 'KES';
-            currentCurrency = storedCurrency;
-            const countryBtn = document.getElementById('country-btn');
-            if (countryBtn) {
-                countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCountry}`;
-            }
-            updatePrices();
-        }
-
-        function updatePrices() {
-            document.querySelectorAll('.ftm-card').forEach(card => {
-                const priceElement = card.querySelector('.ftm-price');
-                const oldPriceElement = card.querySelector('.ftm-old-price');
-
-                // Get base price from data-price attribute (in KES)
-                const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
-                if (!isNaN(basePriceKES)) {
-                    const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-
-                    // Preserve the HTML structure
-                    if (oldPriceElement) {
-                        // Product has a discount, update both discounted and original prices
-                        const baseOldPriceKES = parseFloat(oldPriceElement.getAttribute('data-old-price'));
-                        if (!isNaN(baseOldPriceKES)) {
-                            const convertedOldPrice = (baseOldPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                            priceElement.innerHTML = `${currentCurrency} ${convertedPrice} <span class="ftm-old-price" data-old-price="${baseOldPriceKES}">${currentCurrency} ${convertedOldPrice}</span>`;
-                        } else {
-                            // Fallback if data-old-price is missing
-                            priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
-                        }
-                    } else {
-                        // No discount, update only the main price
-                        priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
-                    }
-                }
-            });
-        }
-
-        function adjustFloatingButtonPositions() {
-            const aboutButton = document.querySelector('.discount-btn-container');
-            const countryButton = document.querySelector('#country-btn-container');
-
-            // Set About Zira button position
-            if (aboutButton) {
-                aboutButton.style.bottom = '16px'; // Fixed position for About Zira
-            }
-
-            // Position currency button above About Zira
-            if (countryButton && aboutButton) {
-                const aboutHeight = aboutButton.offsetHeight || 48;
-                const countryOffset = 16 + aboutHeight + 16; // 16px gap above About Zira
-                countryButton.style.bottom = `${countryOffset}px`;
-            } else if (countryButton) {
-                countryButton.style.bottom = '16px'; // Fallback if no About Zira button
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const countryBtn = document.getElementById('country-btn');
-            if (countryBtn) {
-                countryBtn.addEventListener('click', () => {
-                    const dropdown = document.getElementById('country-dropdown');
-                    dropdown.classList.toggle('hidden');
-                });
-            }
-
-            document.querySelectorAll('.country-option').forEach(option => {
-                option.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    const country = e.target.getAttribute('data-country');
-                    const flag = e.target.getAttribute('data-flag');
-                    currentCurrency = e.target.getAttribute('data-currency');
-                    document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
-                    document.getElementById('country-dropdown').classList.add('hidden');
-                    localStorage.setItem('currency', currentCurrency);
-                    localStorage.setItem('country', country);
-                    localStorage.setItem('flag', flag);
-                    // Optional: Sync with backend
-                    try {
-                        await fetch('/api/set_currency', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ currency: currentCurrency }),
-                            credentials: 'include'
-                        });
-                    } catch (error) {
-                        console.error('Failed to sync currency with backend:', error);
-                    }
-                    updatePrices();
-                });
-            });
-
-            adjustFloatingButtonPositions();
-            window.addEventListener('resize', adjustFloatingButtonPositions);
-            initializeCurrencyButton();
-        });
-    </script>
 
     <!-- Section 2: Discover and Buy -->
     <section id="features-section" class="py-12 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <!-- Discover & Buy -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
                     <img loading="lazy" src="{{ url_for('static', filename='images/discover.png') }}" alt="Discover & Buy" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Discover & Buy</h3>
                     <p class="text-gray-600">Discover and buy from Africa’s most talented craftspeople</p>
                 </a>
-                <!-- Ship & Track -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
                     <img loading="lazy" src="{{ url_for('static', filename='images/ship.png') }}" alt="Ship & Track" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Ship & Track</h3>
                     <p class="text-gray-600">24/7 International & domestic shipping</p>
                 </a>
-                <!-- Wholesale Friendly -->
                 <a href="#" class="flex flex-col items-center space-y-4 hover:opacity-80 transition">
                     <img loading="lazy" src="{{ url_for('static', filename='images/friendly.png') }}" alt="Wholesale Friendly" class="h-16 w-16">
                     <h3 class="text-lg font-semibold text-yellow-700">Wholesale Friendly</h3>
@@ -450,56 +338,48 @@
         <div class="relative z-10">
             <h2 class="text-4xl font-bold text-center text-yellow-700 mb-12">Among our Products</h2>
             <div class="flex flex-wrap justify-center gap-12">
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://www.skydelldesign.com/upload/blog/1693248430_post_image.jpg" alt="Cultural Jewelry" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Cultural Jewelry</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://cdn.shopify.com/s/files/1/1846/7989/files/Artesania_san_jacinto_collectiviste_colombia.jpg?v=1562243047" alt="Handwoven Textiles" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Handwoven Textiles</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://tamara-artefacts.myshopify.com/cdn/shop/products/IMG20220608115904_1024x1024@2x.jpg?v=1654674361" alt="Stone Decor" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Stone Decor</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://i.ebayimg.com/images/g/cLMAAOSwGKJkgpsK/s-l1200.jpg" alt="Ceremonial Tools" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Ceremonial Tools</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://usercontent.one/wp/combonimissionaries.co.uk/wp-content/uploads/2024/04/photo-news-3-46.jpg" alt="Woven Baskets" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Woven Baskets</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfuYoU3TbWglIjY6Q8yxiNe4vF7DON3HNCgyLeQnYgVYg0TKZfYUGYCSdJmMz0Wwtxeco&usqp=CAU" alt="Cultural Footwear" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800">Cultural Footwear</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="{{ url_for('static', filename='images/travel.jpg') }}" alt="Travel Souvenirs" class="w-full h-full object-cover">
                     </div>
                     <p class="mt-4 text-lg font-semibold text-gray-800 text-center">Travel Souvenirs</p>
                 </div>
-                <!-- Category Item -->
                 <div class="w-64 flex flex-col items-center transition-transform duration-500 transform hover:scale-110 animate-pulse-category">
                     <div class="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-yellow-700">
                         <img loading="lazy" src="{{ url_for('static', filename='images/art.jpg') }}" alt="Stone Artifacts" class="w-full h-full object-cover">
@@ -511,263 +391,107 @@
     </section>
 
     <!-- Featured This Month -->
-    <section id="featured-this-month">
-        <h2 class="ftm-title">Get Your Discount</h2>
-        <div class="ftm-tabs">
-            <div class="ftm-tab active" onclick="showTab('new')">Zira's Latest</div>
-            <div class="ftm-tab" onclick="showTab('sale')">On Discount</div>
-            <div class="ftm-tab" onclick="showTab('easter')">Popular Collections</div>
-        </div>
-
-        <!-- New Arrivals -->
-        <div class="ftm-tab-content active" id="tab-new">
-            {% for product in latest_products %}
-            <div class="ftm-card">
-                <div class="ftm-card-img">
+<section id="featured-this-month">
+    <h2 class="ftm-title">Get Your Discount</h2>
+    <div class="ftm-tabs">
+        <div class="ftm-tab active" onclick="showTab('new')">Zira's Latest</div>
+        <div class="ftm-tab" onclick="showTab('sale')">On Discount</div>
+        <div class="ftm-tab" onclick="showTab('easter')">Popular Collections</div>
+    </div>
+    <div class="ftm-tab-content active" id="tab-new">
+        {% for product in latest_products %}
+        <div class="ftm-card">
+            <div class="ftm-card-img">
+                {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
+                <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
+                {% endif %}
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+            </div>
+            <div class="ftm-card-content">
+                <div class="ftm-product-name">{{ product.name }}</div>
+                <div class="ftm-price" data-price="{% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}{{ product.price * (1 - product.discount.percent / 100) }}{% else %}{{ product.price }}{% endif %}" aria-live="polite">
                     {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
-                    <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
+                    KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
+                    <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
+                    {% else %}
+                    KSh{{ "%.2f" % product.price }}
                     {% endif %}
-                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
                 </div>
-                <div class="ftm-card-content">
-                    <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price" data-price="{{ product.price }}" aria-live="polite">
-                        {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
-                        KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
-                        {% else %}
-                        KSh{{ "%.2f" % product.price }}
-                        {% endif %}
-                    </div>
-                    <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
-                        <i class="fas fa-heart mr-2"></i> Add to Wishlist
-                    </button>
-                </div>
-            </div>
-            {% else %}
-            <p>No new products available.</p>
-            {% endfor %}
-            <div class="flex justify-center items-center w-full text-center mt-6">
-                <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+                <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
+                    <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                </button>
             </div>
         </div>
-
-        <!-- On Sale -->
-        <div class="ftm-tab-content" id="tab-sale">
-            {% for product in discount_products %}
-            <div class="ftm-card">
-                <div class="ftm-card-img">
-                    <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
-                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
-                </div>
-                <div class="ftm-card-content">
-                    <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price" data-price="{{ product.price * (1 - product.discount.percent / 100) }}" aria-live="polite">
-                        KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
-                    </div>
-                    <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
-                        <i class="fas fa-heart mr-2"></i> Add to Wishlist
-                    </button>
-                </div>
+        {% else %}
+        <p>No new products available.</p>
+        {% endfor %}
+        <div class="flex justify-center items-center w-full text-center mt-6">
+            <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+        </div>
+    </div>
+    <div class="ftm-tab-content" id="tab-sale">
+        {% for product in discount_products %}
+        <div class="ftm-card">
+            <div class="ftm-card-img">
+                <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
+                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
             </div>
-            {% else %}
-            <p>No Special Discount available.</p>
-            {% endfor %}
-            <div class="flex justify-center items-center w-full text-center mt-6">
-                <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+            <div class="ftm-card-content">
+                <div class="ftm-product-name">{{ product.name }}</div>
+                <div class="ftm-price" data-price="{{ product.price * (1 - product.discount.percent / 100) }}" aria-live="polite">
+                    KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
+                    <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
+                </div>
+                <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
+                    <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                </button>
             </div>
         </div>
-
-        <!-- Popular Collections -->
-        <div class="ftm-tab-content" id="tab-easter">
-            {% for product in popular_products %}
-            <div class="ftm-card">
-                <div class="ftm-card-img">
+        {% else %}
+        <p>No Special Discount available.</p>
+        {% endfor %}
+        <div class="flex justify-center items-center w-full text-center mt-6">
+            <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+        </div>
+    </div>
+    <div class="ftm-tab-content" id="tab-easter">
+        {% for product in popular_products %}
+        <div class="ftm-card">
+            <div class="ftm-card-img">
+                {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
+                <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
+                {% endif %}
+                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+            </div>
+            <div class="ftm-card-content">
+                <div class="ftm-product-name">{{ product.name }}</div>
+                <div class="ftm-price" data-price="{% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}{{ product.price * (1 - product.discount.percent / 100) }}{% else %}{{ product.price }}{% endif %}" aria-live="polite">
                     {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
-                    <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
+                    KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
+                    <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
+                    {% else %}
+                    KSh{{ "%.2f" % product.price }}
                     {% endif %}
-                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
                 </div>
-                <div class="ftm-card-content">
-                    <div class="ftm-product-name">{{ product.name }}</div>
-                    <div class="ftm-price" data-price="{{ product.price }}" aria-live="polite">
-                        {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
-                        KSh{{ "%.2f" % (product.price * (1 - product.discount.percent / 100)) }}
-                        <span class="ftm-old-price" data-old-price="{{ product.price }}">KSh{{ "%.2f" % product.price }}</span>
-                        {% else %}
-                        KSh{{ "%.2f" % product.price }}
-                        {% endif %}
-                    </div>
-                    <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
-                        <i class="fas fa-heart mr-2"></i> Add to Wishlist
-                    </button>
-                </div>
-            </div>
-            {% else %}
-            <p>No popular products available.</p>
-            {% endfor %}
-            <div class="flex justify-center items-center w-full text-center mt-6">
-                <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+                <button class="wishlist-btn bg-yellow-600 text-white px-3 py-1 rounded mt-2 hover:bg-yellow-700 transition flex items-center" onclick="addToWishlist({{ product.id }})">
+                    <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                </button>
             </div>
         </div>
-    </section>
-    <style>
-        /* Ensure the container for the cards uses flexbox to align cards */
-        .ftm-tab-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem; /* Adjust gap as needed */
-        }
-
-        /* Style for each card to have the same height */
-        .ftm-card {
-            display: flex;
-            flex-direction: column;
-            min-height: 360px; /* Fixed minimum height for all cards */
-            width: 240px; /* Maintain existing width */
-            background: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        /* Image container with fixed height, no extra padding */
-        .ftm-card-img {
-            position: relative;
-            width: 100%;
-            height: 240px; /* Fixed height for uniformity */
-            overflow: hidden;
-        }
-
-        /* Ensure the entire image is visible, filling the container vertically */
-        .ftm-card-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Use cover to fill container, avoiding white space */
-            object-position: center; /* Center the image */
-        }
-
-        /* Style for the discount badge */
-        .ftm-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #d97706;
-            color: #fff;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-        }
-
-        /* Content area takes remaining space and aligns content */
-        .ftm-card-content {
-            flex: 1; /* Take remaining space */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Space out content evenly */
-            padding: 1rem;
-            text-align: center;
-        }
-
-        /* Ensure product name doesn't overflow and wraps */
-        .ftm-product-name {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1f2937;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Limit to 2 lines */
-            -webkit-box-orient: vertical;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Price styling */
-        .ftm-price {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #d97706;
-            margin-bottom: 0.5rem;
-        }
-
-        .ftm-old-price {
-            font-size: 0.875rem;
-            color: #6b7280;
-            text-decoration: line-through;
-            margin-left: 0.5rem;
-        }
-
-        /* Wishlist button styling */
-        .wishlist-btn {
-            width: 100%;
-            background: #d97706;
-            color: #fff;
-            padding: 0.5rem; /* Default padding for desktop */
-            border-radius: 0.25rem;
-            font-size: 0.875rem; /* Default font size */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease;
-        }
-
-        .wishlist-btn:hover {
-            background: #b45309;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .ftm-card {
-                width: 100%;
-                max-width: 280px; /* Slightly smaller for mobile */
-                min-height: 340px; /* Adjust for mobile */
-            }
-
-            .ftm-card-img {
-                height: 220px; /* Slightly smaller image height for mobile */
-            }
-
-            .ftm-product-name {
-                font-size: 1rem;
-            }
-
-            /* Adjust wishlist button for smaller devices */
-            .wishlist-btn {
-                padding: 0.375rem; /* Reduced padding for compactness */
-                font-size: 0.75rem; /* Smaller font size */
-            }
-        }
-    </style>
-
-    <style>
-        /* Ensure the tab content grid doesn't interfere with button centering */
-        .ftm-tab-content {
-            position: relative;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            justify-items: center; /* Center grid items */
-        }
-        .ftm-tab-content.active {
-            display: grid; /* Maintain grid for active tab */
-        }
-        /* Ensure the button wrapper spans the full width */
-        .ftm-tab-content > div.flex {
-            grid-column: 1 / -1; /* Span all grid columns */
-            width: 100%; /* Full width of the container */
-        }
-    </style>
-
+        {% else %}
+        <p>No popular products available.</p>
+        {% endfor %}
+        <div class="flex justify-center items-center w-full text-center mt-6">
+            <button class="ftm-view-all bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 transition md:px-4 md:py-2 md:text-base" onclick="window.location.href='{{ url_for('discounted_artefacts') }}'">View All</button>
+        </div>
+    </div>
+</section>
     <!-- Wholesale Collections -->
     <section class="bg-white py-16" id="wholesale-collections">
         <div class="text-center mb-12">
             <h2 class="text-4xl font-semibold text-yellow-600 animate-fadeInUp">Wholesale Collections</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 max-w-7xl mx-auto">
-            <!-- Card 1 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[100ms]">
                 <img loading="lazy" src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Stone Sculpture Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
@@ -776,7 +500,6 @@
                     </h3>
                 </div>
             </div>
-            <!-- Card 2 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[200ms]">
                 <img loading="lazy" src="https://images.stockcake.com/public/0/a/c/0ac572f5-0e4b-4eb1-a834-5d544a7827b8_large/tribal-decor-galore-stockcake.jpg" alt="Cultural Decor Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
@@ -785,7 +508,6 @@
                     </h3>
                 </div>
             </div>
-            <!-- Card 3 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[300ms]">
                 <img loading="lazy" src="https://sites.duke.edu/downhome/files/2014/01/Down-Home_007.png" alt="Ceremonial Artifacts Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
@@ -794,7 +516,6 @@
                     </h3>
                 </div>
             </div>
-            <!-- Card 4 -->
             <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-fadeInUp delay-[400ms]">
                 <img loading="lazy" src="https://images.squarespace-cdn.com/content/v1/65a77c25c2e955035c0fc7a4/3f515310-c533-48ae-b9ed-81196f14d072/cultural-wedding-gift-ideas.jpg" alt="Cultural Gifting Collection" class="w-full h-64 object-cover group-hover:brightness-90 transition duration-500">
                 <div class="p-4">
@@ -812,7 +533,6 @@
             <h2 class="text-4xl font-semibold text-yellow-600 animate-fadeInUp">Know More About Zira Artifacts</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto px-4">
-            <!-- Card 1 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[100ms]">
                 <div class="flex justify-center mb-4">
                     <img loading="lazy" src="{{ url_for('static', filename='images/craft.jpg') }}" alt="Artifacts icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -824,7 +544,6 @@
                     A secure platform to explore and acquire a diverse range of authentic artifacts, stone-carved items, and cultural treasures.
                 </p>
             </div>
-            <!-- Card 2 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[200ms]">
                 <div class="flex justify-center mb-4">
                     <img loading="lazy" src="{{ url_for('static', filename='images/craftp.jpg') }}" alt="Artisans icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -836,7 +555,6 @@
                     Celebrate the artistry of skilled artisans who blend cultural heritage with timeless craftsmanship in stone-carved items and artifacts.
                 </p>
             </div>
-            <!-- Card 3 -->
             <div class="group text-center p-6 rounded-lg transition-transform transform hover:-translate-y-2 duration-500 animate-fadeInUp delay-[300ms]">
                 <div class="flex justify-center mb-4">
                     <img loading="lazy" src="{{ url_for('static', filename='images/craftt.jpg') }}" alt="Cultural Preservation icon" class="w-20 h-20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -856,7 +574,6 @@
         <div class="text-center mb-10 px-4">
             <h2 class="text-4xl font-semibold text-yellow-700 animate-fadeInUp">What our customers say about us.</h2>
         </div>
-        <!-- Arrow Navigation -->
         <div class="flex justify-center items-center gap-6 mb-6 animate-fadeInUp delay-[100ms]">
             <button id="prevReview" class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-yellow-600 hover:text-white transition-all duration-300" aria-label="Previous review slide">
                 ❮
@@ -865,19 +582,15 @@
                 ❯
             </button>
         </div>
-        <!-- Review Slider for Larger Screens (2 cards per slide) -->
         <div id="reviewSliderLarge" class="hidden md:block overflow-hidden max-w-6xl mx-auto px-4">
             <div id="reviewSliderLargeInner" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
-                <!-- Slide 1 -->
                 <div class="min-w-full grid grid-cols-2 gap-10 animate-fadeInUp">
-                    <!-- Review 1 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Amina K., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★★</p>
                         <h4 class="mt-2 font-semibold">Authentic & Beautiful</h4>
                         <p class="text-gray-600 mt-1">Zira Collections is my go-to store for authentic African crafts. The packaging and attention to detail are unmatched.</p>
                     </div>
-                    <!-- Review 2 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Jean-Luc M., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★★</p>
@@ -885,16 +598,13 @@
                         <p class="text-gray-600 mt-1">My order arrived earlier than expected. I love the craftsmanship and the sustainability ethos behind Zira.</p>
                     </div>
                 </div>
-                <!-- Slide 2 -->
                 <div class="min-w-full grid grid-cols-2 gap-10 animate-fadeInUp">
-                    <!-- Review 3 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Fatou N., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★★</p>
                         <h4 class="mt-2 font-semibold">Impressive Quality</h4>
                         <p class="text-gray-600 mt-1">Everything was beautifully handcrafted and exactly as shown. Zira really brings African heritage to life.</p>
                     </div>
-                    <!-- Review 4 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Liam T., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★☆</p>
@@ -902,16 +612,13 @@
                         <p class="text-gray-600 mt-1">The team was very responsive and helped me with customizations. Will definitely recommend to friends.</p>
                     </div>
                 </div>
-                <!-- Slide 3 -->
                 <div class="min-w-full grid grid-cols-2 gap-10 animate-fadeInUp">
-                    <!-- Review 5 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Chinwe O., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★★</p>
                         <h4 class="mt-2 font-semibold">Just What I Needed</h4>
                         <p class="text-gray-600 mt-1">Zira’s collection helped me furnish my boutique hotel. The designs are timeless and ethical.</p>
                     </div>
-                    <!-- Review 6 -->
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Emily S., Nairobi, Kenya</h3>
                         <p class="text-yellow-600">★★★★★</p>
@@ -921,10 +628,8 @@
                 </div>
             </div>
         </div>
-        <!-- Review Slider for Smaller Screens (1 card per slide) -->
         <div id="reviewSliderSmall" class="block md:hidden overflow-hidden max-w-6xl mx-auto px-4">
             <div id="reviewSliderSmallInner" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
-                <!-- Slide 1 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Amina K., Nairobi, Kenya</h3>
@@ -933,7 +638,6 @@
                         <p class="text-gray-600 mt-1">Zira Collections is my go-to store for authentic African crafts. The packaging and attention to detail are unmatched.</p>
                     </div>
                 </div>
-                <!-- Slide 2 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Jean-Luc M., Nairobi, Kenya</h3>
@@ -942,7 +646,6 @@
                         <p class="text-gray-600 mt-1">My order arrived earlier than expected. I love the craftsmanship and the sustainability ethos behind Zira.</p>
                     </div>
                 </div>
-                <!-- Slide 3 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Fatou N., Nairobi, Kenya</h3>
@@ -951,7 +654,6 @@
                         <p class="text-gray-600 mt-1">Everything was beautifully handcrafted and exactly as shown. Zira really brings African heritage to life.</p>
                     </div>
                 </div>
-                <!-- Slide 4 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Liam T., Nairobi, Kenya</h3>
@@ -960,7 +662,6 @@
                         <p class="text-gray-600 mt-1">The team was very responsive and helped me with customizations. Will definitely recommend to friends.</p>
                     </div>
                 </div>
-                <!-- Slide 5 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Chinwe O., Nairobi, Kenya</h3>
@@ -969,7 +670,6 @@
                         <p class="text-gray-600 mt-1">Zira’s collection helped me furnish my boutique hotel. The designs are timeless and ethical.</p>
                     </div>
                 </div>
-                <!-- Slide 6 -->
                 <div class="min-w-full animate-fadeInUp">
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md">
                         <h3 class="font-semibold">Emily S., Nairobi, Kenya</h3>
@@ -991,7 +691,6 @@
         <div class="overflow-x-auto">
             <div class="flex gap-6 px-4 md:justify-center md:flex-wrap">
                 {% for story in stories %}
-                <!-- Dynamic Story Card -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp" data-delay="[{{ loop.index0 * 100 + 200 }}ms]" onclick="openStoryModal({{ story.id }})">
                     <div class="overflow-hidden rounded-lg">
                         <img loading="lazy" src="{{ url_for('static', filename='uploads/' + story.image) if story.image else url_for('static', filename='images/craft.jpg') }}" alt="{{ story.title }}" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
@@ -1000,7 +699,6 @@
                     <p class="text-gray-600 mt-2 text-sm">{{ story.content | truncate(100, True) }}</p>
                 </div>
                 {% else %}
-                <!-- Fallback if no stories -->
                 <div class="min-w-[300px] max-w-sm bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:-translate-y-2 animate-fadeInUp delay-[200ms]">
                     <div class="overflow-hidden rounded-lg">
                         <img loading="lazy" src="{{ url_for('static', filename='images/craft.jpg') }}" alt="No Stories" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105 rounded-lg">
@@ -1025,76 +723,10 @@
         </div>
     </div>
 
-    <style>
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
-            background: rgba(0, 0, 0, 0.6);
-            align-items: flex-start; /* Align to top instead of center */
-            justify-content: center;
-            z-index: 1000; /* Above navbar */
-            transition: opacity 0.3s ease;
-            opacity: 0;
-            overflow-y: auto; /* Allow scrolling if modal content exceeds viewport */
-        }
-
-        .modal.hidden {
-            display: none; /* Ensure hidden class hides the modal */
-        }
-
-        .modal.open {
-            display: flex; /* Show modal when open class is added */
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            max-width: 32rem;
-            width: 100%;
-            position: relative;
-            margin-top: 1rem; /* Default top margin for spacing */
-            margin-bottom: 1rem; /* Ensure bottom spacing */
-            animation: slideIn 0.3s ease;
-            z-index: 1001; /* Higher than backdrop */
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            cursor: pointer;
-            z-index: 1002; /* Ensure close button is clickable */
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Ensure modal text is not truncated */
-        #story-text {
-            white-space: pre-wrap; /* Preserve line breaks and wrap text */
-            overflow: auto; /* Allow scrolling if content is long */
-            max-height: 50vh; /* Limit height to avoid overflow */
-        }
-
-        /* Responsive adjustments */
-        @media (min-width: 640px) {
-            .modal-content {
-                margin-top: 2rem; /* Larger top margin for desktop */
-            }
-        }
-    </style>
-
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
         <div class="max-w-7xl mx-auto">
-            <!-- Desktop Layout -->
             <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
-                <!-- Shop -->
                 <div>
                     <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
                     <ul class="space-y-2">
@@ -1102,7 +734,6 @@
                         <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
                     </ul>
                 </div>
-                <!-- Sell -->
                 <div>
                     <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
                     <ul class="space-y-2">
@@ -1110,7 +741,6 @@
                         <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
                     </ul>
                 </div>
-                <!-- Policies -->
                 <div>
                     <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
                     <ul class="space-y-2">
@@ -1118,15 +748,14 @@
                         <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
                     </ul>
                 </div>
-                <!-- Company -->
                 <div>
                     <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
                     <ul class="space-y-2">
                         <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">About Us</a></li>
                         <li><a href="#" id="discount-btn" class="text-white hover:text-yellow-400">Contact Us</a></li>
                         <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                        <li class="mt-4 text-white font-medium">+254 790 867 733</li>
-                        <li>sales@ziraartifacts.com</li>
+                        <li class="mt-4 text-white font-medium">+254701539003</li>
+                        <li>vickiebmochama@gmail.com</li>
                         <li class="flex gap-4 mt-2 text-xl">
                             <a href="#"><i class="fab fa-pinterest"></i></a>
                             <a href="#"><i class="fab fa-facebook"></i></a>
@@ -1136,7 +765,6 @@
                         </li>
                     </ul>
                 </div>
-                <!-- Subscribe -->
                 <div>
                     <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
                     <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
@@ -1152,9 +780,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Mobile Dropdowns -->
             <div class="md:hidden space-y-4">
-                <!-- Shop -->
                 <details class="bg-gray-900 rounded-md p-4">
                     <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
                     <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
@@ -1162,7 +788,6 @@
                         <li><a href="{{ url_for('discounted_artefacts') }}" class="text-white hover:text-yellow-400">Special Discounts</a></li>
                     </ul>
                 </details>
-                <!-- Sell -->
                 <details class="bg-gray-900 rounded-md p-4">
                     <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
                     <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
@@ -1170,14 +795,12 @@
                         <li><a href="#" class="text-white hover:text-yellow-400">Seller Guidelines</a></li>
                     </ul>
                 </details>
-                <!-- Policies -->
                 <details class="bg-gray-900 rounded-md p-4">
                     <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
                     <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
                         <li><a href="#" class="text-white hover:text-yellow-400">Privacy Policy</a></li>
                     </ul>
                 </details>
-                <!-- Company -->
                 <details class="bg-gray-900 rounded-md p-4">
                     <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
                     <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
@@ -1186,8 +809,8 @@
                         <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
                     </ul>
                     <div class="mt-3 text-sm">
-                        <p>+254 790 867 733</p>
-                        <p>sales@ziraartifacts.com</p>
+                        <p>+254701539003</p>
+                        <p>vickiebmochama@gmail.com</p>
                         <div class="flex gap-3 mt-2 text-xl">
                             <a href="#"><i class="fab fa-pinterest"></i></a>
                             <a href="#"><i class="fab fa-facebook"></i></a>
@@ -1197,7 +820,6 @@
                         </div>
                     </div>
                 </details>
-                <!-- Subscribe -->
                 <details class="bg-gray-900 rounded-md p-4">
                     <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
                     <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
@@ -1217,6 +839,5 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 </html>

@@ -712,29 +712,39 @@ def get_orders():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        # If admin, fetch all orders; if user, fetch only their orders
+        # Fetch orders based on session
         if 'admin' in session:
             orders = db.session.query(Order).all()
+            app.logger.debug("Fetching all orders for admin")
         else:  # user in session
-            user_id = session['user']['id']  # Assuming session['user'] contains user ID
+            user = User.query.filter_by(email=session['user']).first()
+            if not user:
+                app.logger.error(f"User not found for email: {session['user']}")
+                return jsonify({'error': 'User not found'}), 404
+            user_id = user.id
             orders = db.session.query(Order).filter_by(user_id=user_id).all()
+            app.logger.debug(f"Fetching orders for user_id: {user_id}")
 
         orders_data = []
         for order in orders:
+            # Fetch user details
             user = User.query.get(order.user_id)
-            # Use customer_name and customer_number if available, else fall back to user details
             customer_name = order.customer_name or (user.name if user else 'Unknown')
             customer_number = order.customer_number or (user.phone_number if user and user.phone_number else 'N/A')
-            # Use user.address as location, default to empty dict if missing
             location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
-            order_items = OrderItem.query.filter_by(order_id=order.id).all()
-            items_data = [
-                {
+
+            # Fetch order items with joined Product data
+            order_items = db.session.query(OrderItem).filter_by(order_id=order.id).join(Product, isouter=True).all()
+            items_data = []
+            for item in order_items:
+                product = item.product
+                items_data.append({
                     'product_id': item.product_id,
-                    'product_name': Product.query.get(item.product_id).name if Product.query.get(item.product_id) else 'Deleted Product',
-                    'quantity': item.quantity
-                } for item in order_items
-            ]
+                    'product_name': product.name if product else 'Deleted Product',
+                    'quantity': item.quantity,
+                    'image': product.image if product and product.image else 'default.jpg'
+                })
+
             orders_data.append({
                 'id': order.id,
                 'customer': customer_name,
@@ -749,11 +759,18 @@ def get_orders():
                 'customer_status': order.customer_status,
                 'status': order.status,
                 'payment_method': order.payment_method,
+                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S') if order.created_at else '',
                 'items': items_data
             })
+
+        app.logger.debug(f"Returning {len(orders_data)} orders with items: {[order['items'] for order in orders_data]}")
         return jsonify(orders_data)
+
+    except SQLAlchemyError as e:
+        app.logger.error(f"Database error fetching orders: {str(e)}")
+        return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        app.logger.error(f"Error fetching orders: {str(e)}")
+        app.logger.error(f"Unexpected error fetching orders: {str(e)}")
         return jsonify({'error': 'Failed to fetch orders'}), 500
 
 
@@ -1918,7 +1935,14 @@ def check_session():
 def account():
     if 'user' not in session:
         return redirect(url_for('user_login'))
-    user = User.query.filter_by(email=session['user']).first()
+    
+    # Handle case where session['user'] is a dictionary (for backward compatibility)
+    user_email = session['user']
+    if isinstance(user_email, dict) and 'email' in user_email:
+        user_email = user_email['email']
+        session['user'] = user_email  # Update session to store email string
+    
+    user = User.query.filter_by(email=user_email).first()
     if not user:
         session.pop('user', None)
         return redirect(url_for('user_login'))
@@ -1928,12 +1952,13 @@ def account():
     orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).all()
     
     return render_template('account.html',
-                           user=user,
-                           wishlist_items=wishlist_items,
-                           cart_items=cart_items,
-                           orders=orders,
-                           address=user.address or {},
-                           current_currency='USD')
+                          user=user,
+                          wishlist_items=wishlist_items,
+                          cart_items=cart_items,
+                          orders=orders,
+                          address=user.address or {},
+                          current_currency='USD')
+    
 
 @app.route('/our_products')
 def our_products():

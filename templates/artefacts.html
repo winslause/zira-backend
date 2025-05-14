@@ -17,789 +17,912 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Custom Styles -->
 
-    <!-- our css styling -->
-    <style>
-        /* Custom Font */
-        body, .navbar {
-            font-family: 'Poppins', sans-serif;
-        }
+<style>
+    /* Custom Font */
+    body, .navbar {
+        font-family: 'Poppins', sans-serif;
+    }
 
-        /* Image Transition on Hover */
-        .product-card img {
-            transition: opacity 0.5s ease-in-out;
-        }
+    /* Hidden Class for Dropdown */
+    .hidden {
+        display: none !important;
+    }
 
-        /* Wishlist Button and Tooltip */
-        .wishlist-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #6b7280; /* Tailwind gray-500 */
-            transition: color 0.3s ease;
-            z-index: 10;
-        }
-        .wishlist-btn:hover {
-            color: #d97706; /* Tailwind yellow-600 */
-        }
-        .wishlist-btn.active {
-            color: #d97706; /* Tailwind yellow-600 */
-        }
-        .wishlist-btn:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        .tooltip {
-            visibility: hidden;
-            opacity: 0;
-            position: absolute;
-            top: 30px;
-            right: -10px;
-            background-color: #d97706; /* Tailwind yellow-600 */
-            color: white;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 15;
-        }
-        .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            right: 15px;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #d97706;
-        }
+    /* Image Transition on Hover */
+    .product-card img {
+        transition: opacity 0.5s ease-in-out;
+    }
 
-        /* Animations */
-        .animate-fadeInUp {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        .animate-bounceIn {
-            animation: bounceIn 1s ease-out forwards;
-        }
-        .animate-zoomIn {
-            animation: zoomIn 5s ease-out forwards;
-        }
-        .animate-pageLoad {
-            animation: pageLoad 1s ease-out forwards;
-        }
-        .animate-navLoad {
-            animation: navLoad 0.8s ease-out forwards;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.95); }
-            50% { opacity: 0.5; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes zoomIn {
-            from { background-size: 100%; }
-            to { background-size: 110%; }
-        }
-        @keyframes pageLoad {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes navLoad {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    /* Wishlist Button and Tooltip */
+    .wishlist-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #6b7280;
+        transition: color 0.3s ease;
+        z-index: 10;
+    }
+    .wishlist-btn:hover {
+        color: #d97706;
+    }
+    .wishlist-btn.active {
+        color: #d97706;
+    }
+    .wishlist-btn:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+    .tooltip {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        top: 30px;
+        right: -10px;
+        background-color: #d97706;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 15;
+    }
+    .tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        right: 15px;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #d97706;
+    }
 
-        /* Toggler Animations */
-        .animate-rotateToggle {
-            animation: rotateToggle 0.3s ease-in-out forwards;
-        }
-        .animate-bounce {
-            animation: bounce 0.2s ease-in-out;
-        }
-        .animate-pulse {
-            animation: pulse 0.3s ease-in-out;
-        }
-        @keyframes rotateToggle {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(90deg) scale(1.2); }
-            100% { transform: rotate(180deg) scale(1); }
-        }
-        @keyframes bounce {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+    /* Animations */
+    .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-bounceIn { animation: bounceIn 1s ease-out forwards; }
+    .animate-zoomIn { animation: zoomIn 5s ease-out forwards; }
+    .animate-pageLoad { animation: pageLoad 1s ease-out forwards; }
+    .animate-navLoad { animation: navLoad 0.8s ease-out forwards; }
+    .animate-rotateToggle { animation: rotateToggle 0.3s ease-in-out forwards; }
+    .animate-bounce { animation: bounce 0.2s ease-in-out; }
+    .animate-pulse { animation: pulse 0.3s ease-in-out; }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounceIn {
+        0% { opacity: 0; transform: scale(0.95); }
+        50% { opacity: 0.5; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes zoomIn {
+        from { background-size: 100%; }
+        to { background-size: 110%; }
+    }
+    @keyframes pageLoad {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes navLoad {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes rotateToggle {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(90deg) scale(1.2); }
+        100% { transform: rotate(180deg) scale(1); }
+    }
+    @keyframes bounce {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
 
-        /* Delay Classes */
-        .delay-\[100ms\] { animation-delay: 100ms; }
-        .delay-\[200ms\] { animation-delay: 200ms; }
-        .delay-\[300ms\] { animation-delay: 300ms; }
-        .delay-\[400ms\] { animation-delay: 400ms; }
+    /* Delay Classes */
+    .delay-\[100ms\] { animation-delay: 100ms; }
+    .delay-\[200ms\] { animation-delay: 200ms; }
+    .delay-\[300ms\] { animation-delay: 300ms; }
+    .delay-\[400ms\] { animation-delay: 400ms; }
 
-        /* Navbar Styling */
-        .navbar {
-            background: #ffffff; /* Tailwind white */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
-            position: fixed;
-            width: 100%;
-            z-index: 50;
-            animation: navLoad 0.8s ease-out;
-        }
-        .navbar-item {
-            position: relative;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #4b5563; /* Tailwind gray-700 */
-            padding: 0.75rem 1.5rem;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-        }
-        .navbar-item:hover, .navbar-item.active {
-            color: #1f2937; /* Tailwind gray-900 */
-            transform: scale(1.05);
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        .navbar-item::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 3px;
-            background-color: #1f2937;
-            transition: width 0.3s ease;
-        }
-        .navbar-item:hover::after, .navbar-item.active::after {
-            width: 50%;
-        }
-        .nav-hover:hover {
-            transform: scale(1.05);
-        }
+    /* Navbar Styling */
+    .navbar {
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 1rem 0;
+        position: fixed;
+        width: 100%;
+        z-index: 50;
+        animation: navLoad 0.8s ease-out;
+    }
+    .navbar-item {
+        position: relative;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #4b5563;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+    .navbar-item:hover, .navbar-item.active {
+        color: #1f2937;
+        transform: scale(1.05);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .navbar-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 3px;
+        background-color: #1f2937;
+        transition: width 0.3s ease;
+    }
+    .navbar-item:hover::after, .navbar-item.active::after {
+        width: 50%;
+    }
+    .nav-hover:hover {
+        transform: scale(1.05);
+    }
 
-        /* Search Container */
-        .search-container {
-            position: relative;
-        }
-        .search-container input {
-            border: 1px solid #d1d5db; /* Tailwind gray-300 */
-            border-radius: 0.375rem;
-            padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-            outline: none;
-        }
-        .search-container .fa-search {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280; /* Tailwind gray-500 */
-        }
-        #mobile-search-bar {
-            display: none;
-            position: absolute;
-            top: 3rem;
-            left: 0;
-            right: 0;
-            margin: 0 1rem;
-            z-index: 45;
-        }
-        #mobile-search-bar.active {
-            display: block;
-        }
+    /* Search Container */
+    .search-container {
+        position: relative;
+    }
+    .search-container input {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+        outline: none;
+    }
+    .search-container .fa-search {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+    #mobile-search-bar {
+        display: none;
+        position: absolute;
+        top: 3rem;
+        left: 0;
+        right: 0;
+        margin: 0 1rem;
+        z-index: 45;
+    }
+    #mobile-search-bar.active {
+        display: block;
+    }
 
-        /* Sidebar Filter Hover Effects */
-        .filter-item:hover, .sidebar select:hover {
-            transform: scale(1.05);
-            color: #d97706;
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
+    /* Sidebar Filter Hover Effects */
+    .filter-item:hover, .sidebar select:hover {
+        transform: scale(1.05);
+        color: #d97706;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
 
-        /* Responsive Grid for Product Cards */
-        .product-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-        .product-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-        .product-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
-        .product-grid.list-view {
+    /* Responsive Grid for Product Cards */
+    .product-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .product-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .product-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .product-grid.list-view {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .product-grid.list-view .product-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+    .product-grid.list-view .product-card .relative {
+        width: 150px;
+        height: 150px;
+    }
+    .product-grid.list-view .product-card .p-4 {
+        flex: 1;
+        text-align: left;
+    }
+
+    /* Display Option Icons */
+    .display-option {
+        padding: 0.5rem;
+        cursor: pointer;
+        color: #4b5563;
+        transition: color 0.3s ease;
+    }
+    .display-option:hover, .display-option.active {
+        color: #d97706;
+    }
+
+    /* Floating Filter Toggler Button (Mobile) */
+    .filter-toggler {
+        display: none;
+        position: fixed;
+        top: 100px;
+        left: 16px;
+        background-color: #d97706;
+        color: white;
+        padding: 8px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: 40;
+        transition: background-color 0.3s ease;
+    }
+    .filter-toggler:hover {
+        background-color: #b45309;
+    }
+
+    /* Filter Close Button (Mobile) */
+    #filter-close-btn {
+        display: none;
+        background-color: #d97706;
+        color: white;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+    #filter-close-btn:hover {
+        background-color: #b45309;
+    }
+
+    /* Country Button in Navbar */
+    #mobile-country-btn-container,
+    #desktop-country-btn-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 60;
+        overflow: visible;
+    }
+    #mobile-country-btn,
+    #desktop-country-btn {
+        background-color: white;
+        color: #374151;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+    #mobile-country-btn:hover,
+    #desktop-country-btn:hover {
+        background-color: #f3f4f6;
+    }
+    #mobile-country-btn .flag,
+    #desktop-country-btn .flag {
+        font-size: 0.875rem;
+        margin-right: 0.5rem;
+    }
+    #mobile-country-dropdown,
+    #desktop-country-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        width: 8rem;
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 0.375rem;
+        padding: 1rem;
+        z-index: 80;
+        display: none;
+    }
+    #mobile-country-dropdown:not(.hidden),
+    #desktop-country-dropdown:not(.hidden) {
+        display: block;
+    }
+    .country-option {
+        font-size: 0.875rem;
+        color: #4b5563;
+        padding: 0.25rem 0.5rem;
+        transition: color 0.3s ease;
+        cursor: pointer;
+    }
+    .country-option:hover {
+        color: #d97706;
+    }
+    .floating-text {
+        font-size: 0.75rem;
+        color: #4b5563;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    /* Action Button Hover Effect */
+    .action-btn {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* Search Bar Styling */
+    .search-input:focus {
+        border-color: #d97706;
+        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+    }
+
+    /* No Results Message */
+    .no-results {
+        display: none;
+        text-align: center;
+        color: #4b5563;
+        font-size: 1rem;
+        grid-column: 1 / -1;
+    }
+
+    /* Mobile Sidebar Styling */
+    .mobile-sidebar-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #4b5563;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+    .mobile-sidebar-item:hover, .mobile-sidebar-item.active {
+        color: #d97706;
+        background-color: #f3f4f6;
+    }
+
+    /* Quantity Modal */
+    #quantity-modal {
+        transition: opacity 0.3s ease;
+    }
+    #quantity-modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    #quantity-modal:not(.hidden) {
+        opacity: 1;
+    }
+    #quantity-input {
+        appearance: textfield;
+    }
+    #quantity-input::-webkit-outer-spin-button,
+    #quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Floating Button Styles */
+    :root {
+        --whatsapp-green: #25D366;
+        --pink: #EC4899;
+        --yellow-600: #d97706;
+        --yellow-700: #b45309;
+        --red: #EF4444;
+        --error-red: #dc2626;
+    }
+
+    /* Custom Animations */
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-15px); }
+        60% { transform: translateY(-7px); }
+    }
+
+    /* Floating Button Container */
+    .floating-btn-container {
+        position: fixed;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        pointer-events: auto;
+    }
+
+    /* WhatsApp Button */
+    .whatsapp-btn-container {
+        bottom: 16px;
+        right: 16px;
+    }
+    .whatsapp-btn-container .floating-btn {
+        width: 48px;
+        height: 48px;
+        background-color: var(--whatsapp-green);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        animation: bounce 2s infinite;
+        cursor: pointer;
+    }
+    .whatsapp-btn-container .floating-btn i {
+        color: white;
+        font-size: 24px;
+    }
+    .whatsapp-btn-container .floating-btn:hover {
+        transform: scale(1.1);
+    }
+    .whatsapp-btn-container .floating-text {
+        margin-right: 8px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    .whatsapp-btn-container .badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background-color: var(--red);
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 10px;
+    }
+
+    /* Discount Button (About Zira Collection) */
+    .discount-btn-container {
+        bottom: 16px;
+        left: 16px;
+        position: fixed;
+        z-index: 1000;
+        pointer-events: auto;
+    }
+    .discount-btn-container .floating-btn {
+        background-color: var(--pink);
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        padding: 16px;
+        height: 48px;
+        transition: all 0.3s ease;
+        animation: bounce 2s infinite;
+        cursor: pointer;
+    }
+    .discount-btn-container .floating-btn:hover {
+        transform: scale(1.1);
+    }
+    .discount-btn-container .floating-btn img {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+    }
+
+    /* Discount Popup */
+    #discount-page {
+        z-index: 60;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        transition: transform 0.5s ease-in-out;
+    }
+    #discount-page .p-6 {
+        min-height: 100%;
+        box-sizing: border-box;
+    }
+    #close-discount {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 65;
+    }
+
+    /* Email Form Styling */
+    #contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    #contact-form label {
+        font-weight: 500;
+        color: #374151;
+    }
+    #contact-form input,
+    #contact-form textarea {
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        color: #1f2937;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #contact-form input:focus,
+    #contact-form textarea:focus {
+        border-color: var(--yellow-600);
+        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+    }
+    #contact-form textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    #contact-form button {
+        background: var(--yellow-600);
+        color: #ffffff;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #contact-form button:hover {
+        background: var(--yellow-700);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    #contact-form button:focus {
+        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
+    }
+    #contact-form .text-right {
+        text-align: center;
+    }
+
+    /* Flash Messages */
+    #flash-message1 {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        min-width: 200px;
+        text-align: center;
+    }
+    #flash-message1.success {
+        background-color: var(--yellow-600);
+    }
+    #flash-message1.error {
+        background-color: var(--error-red);
+    }
+    #flash-message1.show {
+        opacity: 1;
+    }
+
+    /* Product Details Modal */
+    #product-details-modal {
+        transition: opacity 0.3s ease;
+    }
+    #product-details-modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    #product-details-modal:not(.hidden) {
+        opacity: 1;
+    }
+    #product-details-modal .bg-white {
+        animation: fadeInUp 0.3s ease-out;
+    }
+    #product-details-modal img {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+        object-fit: contain;
+        transition: none;
+    }
+    #product-details-modal img:hover {
+        transform: scale(1.05);
+    }
+    #product-details-modal button {
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    #product-details-modal button:hover {
+        transform: scale(1.05);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 767px) {
+        #desktop-navbar {
+            display: none !important;
+        }
+        .product-grid.cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
             grid-template-columns: 1fr;
-            gap: 1rem;
         }
         .product-grid.list-view .product-card {
-            display: flex;
-            flex-direction: row;
+            flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            text-align: center;
         }
         .product-grid.list-view .product-card .relative {
-            width: 150px;
-            height: 150px;
+            width: 100%;
+            height: 200px;
         }
         .product-grid.list-view .product-card .p-4 {
-            flex: 1;
-            text-align: left;
-        }
-
-        /* Display Option Icons */
-        .display-option {
-            padding: 0.5rem;
-            cursor: pointer;
-            color: #4b5563;
-            transition: color 0.3s ease;
-        }
-        .display-option:hover, .display-option.active {
-            color: #d97706;
-        }
-
-        /* Floating Filter Toggler Button (Mobile) */
-        .filter-toggler {
-            display: none;
-            position: fixed;
-            top: 100px;
-            left: 16px;
-            background-color: #d97706;
-            color: white;
-            padding: 8px;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 40;
-            transition: background-color 0.3s ease;
-        }
-        .filter-toggler:hover {
-            background-color: #b45309;
-        }
-
-        /* Filter Close Button (Mobile) */
-        #filter-close-btn {
-            display: none;
-            background-color: #d97706;
-            color: white;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-        }
-        #filter-close-btn:hover {
-            background-color: #b45309;
-        }
-
-        /* Country Button Fixed Position */
-        #country-btn-container {
-            position: fixed !important;
-            bottom: 16px; /* Adjusted dynamically by JS */
-            left: 1rem;
-            z-index: 1000;
-            pointer-events: auto;
-            transform: none;
-            will-change: auto;
-        }
-        #country-dropdown {
-            position: absolute;
-            bottom: 3rem;
-            left: 0;
-            z-index: 1000;
-        }
-
-        /* Flag Styling */
-        .flag {
-            font-size: 0.875rem;
-            margin-right: 0.5rem;
-        }
-
-        /* Action Button Hover Effect */
-        .action-btn {
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* Search Bar Styling */
-        .search-input:focus {
-            border-color: #d97706;
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
-        }
-
-        /* No Results Message */
-        .no-results {
-            display: none;
             text-align: center;
-            color: #4b5563; /* Fixed 'Giles' to Tailwind gray-700 */
-            font-size: 1rem;
-            grid-column: 1 / -1;
         }
-
-        /* Mobile Sidebar Styling */
-        .mobile-sidebar-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #4b5563;
-            transition: color 0.3s ease, background-color 0.3s ease;
-        }
-        .mobile-sidebar-item:hover, .mobile-sidebar-item.active {
-            color: #d97706;
-            background-color: #f3f4f6;
-        }
-
-        /* Quantity Modal */
-        #quantity-modal {
-            transition: opacity 0.3s ease;
-        }
-        #quantity-modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #quantity-modal:not(.hidden) {
-            opacity: 1;
-        }
-        #quantity-input {
-            appearance: textfield;
-        }
-        #quantity-input::-webkit-outer-spin-button,
-        #quantity-input::-webkit-inner-spin-button {
-            -тегwebkitaappearance: none;
-            margin: 0;
-        }
-
-        /* Floating Button Styles */
-        :root {
-            --whatsapp-green: #25D366;
-            --pink: #EC4899;
-            --yellow-600: #d97706;
-            --yellow-700: #b45309;
-            --red: #EF4444;
-            --error-red: #dc2626;
-        }
-
-        /* Custom Animations */
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-15px); }
-            60% { transform: translateY(-7px); }
-        }
-
-        /* Floating Button Container */
-        .floating-btn-container {
+        .sidebar {
             position: fixed;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            pointer-events: auto;
-        }
-
-        /* WhatsApp Button */
-        .whatsapp-btn-container {
-            bottom: 16px;
-            right: 16px;
-        }
-        .whatsapp-btn-container .floating-btn {
-            width: 48px;
-            height: 48px;
-            background-color: var(--whatsapp-green);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            animation: bounce 2s infinite;
-            cursor: pointer;
-        }
-        .whatsapp-btn-container .floating-btn i {
-            color: white;
-            font-size: 24px;
-        }
-        .whatsapp-btn-container .floating-btn:hover {
-            transform: scale(1.1);
-        }
-        .whatsapp-btn-container .floating-text {
-            margin-right: 8px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        .whatsapp-btn-container .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background-color: var(--red);
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 10px;
-        }
-
-        /* Discount Button */
-        .discount-btn-container {
-            bottom: 16px; /* Adjusted dynamically by JS */
-            left: 16px;
-        }
-        .discount-btn-container .floating-btn {
-            background-color: var(--pink);
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            padding: 16px;
-            height: 48px;
-            transition: all 0.3s ease;
-            animation: bounce 2s infinite;
-            cursor: pointer;
-        }
-        .discount-btn-container .floating-btn:hover {
-            transform: scale(1.1);
-        }
-        .discount-btn-container .floating-btn img {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-        }
-
-        /* Discount Popup */
-        #discount-page {
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background-color: #f3f4f6;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
             z-index: 60;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            transition: transform 0.5s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        #mobile-sidebar {
+        display: block; /* Ensure it's not hidden */
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+         z-index: 80; /* Increase z-index */
+    }
+    #mobile-sidebar.open {
+        transform: translateX(0);
+    }
+
+        .filter-toggler {
+            display: block;
+        }
+        #filter-close-btn {
+            display: block;
+        }
+        .tooltip {
+            right: 0;
+            top: -50px;
+        }
+        .tooltip::after {
+            right: 10px;
+        }
+        .navbar {
+            padding: 0.5rem 0;
+        }
+        .navbar-logo {
+            height: 48px;
+        }
+        .whatsapp-btn-container .floating-btn {
+            width: 36px;
+            height: 36px;
+        }
+        .whatsapp-btn-container .floating-btn i {
+            font-size: 18px;
+        }
+        .whatsapp-btn-container .floating-text {
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+        .whatsapp-btn-container .badge {
+            font-size: 8px;
+            padding: 1px 4px;
+            top: -2px;
+            right: -2px;
+        }
+        .discount-btn-container .floating-btn {
+            height: 36px;
+            font-size: 10px;
+            padding: 12px;
+        }
+        .discount-btn-container .floating-btn img {
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+        }
+        #discount-page {
+            width: 100%;
         }
         #discount-page .p-6 {
-            min-height: 100%;
-            box-sizing: border-box;
+            padding: 1rem;
         }
-        #close-discount {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 65;
+        #discount-page .h-16 {
+            height: 2.5rem;
         }
-
-        /* Email Form Styling */
+        #discount-page h2 {
+            font-size: 1.5rem;
+        }
+        #discount-page p {
+            font-size: 0.875rem;
+        }
+        #discount-page .text-sm {
+            font-size: 0.75rem;
+        }
         #contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-        #contact-form label {
-            font-weight: 500;
-            color: #374151;
+            gap: 1rem;
         }
         #contact-form input,
         #contact-form textarea {
-            background: #ffffff;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
             font-size: 0.875rem;
-            color: #1f2937;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        #contact-form input:focus,
-        #contact-form textarea:focus {
-            border-color: var(--yellow-600);
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
-        }
-        #contact-form textarea {
-            resize: vertical;
-            min-height: 120px;
+            padding: 0.5rem;
         }
         #contact-form button {
-            background: var(--yellow-600);
-            color: #ffffff;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
         }
-        #contact-form button:hover {
-            background: var(--yellow-700);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        #contact-form label {
+            font-size: 0.75rem;
         }
-        #contact-form button:focus {
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
+        #mobile-country-btn-container {
+            display: flex;
         }
-        #contact-form .text-right {
-            text-align: center;
+        #mobile-country-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-
-        /* Flash Messages */
-        #flash-message1 {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 16px;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            min-width: 200px;
-            text-align: center;
+        #mobile-country-btn .flag {
+            font-size: 0.75rem;
         }
-        #flash-message1.success {
-            background-color: var(--yellow-600);
+        #mobile-country-dropdown {
+            width: 100px;
+            padding: 0.5rem;
         }
-        #flash-message1.error {
-            background-color: var(--error-red);
+        .country-option {
+            font-size: 0.75rem;
         }
-        #flash-message1.show {
-            opacity: 1;
+        .floating-text {
+            font-size: 0.625rem;
+            margin-bottom: 0.125rem;
         }
-
-        /* Responsive Adjustments */
-        @media (max-width: 767px) {
-            .product-grid.cols-2, .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
-                grid-template-columns: 1fr;
-            }
-            .product-grid.list-view .product-card {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .product-grid.list-view .product-card .relative {
-                width: 100%;
-                height: 200px;
-            }
-            .product-grid.list-view .product-card .p-4 {
-                text-align: center;
-            }
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 280px;
-                height: 100%;
-                background-color: #f3f4f6;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                z-index: 60;
-                overflow-y: auto;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .filter-toggler {
-                display: block;
-            }
-            #filter-close-btn {
-                display: block;
-            }
-            .tooltip {
-                right: 0;
-                top: -50px;
-            }
-            .tooltip::after {
-                right: 10px;
-            }
-            .navbar {
-                padding: 0.5rem 0;
-            }
-            .navbar-logo {
-                height: 48px;
-            }
-            .whatsapp-btn-container .floating-btn {
-                width: 36px;
-                height: 36px;
-            }
-            .whatsapp-btn-container .floating-btn i {
-                font-size: 18px;
-            }
-            .whatsapp-btn-container .floating-text {
-                font-size: 10px;
-                padding: 3px 6px;
-            }
-            .whatsapp-btn-container .badge {
-                font-size: 8px;
-                padding: 1px 4px;
-                top: -2px;
-                right: -2px;
-            }
-            .discount-btn-container .floating-btn {
-                height: 36px;
-                font-size: 10px;
-                padding: 12px;
-            }
-            .discount-btn-container .floating-btn img {
-                width: 18px;
-                height: 18px;
-                margin-right: 6px;
-            }
-            #discount-page {
-                width: 100%;
-            }
-            #discount-page .p-6 {
-                padding: 1rem;
-            }
-            #discount-page .h-16 {
-                height: 2.5rem;
-            }
-            #discount-page h2 {
-                font-size: 1.5rem;
-            }
-            #discount-page p {
-                font-size: 0.875rem;
-            }
-            #discount-page .text-sm {
-                font-size: 0.75rem;
-            }
-            #contact-form {
-                gap: 1rem;
-            }
-            #contact-form input,
-            #contact-form textarea {
-                font-size: 0.875rem;
-                padding: 0.5rem;
-            }
-            #contact-form button {
-                font-size: 0.875rem;
-                padding: 0.5rem 1rem;
-            }
-            #contact-form label {
-                font-size: 0.75rem;
-            }
+    }
+    @media (min-width: 768px) {
+        #desktop-navbar {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .sidebar {
-                width: 100%;
-                margin-bottom: 2rem;
-            }
-            .navbar-item {
-                padding: 0.5rem 0.75rem;
-                font-size: 1rem;
-            }
-            .navbar-logo {
-                height: 56px;
-            }
-            #discount-page {
-                width: 50%;
-            }
+        .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
+            grid-template-columns: repeat(2, 1fr);
         }
-        @media (min-width: 1024px) {
-            .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-            .navbar-logo {
-                height: 64px;
-            }
+        .sidebar {
+            width: 100%;
+            margin-bottom: 2rem;
         }
-        /* Product Details Modal */
-#product-details-modal {
-    transition: opacity 0.3s ease;
-}
-
-#product-details-modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-#product-details-modal:not(.hidden) {
-    opacity: 1;
-}
-
-#product-details-modal .bg-white {
-    animation: fadeInUp 0.3s ease-out;
-}
-
-#product-details-modal img {
-    width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    max-height: 400px; /* Optional: Limit max height to prevent oversized images */
-    object-fit: contain; /* Display full image without cropping */
-    transition: none; /* Remove hover scaling effect */
-}
-
-#product-details-modal img:hover {
-    transform: scale(1.05);
-}
-
-#product-details-modal button {
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-#product-details-modal button:hover {
-    transform: scale(1.05);
-}
-    </style>
+        .navbar-item {
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+        }
+        .navbar-logo {
+            height: 56px;
+        }
+        #discount-page {
+            width: 50%;
+        }
+        #desktop-country-btn-container {
+            display: flex;
+        }
+        #desktop-country-btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        #desktop-country-dropdown {
+            width: 120px;
+            padding: 0.75rem;
+        }
+        .country-option {
+            font-size: 0.875rem;
+        }
+        .floating-text {
+            font-size: 0.75rem;
+        }
+        #mobile-sidebar {
+            display: none;
+        }
+    }
+    @media (min-width: 1024px) {
+        .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .navbar-logo {
+            height: 64px;
+        }
+        #desktop-country-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        #desktop-country-dropdown {
+            width: 140px;
+            padding: 1rem;
+        }
+        .country-option {
+            font-size: 0.875rem;
+        }
+        .floating-text {
+            font-size: 0.75rem;
+        }
+    }
+</style>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navbar -->
-    <nav class="navbar bg-white shadow-md fixed w-full z-50">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Mobile Navbar -->
-            <div class="md:hidden flex items-center justify-between w-full relative">
-                <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-                <div class="flex items-center space-x-4">
-                    <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
-                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                </div>
-                <!-- Mobile Search Bar -->
-                <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden">
-                    <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
+    <!-- Navbar -->
+<nav class="navbar bg-white shadow-md fixed w-full z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <!-- Mobile Navbar -->
+        <div class="md:hidden flex items-center justify-between w-full relative">
+            <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+            <div class="flex items-center space-x-4">
+                <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
+                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                <div id="mobile-country-btn-container" class="relative flex flex-col items-center">
+                    <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
+                    <button id="mobile-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition flex items-center text-sm">
+                        <span class="flag">🇺🇸</span> USA
+                    </button>
+                    <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 top-full mt-2 right-0 z-80">
+                        <div class="country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸">USA (USD)</div>
+                        <div class="country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪">Germany (EUR)</div>
+                        <div class="country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧">UK (GBP)</div>
+                        <div class="country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪">Kenya (KES)</div>
+                    </div>
                 </div>
             </div>
-            <!-- Desktop Navbar -->
-            <div class="hidden md:flex items-center justify-between w-full">
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-                <div class="flex space-x-6">
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 active">Products</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
-                    </div>
-                </div>
-                <!-- Search and Icons -->
-                <div class="flex items-center space-x-4">
-                    <div class="search-container">
-                        <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
-                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                </div>
+            <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden">
+                <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
             </div>
         </div>
-    </nav>
-
-    <!-- Mobile Sidebar -->
-    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
-        <div class="p-4">
-            <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
-            <div class="space-y-2">
-                <a href="{{ url_for('index') }}" class="mobile-sidebar-item" style="padding-top: 40px;">Home</a>
-                <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item active">Products</a>
-                <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item">Special Discount</a>
-               
-                <a href="{{ url_for('account') }}" class="mobile-sidebar-item">My Account</a>
-             
+        <!-- Desktop Navbar -->
+        <div id="desktop-navbar" class="hidden md:flex items-center justify-between w-full">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+            <div class="flex space-x-6">
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
+                </div>
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 active">Products</a>
+                </div>
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="search-container">
+                    <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
+                    <i class="fas fa-search"></i>
+                </div>
+                <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
+                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
+                <div id="desktop-country-btn-container" class="relative flex flex-col items-center">
+                    <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
+                    <button id="desktop-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition flex items-center text-sm">
+                        <span class="flag">🇺🇸</span> USA
+                    </button>
+                    <div id="desktop-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 top-full mt-2 right-0 z-80">
+                        <div class="country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸">USA (USD)</div>
+                        <div class="country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪">Germany (EUR)</div>
+                        <div class="country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧">UK (GBP)</div>
+                        <div class="country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪">Kenya (KES)</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</nav>
+<!-- Mobile Sidebar -->
+<div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 transform translate-x-[-100%] transition-transform duration-300 z-60">
+    <button id="close-sidebar" class="absolute top-4 right-4 text-2xl text-gray-700"><i class="fas fa-times"></i></button>
+    <div class="flex flex-col p-4 space-y-4">
+        <a href="{{ url_for('index') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600" style="margin-top: 100px;">Home</a>
+        <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 active">Products</a>
+        <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600">Special Discount</a>
+        <a href="{{ url_for('account') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600">Account</a>
+    </div>
+</div>
 
     <!-- Hero Section -->
     <section class="relative h-96">
@@ -816,7 +939,7 @@
     <!-- WhatsApp Floating Button -->
 <div class="floating-btn-container whatsapp-btn-container">
     <span class="floating-text">Chat with Us</span>
-    <a href="https://wa.me/254769525570" target="_blank" aria-label="Chat with us on WhatsApp">
+    <a href="https://wa.me/254701539003" target="_blank" aria-label="Chat with us on WhatsApp">
         <div class="floating-btn relative" role="button">
             <i class="fab fa-whatsapp"></i>
             <span class="badge">1</span>
@@ -834,58 +957,66 @@
     </div>
 
     <!-- Discount Popup -->
-    <div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
-        <div class="p-6 space-y-6">
-            <!-- Close Button -->
-            <div class="flex justify-end">
-                <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <!-- Logo -->
-            <div class="flex justify-center">
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
-            </div>
-            <!-- About Text -->
-            <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
-                <p class="text-gray-600 text-base leading-relaxed">
-                    At <span class="font-semibold text-yellow-600">Zira Collection</span>, we create and sell 
-                    <span class="italic">authentic cultural artifacts and sculptures</span>. Our mission is to preserve and promote 
-                    Africa’s rich heritage through beautiful, handcrafted art pieces that celebrate tradition, creativity, and identity.
-                </p>
-            </div>
-            <!-- Contact Info -->
-            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-                <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
-                <ul class="space-y-1 text-sm">
-                    <li><strong>Phone:</strong> <a href="tel:+254700123456">+254 700 123456</a></li>
-<li><strong>Email:</strong> <a href="mailto:info@ziracollection.com">info@ziracollection.com</a></li>
+<div id="discount-page" class="fixed inset-y-0 left-0 bg-white shadow-lg transform -translate-x-full transition-transform z-30 md:w-1/2 w-full">
+    <div class="p-6 space-y-6">
+        <!-- Close Button -->
+        <div class="flex justify-end">
+            <button id="close-discount" class="text-gray-600 text-2xl hover:text-red-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-                    <li><strong>Location:</strong> Nairobi, Kenya</li>
-                </ul>
-            </div>
-            <!-- Email Form -->
-            <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
-                <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
-                <div id="flash-message1" style="display: none;"></div>
-                <form id="contact-form" class="space-y-4">
-                    <div>
-                        <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                        <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
-                    </div>
-                    <div>
-                        <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring MURDER focus:ring-yellow-600 transition" required></textarea>
-                    </div>
-                    <div class="text-right">
-                        <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
-                    </div>
-                </form>
-                <div id="flash-message1" style="display: none;"></div>
-            </div>
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-16 w-auto">
+        </div>
+
+        <!-- About Text -->
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-4">About Zira Collection</h2>
+            <p class="text-gray-600 text-base leading-relaxed">
+                At <span class="font-semibold text-yellow-600">Zira Collection</span>, we offer a curated celebration of Africa’s rich artistic heritage — showcasing 
+                <span class="italic">handcrafted artefacts</span>, <span class="italic">intricate beadwork</span>, 
+                <span class="italic">elegant soapstone carvings</span>, <span class="italic">beautifully done wooden products</span>, and 
+                <span class="italic">vibrant woven rugs</span>. Each piece is <span class="font-medium text-gray-800">authentically made</span> by 
+                <span class="font-medium text-gray-800">skilled African artisans</span>, blending traditional techniques with contemporary design.
+                Whether you're looking for <span class="font-semibold">meaningful souvenirs</span>, <span class="font-semibold">distinctive home décor</span>, 
+                or <span class="font-semibold">wearable cultural regalia</span>, our collection offers <span class="italic">timeless treasures that tell a story</span>.
+                By supporting this initiative, you’re not only bringing <span class="text-yellow-700 font-semibold">beauty into your space</span> but also 
+                <span class="text-yellow-700 font-semibold">empowering local communities</span> across the continent.
+            </p>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-2 text-yellow-700">Contact Us</h3>
+            <ul class="space-y-1 text-sm">
+                <li><strong>Phone:</strong> <a href="tel:+254701539003">0701 539003</a></li>
+                <li><strong>Email:</strong> <a href="mailto:vickiebmochama@gmail.com">vickiebmochama@gmail.com</a></li>
+                <li><strong>Location:</strong> Nairobi, Kenya</li>
+            </ul>
+        </div>
+
+        <!-- Email Form -->
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner text-gray-700">
+            <h3 class="text-xl font-semibold mb-4 text-yellow-700">Send Us a Message</h3>
+            <div id="flash-message1" style="display: none;"></div>
+            <form id="contact-form" class="space-y-4">
+                <div>
+                    <label for="contact-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <input type="text" id="contact-subject" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required>
+                </div>
+                <div>
+                    <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600 transition" required></textarea>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition">Send Message</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- Products Section -->
     <section id="products-section" class="bg-white py-16 animate-pageLoad">
@@ -1057,8 +1188,8 @@
                         <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
                         <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
                         <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                        <li class="mt-4 text-white font-medium">+254 790 867 733</li>
-                        <li>sales@ziraartifacts.com</li>
+                        <li class="mt-4 text-white font-medium">+254701539003</li>
+                        <li>vickiebmochama@gmail.com</li>
                         <li class="flex gap-4 mt-2 text-xl">
                             <a href="#"><i class="fab fa-pinterest"></i></a>
                             <a href="#"><i class="fab fa-facebook"></i></a>
@@ -1117,8 +1248,8 @@
                         <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
                     </ul>
                     <div class="mt-3 text-sm">
-                        <p>+254 790 867 733</p>
-                        <p>sales@ziraartifacts.com</p>
+                        <p>+254701539003</p>
+                        <p>vickiebmochama@gmail.com</p>
                         <div class="flex gap-3 mt-2 text-xl">
                             <a href="#"><i class="fab fa-pinterest"></i></a>
                             <a href="#"><i class="fab fa-facebook"></i></a>
@@ -1146,8 +1277,8 @@
     </footer>
 
     <!-- JavaScript -->
-    <script>
-// Currency Conversion Logic (KES as base currency)
+ <script>
+    // Currency Conversion Logic (KES as base currency)
 const exchangeRates = {
     USD: 0.0077, // 1 KES = 0.0077 USD
     EUR: 0.0073, // 1 KES = 0.0073 EUR
@@ -1156,10 +1287,53 @@ const exchangeRates = {
 };
 let currentCurrency = '{{ current_currency }}';
 
-// Toggle Country Dropdown
-document.getElementById('country-btn').addEventListener('click', () => {
-    const dropdown = document.getElementById('country-dropdown');
-    dropdown.classList.toggle('hidden');
+// Toggle Currency Dropdown (Mobile and Desktop)
+function toggleCurrencyDropdown(buttonId, dropdownId) {
+    return function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+            dropdown.classList.toggle('hidden');
+            console.log(`${dropdownId} toggled:`, !dropdown.classList.contains('hidden'), 'Screen width:', window.innerWidth);
+        } else {
+            console.error(`${dropdownId} element not found`);
+        }
+    };
+}
+
+// Attach event listeners to both currency buttons
+const mobileCurrencyButton = document.getElementById('mobile-country-btn');
+const desktopCurrencyButton = document.getElementById('desktop-country-btn');
+
+if (mobileCurrencyButton) {
+    mobileCurrencyButton.addEventListener('click', toggleCurrencyDropdown('mobile-country-btn', 'mobile-country-dropdown'));
+} else {
+    console.error('Mobile currency button not found');
+}
+
+if (desktopCurrencyButton) {
+    desktopCurrencyButton.addEventListener('click', toggleCurrencyDropdown('desktop-country-btn', 'desktop-country-dropdown'));
+} else {
+    console.error('Desktop currency button not found');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdowns = [
+        { id: 'mobile-country-dropdown', buttonId: 'mobile-country-btn' },
+        { id: 'desktop-country-dropdown', buttonId: 'desktop-country-btn' }
+    ];
+    dropdowns.forEach(({ id, buttonId }) => {
+        const dropdown = document.getElementById(id);
+        const button = document.getElementById(buttonId);
+        if (dropdown && button && !dropdown.contains(e.target) && !button.contains(e.target)) {
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+                console.log(`${id} closed (outside click)`, 'Screen width:', window.innerWidth);
+            }
+        }
+    });
 });
 
 // Update Currency
@@ -1169,9 +1343,22 @@ document.querySelectorAll('.country-option').forEach(option => {
         const country = e.target.getAttribute('data-country');
         const flag = e.target.getAttribute('data-flag');
         currentCurrency = e.target.getAttribute('data-currency');
-        document.getElementById('country-btn').innerHTML = `<span class="flag">${flag}</span> ${country}`;
-        document.getElementById('country-dropdown').classList.add('hidden');
+        // Update both buttons
+        const buttons = [document.getElementById('mobile-country-btn'), document.getElementById('desktop-country-btn')];
+        buttons.forEach(button => {
+            if (button) {
+                button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+            }
+        });
+        // Close both dropdowns
+        ['mobile-country-dropdown', 'desktop-country-dropdown'].forEach(id => {
+            const dropdown = document.getElementById(id);
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+            }
+        });
         updatePrices();
+        console.log('Currency updated to:', currentCurrency);
     });
 });
 
@@ -1224,7 +1411,7 @@ const applyFilters = () => {
             priceMatch = priceKES > 26000;
         }
         // Search Filter
-        const name = card.getAttribute('data-name');
+        const name = card.getAttribute('data-name').toLowerCase();
         const category = card.getAttribute('data-category').toLowerCase();
         const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
 
@@ -1328,24 +1515,20 @@ function addToWishlist(productId) {
     })
     .then(response => {
         if (response.status === 401) {
-    // Show toast notification
-    Toastify({
-        text: "Please login to add any item to your wishlist.",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f87171", // red-400
-        stopOnFocus: true
-    }).showToast();
-
-    // Redirect after toast duration
-    setTimeout(() => {
-        window.location.href = '/user_login';
-    }, 3000);
-
-    return null;
-}
+            Toastify({
+                text: "Please login to add any item to your wishlist.",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f87171",
+                stopOnFocus: true
+            }).showToast();
+            setTimeout(() => {
+                window.location.href = '/user_login';
+            }, 3000);
+            return null;
+        }
         if (!response.ok) {
             throw new Error(`Failed to update wishlist: ${response.statusText}`);
         }
@@ -1353,45 +1536,34 @@ function addToWishlist(productId) {
     })
     .then(data => {
         if (data) {
-    // Show toast
-    Toastify({
-        text: data.message,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#4ade80", // green for success
-        stopOnFocus: true
-    }).showToast();
-
-    // Toggle button state
-    wishlistBtn.classList.toggle('active');
-    icon.classList.toggle('fas');
-    icon.classList.toggle('far');
-
-    // Determine current active state after toggle
-    const isActive = wishlistBtn.classList.contains('active');
-
-    // Update tooltip text
-    const tooltip = wishlistBtn.querySelector('.tooltip');
-    tooltip.textContent = isActive ? 'Remove from Wishlist' : 'Add to Wishlist';
-}
+            Toastify({
+                text: data.message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4ade80",
+                stopOnFocus: true
+            }).showToast();
+            wishlistBtn.classList.toggle('active');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+            tooltip.textContent = wishlistBtn.classList.contains('active') ? 'Remove from Wishlist' : 'Add to Wishlist';
+        }
     })
     .catch(error => {
         if (error.message !== 'Failed to update wishlist: Unauthorized') {
-    console.error('Error managing wishlist:', error);
-
-    // Show error toast notification
-    Toastify({
-        text: 'Failed to update wishlist: ' + error.message,
-        duration: 4000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f87171", // red for error
-        stopOnFocus: true
-    }).showToast();
-}
+            console.error('Error managing wishlist:', error);
+            Toastify({
+                text: 'Failed to update wishlist: ' + error.message,
+                duration: 4000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f87171",
+                stopOnFocus: true
+            }).showToast();
+        }
     });
 }
 
@@ -1408,19 +1580,17 @@ function addToCart(productId) {
     const confirmHandler = () => {
         const quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1) {
-    // Show toast notification
-    Toastify({
-        text: "Please enter a valid quantity (1 or more).",
-        duration: 3000,  // 3 seconds
-        close: true,
-        gravity: "top", // Position at top
-        position: "right", // Position on the right
-        backgroundColor: "#f87171", // red color for error
-        stopOnFocus: true
-    }).showToast();
-
-    return;
-}
+            Toastify({
+                text: "Please enter a valid quantity (1 or more).",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f87171",
+                stopOnFocus: true
+            }).showToast();
+            return;
+        }
 
         fetch('/api/cart', {
             method: 'POST',
@@ -1431,47 +1601,22 @@ function addToCart(productId) {
             credentials: 'include'
         })
         .then(response => {
-            if (response.status === 401) {
-    // Show the toast notification
-    Toastify({
-        text: "Please login to add any item to your cart.",
-        duration: 3000,  // 3 seconds
-        close: true,
-        gravity: "top", // Position at top
-        position: "right", // Position on the right
-        backgroundColor: "#f87171", // red color for error
-        stopOnFocus: true
-    }).showToast();
-
-    // Hide modal and redirect after toast is shown
-    modal.classList.add('hidden');
-    setTimeout(() => {
-        window.location.href = '/user_login';
-    }, 3000); // Wait for the toast to disappear before redirecting
-
-    return null;
-}
-
-            if (response.redirected && response.url.includes('/login')) {
-    // Show the toast notification
-    Toastify({
-        text: "Session expired. Please log in.",
-        duration: 4000,  // 4 seconds
-        close: true,
-        gravity: "top", // Position at the top
-        position: "right", // Position on the right
-        backgroundColor: "#f87171", // Red color for error
-        stopOnFocus: true
-    }).showToast();
-
-    // Hide modal and redirect after toast is shown
-    modal.classList.add('hidden');
-    setTimeout(() => {
-        window.location.href = '/user_login';
-    }, 4000); // Wait for the toast to disappear before redirecting
-
-    return null;
-}
+            if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
+                Toastify({
+                    text: response.status === 401 ? "Please login to add any item to your cart." : "Session expired. Please log in.",
+                    duration: response.status === 401 ? 3000 : 4000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f87171",
+                    stopOnFocus: true
+                }).showToast();
+                modal.classList.add('hidden');
+                setTimeout(() => {
+                    window.location.href = '/user_login';
+                }, response.status === 401 ? 3000 : 4000);
+                return null;
+            }
             if (!response.ok) {
                 throw new Error(`Failed to add to cart: ${response.statusText}`);
             }
@@ -1479,36 +1624,31 @@ function addToCart(productId) {
         })
         .then(data => {
             if (data) {
-    // Show toast notification
-    Toastify({
-        text: data.message,
-        duration: 3000,  // Duration of the toast in milliseconds (3 seconds)
-        close: true,
-        gravity: "top", // Position the toast at the top of the screen
-        position: "right", // Position the toast to the right
-        backgroundColor: "#4ade80", // Green background for success messages
-        stopOnFocus: true
-    }).showToast();
-
-    // Hide the modal
-    modal.classList.add('hidden');
-}
+                Toastify({
+                    text: data.message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#4ade80",
+                    stopOnFocus: true
+                }).showToast();
+                modal.classList.add('hidden');
+            }
         })
         .catch(error => {
             if (error.message !== 'Failed to add to cart: Unauthorized') {
-    console.error('Error adding to cart:', error);
-
-    // Show toast notification
-    Toastify({
-        text: 'Failed to add to cart: ' + error.message,
-        duration: 4000,  // Duration of the toast in milliseconds (4 seconds)
-        close: true,
-        gravity: "top", // Position the toast at the top
-        position: "right", // Position the toast to the right
-        backgroundColor: "#f87171", // Red background for errors
-        stopOnFocus: true
-    }).showToast();
-}
+                console.error('Error adding to cart:', error);
+                Toastify({
+                    text: 'Failed to add to cart: ' + error.message,
+                    duration: 4000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f87171",
+                    stopOnFocus: true
+                }).showToast();
+            }
         })
         .finally(() => {
             confirmButton.removeEventListener('click', confirmHandler);
@@ -1530,7 +1670,7 @@ function addToCart(productId) {
 document.getElementById('nav-toggler').addEventListener('click', () => {
     const sidebar = document.getElementById('mobile-sidebar');
     const icon = document.querySelector('#nav-toggler i');
-    sidebar.classList.toggle('-translate-x-full');
+    sidebar.classList.toggle('open'); // Toggle the 'open' class
     icon.classList.toggle('fa-bars');
     icon.classList.toggle('fa-times');
     icon.classList.add('animate-rotateToggle');
@@ -1541,7 +1681,7 @@ document.getElementById('nav-toggler').addEventListener('click', () => {
 document.getElementById('close-sidebar').addEventListener('click', () => {
     const sidebar = document.getElementById('mobile-sidebar');
     const icon = document.querySelector('#nav-toggler i');
-    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('open'); // Remove 'open' class
     icon.classList.add('fa-bars');
     icon.classList.remove('fa-times');
     icon.classList.add('animate-rotateToggle');
@@ -1593,13 +1733,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function adjustFloatingButtonPositions() {
         const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
         let aboutOffset = 16; // Default bottom for About Zira button
-        let countryOffset = 16; // Default bottom for Country button
 
         // Calculate offsets for buttons excluding WhatsApp (right-aligned)
         floatingButtons.forEach(button => {
             if (button !== document.querySelector('.discount-btn-container') &&
-                button !== document.querySelector('.whatsapp-btn-container') &&
-                button !== document.querySelector('#country-btn-container')) {
+                button !== document.querySelector('.whatsapp-btn-container')) {
                 const buttonBottom = parseInt(getComputedStyle(button).bottom) || 0;
                 const buttonHeight = button.offsetHeight || 48;
                 aboutOffset = Math.max(aboutOffset, buttonBottom + buttonHeight + 16);
@@ -1610,14 +1748,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const aboutButton = document.querySelector('.discount-btn-container');
         if (aboutButton) {
             aboutButton.style.bottom = `${aboutOffset}px`;
-        }
-
-        // Set Country button above About Zira button
-        const countryButton = document.querySelector('#country-btn-container');
-        if (countryButton && aboutButton) {
-            const aboutHeight = aboutButton.offsetHeight || 48;
-            countryOffset = aboutOffset + aboutHeight + 16; // Place above About Zira
-            countryButton.style.bottom = `${countryOffset}px`;
         }
     }
     adjustFloatingButtonPositions();
@@ -1731,7 +1861,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 // Open Product Details Modal
 function openProductModal(id, name, category, price, description, image) {
     const modal = document.getElementById('product-details-modal');
@@ -1755,8 +1884,8 @@ function openProductModal(id, name, category, price, description, image) {
 
     // Add to Cart button handler
     addToCartButton.onclick = () => {
-        modal.classList.add('hidden'); // Close details modal
-        addToCart(id); // Open quantity modal
+        modal.classList.add('hidden');
+        addToCart(id);
     };
 }
 
@@ -1781,11 +1910,9 @@ document.getElementById('close-product-modal').addEventListener('keydown', (e) =
     }
 });
 
-
 // Initialize Prices and Filters
 updatePrices();
 applyFilters();
-
-</script>
+ </script>
 </body>
 </html>
