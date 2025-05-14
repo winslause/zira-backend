@@ -43,7 +43,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_SECURE'] = True  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # Flask-Mail configuration
@@ -1701,7 +1701,7 @@ def dashboard_stats():
 @app.route('/api/orders/<int:id>/cancel', methods=['POST'])
 def cancel_order(id):
     try:
-        logging.debug(f"Session contents: {dict(session)}")
+        logging.debug(f"Session contents: {dict(session)}, Cookies: {request.cookies}")
         if 'user' not in session:
             logging.debug('Unauthorized: No user in session')
             return jsonify({'error': 'Unauthorized'}), 401
@@ -1714,8 +1714,8 @@ def cancel_order(id):
         if order.status != 'Pending':
             logging.debug(f'Order {id} cannot be canceled, status: {order.status}')
             return jsonify({'error': 'Only pending orders can be canceled'}), 400
-        order.customer_status = 'Canceled'  # Update customer_status
-        order.status = 'Canceled'  # Also update status for consistency
+        order.customer_status = 'Canceled'
+        order.status = 'Canceled'
         db.session.commit()
         logging.debug(f'Order {id} canceled by user {user_email}')
         return jsonify({'message': 'Order canceled successfully'}), 200
@@ -1727,7 +1727,7 @@ def cancel_order(id):
         db.session.rollback()
         logging.error(f"Unexpected error in POST /api/orders/{id}/cancel: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-
+    
 @app.route('/api/orders', methods=['POST'])
 def create_order():
     if 'user' not in session:
