@@ -43,8 +43,13 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = True  # Set to True in production with HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True
+# app.config['SESSION_COOKIE_SECURE'] = True  # Set to True in production with HTTPS
+# app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+# app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-secure-secret-key') 
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JS access
+# app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow redirects
+app.config['SESSION_COOKIE_SECURE'] = False  # Explicitly allow HTTP
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -319,8 +324,18 @@ def index():
 @app.route('/admin')
 def admin():
     if 'admin' not in session:
+        app.logger.debug("No admin session, redirecting to login")
         return redirect(url_for('login'))
+    app.logger.debug("Rendering admin.html")
     return render_template('admin.html')
+
+@app.route('/debug_session')
+def debug_session():
+    app.logger.debug("Checking session")
+    return jsonify({
+        'admin_in_session': 'admin' in session,
+        'admin_id': session.get('admin')
+    })
 
 # Admin Forgot Password Route
 @app.route('/api/admin_forgot_password', methods=['POST'])
@@ -500,35 +515,37 @@ def login():
         data = request.get_json()
         username = data.get('username')
         password = data.get('password')
+        app.logger.debug(f"Login attempt for username: {username}")
 
-        # Validate input
         if not username or not password:
+            app.logger.debug("Missing username or password")
             return jsonify({'error': 'Username and password are required'}), 400
 
-        # Query user by username
         user = User.query.filter_by(username=username).first()
-        
-        # Check if user exists, password is correct, and role is 'admin'
         if not user:
+            app.logger.debug(f"No user found for username: {username}")
             return jsonify({'error': 'Invalid username'}), 401
+
         if not check_password_hash(user.password, password):
+            app.logger.debug("Password check failed")
             return jsonify({'error': 'Invalid password'}), 401
+
         if user.role != 'admin':
+            app.logger.debug(f"User {username} is not an admin, role: {user.role}")
             return jsonify({'error': 'Access denied: Admin role required'}), 403
 
-        # Check if reset token exists and is valid
         if user.reset_token and user.reset_token_expiry and user.reset_token_expiry > datetime.utcnow():
+            app.logger.debug(f"Reset token active for user: {username}")
             return jsonify({
                 'message': 'Password reset required',
                 'reset_required': True,
                 'username': user.username
             }), 200
 
-        # Successful login for admin
         session['admin'] = user.id
+        app.logger.debug(f"Login successful for user: {username}, session set")
         return jsonify({'message': 'Login successful'}), 200
 
-    # Render login page for GET requests
     return render_template('admin-login.html')
 
 
