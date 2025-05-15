@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import logging
 from flask_mail import Mail, Message
 
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 logging.basicConfig(level=logging.INFO)
 def allowed_file(filename):
