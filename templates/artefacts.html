@@ -1108,10 +1108,10 @@
      data-name="{{ product.name | lower }}" 
      data-description="{{ product.description | e }}">
     <div class="relative w-full h-64 overflow-hidden cursor-pointer product-image">
-        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" 
+        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" 
              alt="{{ product.name }}" 
              class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-        <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" 
+        <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" 
              alt="{{ product.name }} Hover" 
              class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
         <!-- Wishlist Button -->
