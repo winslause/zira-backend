@@ -1151,7 +1151,7 @@ async function fetchDashboardStats() {
         initializeCharts(data.sales_data || [], data.users_data || []);
     } catch (error) {
         console.error('Error in fetchDashboardStats:', error);
-        showToast('Failed to load dashboard stats: ' + error.message, 'error');
+        showToast('Your internet connection is not stable: ','error');
     }
 }
 

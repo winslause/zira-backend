@@ -434,7 +434,7 @@
         <div class="ftm-card">
             <div class="ftm-card-img">
                 <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
-                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
             </div>
             <div class="ftm-card-content">
                 <div class="ftm-product-name">{{ product.name }}</div>
@@ -461,7 +461,7 @@
                 {% if product.discount and product.discount.start_date <= today and product.discount.end_date >= today %}
                 <span class="ftm-badge">-{{"%d" % product.discount.percent}}%</span>
                 {% endif %}
-                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
+                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/240x240') }}" alt="{{ product.name }}">
             </div>
             <div class="ftm-card-content">
                 <div class="ftm-product-name">{{ product.name }}</div>
