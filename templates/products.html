@@ -227,6 +227,7 @@ body, .navbar {
 #country-btn,
 #mobile-country-btn {
     position: relative; /* Anchor for floating-text */
+    background-color: #d97706 !important;
 }
 .floating-text {
     position: absolute;
@@ -1923,6 +1924,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Initialize Prices and Filters
 updatePrices();
 applyFilters();
-    </script>  
+    </script> 
+    <script src="{{ url_for('static', filename='js/email.js') }}"></script> 
     </body>
     </html>

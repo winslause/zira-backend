@@ -55,9 +55,9 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Explicitly allow HTTP
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'wenbusale383@gmail.com'
-app.config['MAIL_PASSWORD'] = 'onkc lnjg ilcl qlix'
-app.config['MAIL_DEFAULT_SENDER'] = 'wenbusale383@gmail.com'
+app.config['MAIL_USERNAME'] = 'vickiebmochama@gmail.com'
+app.config['MAIL_PASSWORD'] = 'yugj xofc egbp whyn'
+app.config['MAIL_DEFAULT_SENDER'] = 'vickiebmochama@gmail.com'
 
 db = SQLAlchemy(app)
 mail = Mail(app)
@@ -2338,7 +2338,7 @@ def send_email():
         # Prepare email
         msg = Message(
             subject=f"Zira Collection: {subject}",
-            recipients=['wenbusale383@gmail.com'],  # Recipient is wenbusale383@gmail.com
+            recipients=['vickiebmochama@gmail.com'],  # Recipient is vickiebmochama@gmail.com
             html=html_body,
             sender=(user.name, user.email)  # Sender is the logged-in user (name, email)
         )
@@ -2413,7 +2413,7 @@ def request_reset():
             subject="Zira Artifacts: Password Reset",
             recipients=[email],
             html=html_body,
-            sender=('Zira Artifacts', 'wenbusale383@gmail.com')
+            sender=('Zira Artifacts', 'vickiebmochama@gmail.com')
         )
 
         mail.send(msg)
