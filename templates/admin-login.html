@@ -381,23 +381,28 @@
             body: JSON.stringify({ username, password })
         });
         console.log('Response status:', response.status);
-        const data = await response.json();
-        console.log('Response data:', data);
 
-        if (response.ok) {
-            if (data.reset_required) {
-                console.log('Reset required, opening modal');
-                showToast('Please reset your password.');
-                usernameResetInput.value = data.username;
-                openModal(resetPasswordModal);
-            } else {
-                console.log('Login successful, redirecting to /admin');
-                showToast(data.message || 'Login successful! Redirecting...');
-                window.location.href = '/admin'; // Remove setTimeout for immediate redirect
-            }
+        if (response.redirected) {
+            console.log('Server redirected to:', response.url);
+            showToast('Login successful! Redirecting...');
+            window.location.href = response.url; // Follow redirect
         } else {
-            console.log('Login failed:', data.error);
-            showToast(data.error || 'Login failed.', 'error');
+            const data = await response.json();
+            console.log('Response data:', data);
+            if (response.ok) {
+                if (data.reset_required) {
+                    console.log('Reset required, opening modal');
+                    showToast('Please reset your password.');
+                    usernameResetInput.value = data.username;
+                    openModal(resetPasswordModal);
+                } else {
+                    console.log('Unexpected JSON response:', data);
+                    showToast('Unexpected response. Please try again.', 'error');
+                }
+            } else {
+                console.log('Login failed:', data.error);
+                showToast(data.error || 'Login failed.', 'error');
+            }
         }
     } catch (error) {
         console.error('Login error:', error);

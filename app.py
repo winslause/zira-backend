@@ -37,19 +37,16 @@ def validate_reset_token(token):
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'zira_collection'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')  # Use env var
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# app.config['SESSION_COOKIE_SECURE'] = True  # Set to True in production with HTTPS
-# app.config['SESSION_COOKIE_HTTPONLY'] = True
-
-# app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-secure-secret-key') 
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow redirects
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JS access
-# app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow redirects
-app.config['SESSION_COOKIE_SECURE'] = False  # Explicitly allow HTTP
+app.config['SESSION_COOKIE_SECURE'] = False  # HTTP
+app.config['SESSION_COOKIE_NAME'] = 'session'  # Explicit name
+
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -509,6 +506,7 @@ def admin_reset_password():
     return jsonify({'message': 'Password updated successfully'})
 
 
+# Routes (unchanged except for redirect in /login)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -543,8 +541,8 @@ def login():
             }), 200
 
         session['admin'] = user.id
-        app.logger.debug(f"Login successful for user: {username}, session set")
-        return jsonify({'message': 'Login successful'}), 200
+        app.logger.debug(f"Login successful for user: {username}, redirecting to admin")
+        return redirect(url_for('admin'))  # Server-side redirect
 
     return render_template('admin-login.html')
 
