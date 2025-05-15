@@ -362,42 +362,48 @@
         }
 
         // Login Form Submission
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+       loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            if (!validateLoginForm()) {
-                showToast('Please fix the errors in the form.', 'error');
-                return;
-            }
+    if (!validateLoginForm()) {
+        showToast('Please fix the errors in the form.', 'error');
+        return;
+    }
 
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
 
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    if (data.reset_required) {
-                        showToast('Please reset your password.');
-                        usernameResetInput.value = data.username; // Pre-fill username
-                        openModal(resetPasswordModal);
-                    } else {
-                        showToast(data.message || 'Login successful! Redirecting...');
-                        setTimeout(() => {
-                            window.location.href = '/admin';
-                        }, 1000);
-                    }
-                } else {
-                    showToast(data.error || 'Login failed.', 'error');
-                }
-            } catch (error) {
-                showToast('An error occurred. Please try again.', 'error');
-            }
+    try {
+        console.log('Sending login request for username:', username);
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (response.ok) {
+            if (data.reset_required) {
+                console.log('Reset required, opening modal');
+                showToast('Please reset your password.');
+                usernameResetInput.value = data.username;
+                openModal(resetPasswordModal);
+            } else {
+                console.log('Login successful, redirecting to /admin');
+                showToast(data.message || 'Login successful! Redirecting...');
+                window.location.href = '/admin'; // Remove setTimeout for immediate redirect
+            }
+        } else {
+            console.log('Login failed:', data.error);
+            showToast(data.error || 'Login failed.', 'error');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    }
+});
 
         // Forgot Password Form Submission
         forgotPasswordForm.addEventListener('submit', async (e) => {
