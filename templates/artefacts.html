@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zira Artifacts - Full Price Products</title>
+    <title>Zira Artifacts - Our Products</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
@@ -1146,7 +1146,7 @@
     </section>
 
     <!-- Floating Country Button -->
-    <div id="country-btn-container">
+    <div id="country-btn-container" style="display: none !important;">
         <button id="country-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-yellow-700 transition flex items-center">
             <span class="flag">🇺🇸</span> USA
         </button>
@@ -1727,12 +1727,19 @@ document.getElementById('close-sidebar').addEventListener('click', () => {
 });
 
 // Mobile Search Toggle
-document.getElementById('mobile-search-icon').addEventListener('click', () => {
+document.getElementById('mobile-search-icon').addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent event bubbling
     const searchBar = document.getElementById('mobile-search-bar');
-    searchBar.classList.toggle('active');
-    const icon = document.getElementById('mobile-search-icon');
-    icon.classList.add('animate-bounce');
-    setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+    if (searchBar) {
+        searchBar.classList.toggle('active');
+        searchBar.classList.toggle('hidden'); // Explicitly toggle hidden class
+        const icon = document.getElementById('mobile-search-icon');
+        icon.classList.add('animate-bounce');
+        setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+        console.log('Mobile search bar toggled:', searchBar.classList.contains('active')); // Debugging
+    } else {
+        console.error('Mobile search bar element not found');
+    }
 });
 
 // Filter Toggler Button (Mobile)
