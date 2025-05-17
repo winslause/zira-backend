@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import sessionmaker, joinedload
+from sqlalchemy import desc  # Import desc for ordering
+import requests
 import os
 import string
 import secrets
@@ -15,6 +17,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 from flask_mail import Mail, Message
+from flask_migrate import Migrate  # Add Flask-Migrate
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -57,7 +60,24 @@ app.config['MAIL_USERNAME'] = 'vickiebmochama@gmail.com'
 app.config['MAIL_PASSWORD'] = 'yugj xofc egbp whyn'
 app.config['MAIL_DEFAULT_SENDER'] = 'vickiebmochama@gmail.com'
 
+API_URL = 'https://api.apilayer.com/exchangerates_data/latest'
+API_KEY = 'pgAxSoHnw8N0b2AEeap3wfuEd7wsSP2D'
+SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD']
+CACHE_DURATION = timedelta(days=1)  # Changed to 1 day for daily fetching
+
+def get_next_mid_month():
+    today = datetime.utcnow()
+    if today.day >= 15:
+        # Next month
+        next_month = today.replace(day=1) + timedelta(days=32)
+        next_month = next_month.replace(day=15)
+    else:
+        # Current month
+        next_month = today.replace(day=15)
+    return next_month
+
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
 mail = Mail(app)
 # logger.debug("Flask-Mail initialized with mail object: %s", mail)
 
@@ -174,6 +194,15 @@ class Cart(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
     product = db.relationship('Product', backref='cart_items', lazy=True)
+    
+class ExchangeRate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    eur = db.Column(db.Float, nullable=False)  # 1 KES = X EUR
+    gbp = db.Column(db.Float, nullable=False)  # 1 KES = X GBP
+    kes = db.Column(db.Float, nullable=False, default=1.0)  # 1 KES = 1 KES
+    usd = db.Column(db.Float, nullable=False)  # 1 KES = X USD
+    depletion_timestamp = db.Column(db.DateTime, nullable=True)  # When to retry API after depletion
 
 # Database Initialization
 # Database Initialization
@@ -2478,6 +2507,106 @@ def change_password():
     except Exception as e:
         logging.error(f"Unexpected error in POST /api/change_password: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+    
+@app.route('/api/exchange_rates', methods=['GET'])
+def get_exchange_rates():
+    # Check for latest valid rates in database
+    latest_rate = ExchangeRate.query.order_by(desc(ExchangeRate.timestamp)).first()
+    now = datetime.utcnow()
+
+    if latest_rate:
+        is_cache_valid = (now - latest_rate.timestamp) < CACHE_DURATION
+        is_depleted = latest_rate.depletion_timestamp and now < latest_rate.depletion_timestamp
+
+        if is_cache_valid and not is_depleted:
+            rates = {
+                'EUR': latest_rate.eur,
+                'GBP': latest_rate.gbp,
+                'KES': latest_rate.kes,
+                'USD': latest_rate.usd
+            }
+            return jsonify(rates), 200
+
+        if is_depleted:
+            rates = {
+                'EUR': latest_rate.eur,
+                'GBP': latest_rate.gbp,
+                'KES': latest_rate.kes,
+                'USD': latest_rate.usd
+            }
+            return jsonify(rates), 200
+
+    # Fetch new rates from API
+    try:
+        response = requests.get(
+            f'{API_URL}?base=KES&symbols={",".join(SUPPORTED_CURRENCIES)}',
+            headers={'apikey': API_KEY}
+        )
+
+        if response.status_code == 429:
+            if latest_rate:
+                rates = {
+                    'EUR': latest_rate.eur,
+                    'GBP': latest_rate.gbp,
+                    'KES': latest_rate.kes,
+                    'USD': latest_rate.usd
+                }
+                # Update depletion timestamp
+                latest_rate.depletion_timestamp = get_next_mid_month()
+                db.session.commit()
+                return jsonify(rates), 200
+            else:
+                # Fallback to static rates
+                rates = {
+                    'EUR': 0.0073,
+                    'GBP': 0.0061,
+                    'KES': 1.0,
+                    'USD': 0.0077
+                }
+                return jsonify(rates), 200
+
+        response.raise_for_status()
+        data = response.json()
+        if not data.get('success') or not data.get('rates'):
+            return jsonify({'error': 'Invalid API response'}), 500
+
+        # Store new rates
+        new_rate = ExchangeRate(
+            eur=data['rates']['EUR'],
+            gbp=data['rates']['GBP'],
+            kes=data['rates']['KES'],
+            usd=data['rates']['USD'],
+            timestamp=now,
+            depletion_timestamp=None
+        )
+        db.session.add(new_rate)
+        db.session.commit()
+
+        rates = {
+            'EUR': new_rate.eur,
+            'GBP': new_rate.gbp,
+            'KES': new_rate.kes,
+            'USD': new_rate.usd
+        }
+        return jsonify(rates), 200
+
+    except requests.RequestException as e:
+        if latest_rate:
+            rates = {
+                'EUR': latest_rate.eur,
+                'GBP': latest_rate.gbp,
+                'KES': latest_rate.kes,
+                'USD': latest_rate.usd
+            }
+            return jsonify(rates), 200
+        # Fallback to static rates
+        rates = {
+            'EUR': 0.0073,
+            'GBP': 0.0061,
+            'KES': 1.0,
+            'USD': 0.0077
+        }
+        return jsonify(rates), 200
     
     
 @app.errorhandler(404)

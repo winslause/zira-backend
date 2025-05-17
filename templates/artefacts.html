@@ -1316,14 +1316,44 @@
 
     <!-- JavaScript -->
  <script>
-    // Currency Conversion Logic (KES as base currency)
-const exchangeRates = {
-    USD: 0.0077, // 1 KES = 0.0077 USD
-    EUR: 0.0073, // 1 KES = 0.0073 EUR
-    GBP: 0.0061, // 1 KES = 0.0061 GBP
-    KES: 1       // 1 KES = 1 KES
+ // Currency Conversion Logic (KES as base currency)
+let exchangeRates = {
+    EUR: 0.0073, // Fallback rates
+    GBP: 0.0061,
+    KES: 1,
+    USD: 0.0077
 };
-let currentCurrency = '{{ current_currency }}';
+let currentCurrency = '{{ current_currency | safe }}';
+
+// API Configuration
+const API_URL = '/api/exchange_rates';
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+
+// Fetch Exchange Rates from Backend
+async function fetchExchangeRates() {
+    console.log('Fetching exchange rates from backend');
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            throw new Error('Backend request failed');
+        }
+        const rates = await response.json();
+        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+            console.error('Invalid backend response:', rates);
+            throw new Error('Invalid backend response');
+        }
+
+        // Update exchange rates
+        exchangeRates = { ...rates };
+        console.log('Fetched exchange rates:', exchangeRates);
+        updatePrices();
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        console.warn('Using fallback exchange rates');
+        updatePrices();
+    }
+}
 
 // Toggle Currency Dropdown (Mobile and Desktop)
 function toggleCurrencyDropdown(buttonId, dropdownId) {
@@ -1402,14 +1432,31 @@ document.querySelectorAll('.country-option').forEach(option => {
 
 // Update Prices
 function updatePrices() {
+    // Validate currency
+    if (!exchangeRates[currentCurrency]) {
+        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+        currentCurrency = 'KES';
+    }
+
     // Convert product prices from KES to selected currency
     document.querySelectorAll('.price').forEach(priceElement => {
         const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+        if (isNaN(basePriceKES)) {
+            console.error('Invalid base price:', priceElement, 'data-price:', priceElement.getAttribute('data-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
     });
+
     document.querySelectorAll('.discounted-price').forEach(priceElement => {
         const baseDiscountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price'));
+        if (isNaN(baseDiscountedPriceKES)) {
+            console.error('Invalid discounted price:', priceElement, 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
         const convertedPrice = (baseDiscountedPriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
     });
@@ -1417,8 +1464,8 @@ function updatePrices() {
     // Update Price Filter Options (convert KES ranges to selected currency)
     const priceFilter = document.querySelector('.price-filter');
     const selectedValue = priceFilter.value;
-    const rangeLow = 13000; // Approx 100 USD in KES (100 / 0.0077)
-    const rangeHigh = 26000; // Approx 200 USD in KES (200 / 0.0077)
+    const rangeLow = 13000; // Approx 100 USD in KES
+    const rangeHigh = 26000; // Approx 200 USD in KES
     priceFilter.innerHTML = `
         <option value="all">All Prices</option>
         <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
@@ -1502,6 +1549,12 @@ document.querySelectorAll('.filter-item').forEach(item => {
 document.querySelector('.price-filter').addEventListener('change', (e) => {
     selectedPriceRange = e.target.value;
     applyFilters();
+});
+
+// Initialize Exchange Rates on Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing exchange rates');
+    fetchExchangeRates();
 });
 
 // Display Options

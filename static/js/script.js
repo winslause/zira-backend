@@ -55,41 +55,85 @@ $(document).ready(function() {
 });
 
 // Currency Button Logic
-const exchangeRates = {
-    USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
-    EUR: 0.0073, // 1 KES = 0.0073 EUR
-    GBP: 0.0061, // 1 KES = 0.0061 GBP
-    KES: 1       // 1 KES = 1 KES
+let exchangeRates = {
+    EUR: 0.0073, // Fallback rates
+    GBP: 0.0061,
+    KES: 1,
+    USD: 0.0077
 };
-let currentCurrency = localStorage.getItem('currency') || 'KES';
+let currentCurrency = localStorage.getItem('currency') || '{{ current_currency | safe }}' || 'KES';
+
+// API Configuration
+const API_URL = '/api/exchange_rates';
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+
+// Fetch Exchange Rates from Backend
+async function fetchExchangeRates() {
+    console.log('Fetching exchange rates from backend');
+    try {
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            throw new Error('Backend request failed');
+        }
+        const rates = await response.json();
+        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+            console.error('Invalid backend response:', rates);
+            throw new Error('Invalid backend response');
+        }
+
+        // Update exchange rates
+        exchangeRates = { ...rates };
+        console.log('Fetched exchange rates:', exchangeRates);
+        updatePrices();
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        console.warn('Using fallback exchange rates');
+        updatePrices();
+    }
+}
 
 function initializeCurrencyButton() {
     const storedCountry = localStorage.getItem('country') || 'Kenya';
     const storedFlag = localStorage.getItem('flag') || '🇰🇪';
-    const storedCurrency = localStorage.getItem('currency') || 'KES';
+    const storedCurrency = localStorage.getItem('currency') || '{{ current_currency | safe }}' || 'KES';
     currentCurrency = storedCurrency;
     const countryBtn = document.getElementById('country-btn');
     const mobileCountryBtn = document.getElementById('mobile-country-btn');
     if (countryBtn) {
-        countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCurrency}`;
+        countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${currentCurrency}`;
+    } else {
+        console.warn('Desktop country button not found');
     }
     if (mobileCountryBtn) {
-        mobileCountryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCurrency}`;
+        mobileCountryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${currentCurrency}`;
+    } else {
+        console.warn('Mobile country button not found');
     }
     updatePrices();
 }
 
 function updatePrices() {
+    // Validate currency
+    if (!exchangeRates[currentCurrency]) {
+        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+        currentCurrency = 'KES';
+        localStorage.setItem('currency', currentCurrency);
+    }
+
     document.querySelectorAll('#featured-this-month .ftm-card').forEach(card => {
         const priceElement = card.querySelector('.ftm-price');
         const oldPriceElement = card.querySelector('.ftm-old-price');
 
         // Get base prices from data attributes (in KES)
-        const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+        const basePriceKES = priceElement ? parseFloat(priceElement.getAttribute('data-price')) : NaN;
         const baseOldPriceKES = oldPriceElement ? parseFloat(oldPriceElement.getAttribute('data-old-price')) : null;
 
         // Debugging: Log prices to identify issues
-        if (!basePriceKES || (oldPriceElement && !baseOldPriceKES)) {
+        if (!priceElement || isNaN(basePriceKES) || (oldPriceElement && isNaN(baseOldPriceKES))) {
             console.warn('Invalid price data for card:', {
                 cardId: card.dataset.productId || 'unknown',
                 productName: card.querySelector('.ftm-product-name')?.textContent || 'unknown',
@@ -97,33 +141,29 @@ function updatePrices() {
                 baseOldPriceKES,
                 tab: card.closest('.ftm-tab-content')?.id || 'unknown'
             });
+            if (priceElement) {
+                priceElement.innerHTML = `${currentCurrency} N/A`;
+            }
+            return;
         }
 
-        if (!isNaN(basePriceKES)) {
-            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
 
-            // Check if the product has a discount (old price exists and is higher)
-            if (oldPriceElement && !isNaN(baseOldPriceKES) && baseOldPriceKES > basePriceKES) {
-                const convertedOldPrice = (baseOldPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                priceElement.innerHTML = `${currentCurrency} ${convertedPrice} <span class="ftm-old-price" data-old-price="${baseOldPriceKES}">${currentCurrency} ${convertedOldPrice}</span>`;
-            } else {
-                priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
-                if (oldPriceElement && baseOldPriceKES <= basePriceKES) {
-                    console.warn('Invalid discount detected:', {
-                        cardId: card.dataset.productId || 'unknown',
-                        productName: card.querySelector('.ftm-product-name')?.textContent || 'unknown',
-                        basePriceKES,
-                        baseOldPriceKES,
-                        tab: card.closest('.ftm-tab-content')?.id || 'unknown'
-                    });
-                }
-            }
+        // Check if the product has a discount (old price exists and is higher)
+        if (oldPriceElement && !isNaN(baseOldPriceKES) && baseOldPriceKES > basePriceKES) {
+            const convertedOldPrice = (baseOldPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.innerHTML = `${currentCurrency} ${convertedPrice} <span class="ftm-old-price" data-old-price="${baseOldPriceKES}">${currentCurrency} ${convertedOldPrice}</span>`;
         } else {
-            console.error('Missing data-price for card:', {
-                cardId: card.dataset.productId || 'unknown',
-                productName: card.querySelector('.ftm-product-name')?.textContent || 'unknown',
-                tab: card.closest('.ftm-tab-content')?.id || 'unknown'
-            });
+            priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
+            if (oldPriceElement && baseOldPriceKES <= basePriceKES) {
+                console.warn('Invalid discount detected:', {
+                    cardId: card.dataset.productId || 'unknown',
+                    productName: card.querySelector('.ftm-product-name')?.textContent || 'unknown',
+                    basePriceKES,
+                    baseOldPriceKES,
+                    tab: card.closest('.ftm-tab-content')?.id || 'unknown'
+                });
+            }
         }
     });
 }
@@ -136,16 +176,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (countryBtn) {
         countryBtn.addEventListener('click', () => {
             const dropdown = document.getElementById('country-dropdown');
-            dropdown.classList.toggle('hidden');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+                console.log('Desktop country dropdown toggled:', !dropdown.classList.contains('hidden'));
+            } else {
+                console.error('Desktop country dropdown not found');
+            }
         });
+    } else {
+        console.warn('Desktop country button not found');
     }
 
     // Mobile currency button
     if (mobileCountryBtn) {
         mobileCountryBtn.addEventListener('click', () => {
             const dropdown = document.getElementById('mobile-country-dropdown');
-            dropdown.classList.toggle('hidden');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+                console.log('Mobile country dropdown toggled:', !dropdown.classList.contains('hidden'));
+            } else {
+                console.error('Mobile country dropdown not found');
+            }
         });
+    } else {
+        console.warn('Mobile country button not found');
     }
 
     // Handle currency selection
@@ -163,20 +217,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileCountryBtn.innerHTML = `<span class="flag">${flag}</span> ${currentCurrency}`;
             }
             // Hide both dropdowns
-            document.getElementById('country-dropdown').classList.add('hidden');
-            if (mobileCountryBtn) {
-                document.getElementById('mobile-country-dropdown').classList.add('hidden');
+            const desktopDropdown = document.getElementById('country-dropdown');
+            const mobileDropdown = document.getElementById('mobile-country-dropdown');
+            if (desktopDropdown) {
+                desktopDropdown.classList.add('hidden');
+            }
+            if (mobileDropdown) {
+                mobileDropdown.classList.add('hidden');
             }
             localStorage.setItem('currency', currentCurrency);
             localStorage.setItem('country', country);
             localStorage.setItem('flag', flag);
             try {
-                await fetch('/api/set_currency', {
+                const response = await fetch('/api/set_currency', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ currency: currentCurrency }),
                     credentials: 'include'
                 });
+                if (!response.ok) {
+                    console.error('Failed to sync currency with backend:', response.status, response.statusText);
+                }
             } catch (error) {
                 console.error('Failed to sync currency with backend:', error);
             }
@@ -184,7 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Initialize currency button and fetch exchange rates
     initializeCurrencyButton();
+    fetchExchangeRates();
 });
 
 // Featured This Month Tabs
@@ -193,9 +256,15 @@ function showTab(tabId) {
     const contents = document.querySelectorAll('#featured-this-month .ftm-tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
     contents.forEach(content => content.classList.remove('active'));
-    document.querySelector(`#featured-this-month .ftm-tab[onclick="showTab('${tabId}')"]`).classList.add('active');
-    document.querySelector(`#tab-${tabId}`).classList.add('active');
-    setTimeout(() => updatePrices(), 0); // Ensure prices update after tab content is visible
+    const tabElement = document.querySelector(`#featured-this-month .ftm-tab[onclick="showTab('${tabId}')"]`);
+    const contentElement = document.querySelector(`#tab-${tabId}`);
+    if (tabElement && contentElement) {
+        tabElement.classList.add('active');
+        contentElement.classList.add('active');
+        setTimeout(() => updatePrices(), 0); // Ensure prices update after tab content is visible
+    } else {
+        console.error('Tab or content not found for tabId:', tabId);
+    }
 }
 
 // Review Slider
@@ -464,5 +533,3 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
     });
 });
-
-

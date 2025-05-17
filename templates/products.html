@@ -1328,22 +1328,57 @@ body, .navbar {
         </div>
     </footer>  
     <script>
-        // Currency Conversion Logic (KES as base currency)
-const exchangeRates = {
-    USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
-    EUR: 0.0073, // 1 KES = 0.0073 EUR
-    GBP: 0.0061, // 1 KES = 0.0061 GBP
-    KES: 1       // 1 KES = 1 KES
+      // Currency Conversion Logic (KES as base currency)
+let exchangeRates = {
+    EUR: 0.0073, // Fallback rates
+    GBP: 0.0061,
+    KES: 1,
+    USD: 0.0077
 };
-let currentCurrency = '{{ current_currency }}';
+let currentCurrency = '{{ current_currency | safe }}';
+
+// API Configuration
+const API_URL = '/api/exchange_rates';
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+
+// Fetch Exchange Rates from Backend
+async function fetchExchangeRates() {
+    console.log('Fetching exchange rates from backend');
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            throw new Error('Backend request failed');
+        }
+        const rates = await response.json();
+        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+            console.error('Invalid backend response:', rates);
+            throw new Error('Invalid backend response');
+        }
+
+        // Update exchange rates
+        exchangeRates = { ...rates };
+        console.log('Fetched exchange rates:', exchangeRates);
+        updatePrices();
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        console.warn('Using fallback exchange rates');
+        updatePrices();
+    }
+}
 
 // Toggle Country Dropdown (Desktop and Mobile)
 function toggleCountryDropdown(btnId, dropdownId) {
     const button = document.getElementById(btnId);
     const dropdown = document.getElementById(dropdownId);
-    button.addEventListener('click', () => {
-        dropdown.classList.toggle('hidden');
-    });
+    if (button && dropdown) {
+        button.addEventListener('click', () => {
+            dropdown.classList.toggle('hidden');
+            console.log(`${dropdownId} toggled:`, !dropdown.classList.contains('hidden'));
+        });
+    } else {
+        console.error(`Button (${btnId}) or dropdown (${dropdownId}) not found`);
+    }
 }
 toggleCountryDropdown('country-btn', 'country-dropdown');
 toggleCountryDropdown('mobile-country-btn', 'mobile-country-dropdown');
@@ -1354,9 +1389,16 @@ function updateCurrency(e, dropdownId, btnId) {
     const country = e.target.getAttribute('data-country');
     const flag = e.target.getAttribute('data-flag');
     currentCurrency = e.target.getAttribute('data-currency');
-    document.getElementById(btnId).innerHTML = `<span class="flag">${flag}</span> ${country}`;
-    document.getElementById(dropdownId).classList.add('hidden');
-    updatePrices();
+    const button = document.getElementById(btnId);
+    const dropdown = document.getElementById(dropdownId);
+    if (button && dropdown) {
+        button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+        dropdown.classList.add('hidden');
+        updatePrices();
+        console.log('Currency updated to:', currentCurrency);
+    } else {
+        console.error(`Button (${btnId}) or dropdown (${dropdownId}) not found`);
+    }
 }
 document.querySelectorAll('.country-option').forEach(option => {
     const isMobile = option.closest('#mobile-country-dropdown');
@@ -1367,28 +1409,51 @@ document.querySelectorAll('.country-option').forEach(option => {
 
 // Update Prices
 function updatePrices() {
+    // Validate currency
+    if (!exchangeRates[currentCurrency]) {
+        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+        currentCurrency = 'KES';
+    }
+
+    // Convert product prices from KES to selected currency
     document.querySelectorAll('.price').forEach(priceElement => {
         const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+        if (isNaN(basePriceKES)) {
+            console.error('Invalid base price:', priceElement, 'data-price:', priceElement.getAttribute('data-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
     });
+
     document.querySelectorAll('.discounted-price').forEach(priceElement => {
         const baseDiscountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price'));
+        if (isNaN(baseDiscountedPriceKES)) {
+            console.error('Invalid discounted price:', priceElement, 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
         const convertedPrice = (baseDiscountedPriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
     });
 
+    // Update Price Filter Options (convert KES ranges to selected currency)
     const priceFilter = document.querySelector('.price-filter');
-    const selectedValue = priceFilter.value;
-    const rangeLow = 13000;
-    const rangeHigh = 26000;
-    priceFilter.innerHTML = `
-        <option value="all">All Prices</option>
-        <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
-        <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
-        <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
-    `;
-    priceFilter.value = selectedValue;
+    if (priceFilter) {
+        const selectedValue = priceFilter.value;
+        const rangeLow = 13000; // Approx 100 USD in KES
+        const rangeHigh = 26000; // Approx 200 USD in KES
+        priceFilter.innerHTML = `
+            <option value="all">All Prices</option>
+            <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
+            <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
+            <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
+        `;
+        priceFilter.value = selectedValue;
+    } else {
+        console.warn('Price filter not found');
+    }
 }
 
 // Filter Logic
@@ -1400,17 +1465,18 @@ const applyFilters = () => {
     let visibleProducts = 0;
     document.querySelectorAll('.product-card').forEach(card => {
         const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
-        const priceKES = parseFloat(card.querySelector('.price').getAttribute('data-price'));
+        const priceElement = card.querySelector('.price');
+        const priceKES = priceElement ? parseFloat(priceElement.getAttribute('data-price')) : NaN;
         let priceMatch = true;
         if (selectedPriceRange === '0-13000') {
-            priceMatch = priceKES <= 13000;
+            priceMatch = !isNaN(priceKES) && priceKES <= 13000;
         } else if (selectedPriceRange === '13000-26000') {
-            priceMatch = priceKES > 13000 && priceKES <= 26000;
+            priceMatch = !isNaN(priceKES) && priceKES > 13000 && priceKES <= 26000;
         } else if (selectedPriceRange === '26000+') {
-            priceMatch = priceKES > 26000;
+            priceMatch = !isNaN(priceKES) && priceKES > 26000;
         }
-        const name = card.getAttribute('data-name');
-        const category = card.getAttribute('data-category').toLowerCase();
+        const name = card.getAttribute('data-name')?.toLowerCase() || '';
+        const category = card.getAttribute('data-category')?.toLowerCase() || '';
         const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
 
         if (categoryMatch && priceMatch && searchMatch) {
@@ -1425,14 +1491,14 @@ const applyFilters = () => {
     const noSearchResults = document.getElementById('no-search-results');
     if (visibleProducts === 0) {
         if (searchQuery) {
-            noSearchResults.style.display = 'block';
+            if (noSearchResults) noSearchResults.style.display = 'block';
             if (noDiscounts) noDiscounts.style.display = 'none';
         } else {
-            noSearchResults.style.display = 'none';
+            if (noSearchResults) noSearchResults.style.display = 'none';
             if (noDiscounts) noDiscounts.style.display = 'block';
         }
     } else {
-        noSearchResults.style.display = 'none';
+        if (noSearchResults) noSearchResults.style.display = 'none';
         if (noDiscounts) noDiscounts.style.display = 'none';
     }
 };
@@ -1457,9 +1523,20 @@ document.querySelectorAll('.filter-item').forEach(item => {
 });
 
 // Price Range Filter
-document.querySelector('.price-filter').addEventListener('change', (e) => {
-    selectedPriceRange = e.target.value;
-    applyFilters();
+const priceFilter = document.querySelector('.price-filter');
+if (priceFilter) {
+    priceFilter.addEventListener('change', (e) => {
+        selectedPriceRange = e.target.value;
+        applyFilters();
+    });
+} else {
+    console.warn('Price filter not found');
+}
+
+// Initialize Exchange Rates on Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing exchange rates');
+    fetchExchangeRates();
 });
 
 // Display Options

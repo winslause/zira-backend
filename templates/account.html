@@ -1298,13 +1298,43 @@
 
 <script>
     // Currency Conversion Logic (KES as base currency)
-const exchangeRates = {
-    USD: 0.0077, // 1 KES = 0.0077 USD (1 USD ≈ 130 KES)
-    EUR: 0.0073, // 1 KES = 0.0073 EUR
-    GBP: 0.0061, // 1 KES = 0.0061 GBP
-    KES: 1       // 1 KES = 1 KES
+let exchangeRates = {
+    EUR: 0.0073, // Fallback rates
+    GBP: 0.0061,
+    KES: 1,
+    USD: 0.0077
 };
 let currentCurrency = '{{ current_currency | safe }}';
+
+// API Configuration
+const API_URL = '/api/exchange_rates';
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+
+// Fetch Exchange Rates from Backend
+async function fetchExchangeRates() {
+    console.log('Fetching exchange rates from backend');
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            throw new Error('Backend request failed');
+        }
+        const rates = await response.json();
+        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+            console.error('Invalid backend response:', rates);
+            throw new Error('Invalid backend response');
+        }
+
+        // Update exchange rates
+        exchangeRates = { ...rates };
+        console.log('Fetched exchange rates:', exchangeRates);
+        updatePrices();
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        console.warn('Using fallback exchange rates');
+        updatePrices();
+    }
+}
 
 // Helper Function to Format Dates Safely
 function formatDate(dateInput) {
@@ -1394,22 +1424,28 @@ document.querySelectorAll('.country-option').forEach(option => {
 function updatePrices() {
     console.log('Updating prices for currency:', currentCurrency);
     let cartTotal = 0;
-    
+
+    // Validate currency
+    if (!exchangeRates[currentCurrency]) {
+        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+        currentCurrency = 'KES';
+    }
+
     // Update Wishlist Prices
     document.querySelectorAll('#wishlist-items .price').forEach(priceElement => {
         const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
         const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-        
+
         if (isNaN(basePriceKES)) {
             console.error('Invalid base price for wishlist item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
             priceElement.textContent = `${currentCurrency} N/A`;
             return;
         }
-        
+
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
         console.log(`Wishlist item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-        
+
         const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
         if (originalPriceElement) {
             const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
@@ -1423,25 +1459,25 @@ function updatePrices() {
             }
         }
     });
-    
+
     // Update Cart Prices and Total
     document.querySelectorAll('#cart-items .price').forEach(priceElement => {
         const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
         const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
         const quantityElement = priceElement.parentElement.querySelector('input[type="number"]');
         const quantity = quantityElement ? parseInt(quantityElement.value) : 1;
-        
+
         if (isNaN(basePriceKES)) {
             console.error('Invalid base price for cart item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
             priceElement.textContent = `${currentCurrency} N/A`;
             return;
         }
-        
+
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
         cartTotal += basePriceKES * quantity;
         console.log(`Cart item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-        
+
         const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
         if (originalPriceElement) {
             const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
@@ -1455,7 +1491,7 @@ function updatePrices() {
             }
         }
     });
-    
+
     // Update Order Prices
     document.querySelectorAll('#order-items .price').forEach(priceElement => {
         const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
@@ -1464,17 +1500,17 @@ function updatePrices() {
                 ? priceElement.getAttribute('data-discounted-price') 
                 : priceElement.getAttribute('data-price')
         );
-        
+
         if (isNaN(basePriceKES)) {
             console.error('Invalid base price for order item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
             priceElement.textContent = `${currentCurrency} N/A`;
             return;
         }
-        
+
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
         priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
         console.log(`Order item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-        
+
         const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
         if (originalPriceElement) {
             const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
@@ -1488,7 +1524,7 @@ function updatePrices() {
             }
         }
     });
-    
+
     // Update Order Totals
     document.querySelectorAll('#order-items .price[data-price]').forEach(totalElement => {
         const baseTotalKES = parseFloat(totalElement.getAttribute('data-price'));
@@ -1501,13 +1537,19 @@ function updatePrices() {
             console.log(`Order total - Base total (KES): ${baseTotalKES}, Converted total: ${currentCurrency} ${convertedTotal}`);
         }
     });
-    
+
     // Update Cart Total
     const cartTotalElement = document.getElementById('cart-total');
     if (cartTotalElement) {
         cartTotalElement.textContent = `${currentCurrency} ${(cartTotal * exchangeRates[currentCurrency]).toFixed(2)}`;
     }
 }
+
+// Initialize Exchange Rates on Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing exchange rates');
+    fetchExchangeRates();
+});
 
 // Modal Functions
 function openModal(modalId) {
