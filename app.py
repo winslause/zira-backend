@@ -1682,9 +1682,9 @@ def dashboard_stats():
         ]
         logger.debug(f'Users data length: {len(users_data)}')
 
-        # Total sales (all time)
+        # Total sales (all time, only Delivered orders)
         try:
-            total_sales = db.session.query(func.sum(Order.total)).filter(Order.status != 'Canceled').scalar() or 0.0
+            total_sales = db.session.query(func.sum(Order.total)).filter(Order.status == 'Delivered').scalar() or 0.0
             logger.debug(f'Total sales: {total_sales}')
         except Exception as e:
             logger.error(f'Total sales query failed: {str(e)}')
@@ -1742,7 +1742,7 @@ def dashboard_stats():
         logger.error(f'Unexpected error in dashboard_stats: {str(e)}')
         return jsonify({'error': 'Internal server error'}), 500
     
-
+    
 @app.route('/api/orders/<int:id>/cancel', methods=['POST'])
 def cancel_order(id):
     try:
