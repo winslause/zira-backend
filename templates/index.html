@@ -41,18 +41,24 @@
                     <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
                     <!-- Mobile Currency Button -->
-                    <div id="mobile-country-btn-container" class="relative">
-                        <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
-                        <button id="mobile-country-btn" class="bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
-                            <span class="flag">🇰🇪</span> KES
-                        </button>
-                        <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-                        </div>
-                    </div>
+<div id="mobile-country-btn-container" class="relative">
+    <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
+    <button id="mobile-country-btn" class="bg-white border border-gray-300 text-gray-700 px-2 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
+        <span class="flag">
+            {% if current_currency == 'USD' %}🇺🇸
+            {% elif current_currency == 'EUR' %}🇩🇪
+            {% elif current_currency == 'GBP' %}🇬🇧
+            {% else %}🇰🇪{% endif %}
+        </span>
+        {{ current_currency }}
+    </button>
+    <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+    </div>
+</div>
                 </div>
                 <!-- Mobile Search Bar -->
                 <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1">
@@ -82,18 +88,25 @@
                     <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
                     <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
                     <!-- Desktop Currency Button -->
-                    <div id="country-btn-container" class="relative">
-                        <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
-                        <button style="border-radius: 35px;" id="country-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
-                            <span class="flag">🇰🇪</span> KES
-                        </button>
-                        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-                        </div>
-                    </div>
+                    <!-- Desktop Currency Button -->
+<div id="country-btn-container" class="relative">
+    <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
+    <button style="border-radius: 35px;" id="country-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
+        <span class="flag">
+            {% if current_currency == 'USD' %}🇺🇸
+            {% elif current_currency == 'EUR' %}🇩🇪
+            {% elif current_currency == 'GBP' %}🇬🇧
+            {% else %}🇰🇪{% endif %}
+        </span>
+        {{ current_currency }}
+    </button>
+    <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+    </div>
+</div>
                 </div>
             </div>
         </div>
