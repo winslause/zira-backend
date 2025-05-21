@@ -2,11 +2,11 @@ $(document).ready(function() {
     // Mobile Navbar Toggle
     $('#nav-toggler').click(function() {
         $('#mobile-sidebar').toggleClass('-translate-x-full');
-        $(this).find('i').toggleClass('fa-bars fa-times'); // Toggle between hamburger and X
+        $(this).find('i').toggleClass('fa-bars fa-times');
     });
     $('#close-sidebar').click(function() {
         $('#mobile-sidebar').addClass('-translate-x-full');
-        $('#nav-toggler').find('i').removeClass('fa-times').addClass('fa-bars'); // Revert to hamburger
+        $('#nav-toggler').find('i').removeClass('fa-times').addClass('fa-bars');
     });
 
     // Mobile Search Bar Toggle
@@ -28,7 +28,6 @@ $(document).ready(function() {
     const slides = $('.hero-slide');
     const dots = $('.dot');
     
-    // Initially show the first slide
     slides.eq(currentSlide).addClass('active');
 
     function showSlide(index) {
@@ -39,7 +38,6 @@ $(document).ready(function() {
         dots.eq(currentSlide).addClass('active');
     }
 
-    // Automatic slideshow for hero
     setInterval(function() {
         let nextSlide = (currentSlide + 1) % slides.length;
         showSlide(nextSlide);
@@ -56,16 +54,16 @@ $(document).ready(function() {
 
 // Currency Button Logic
 let exchangeRates = {
-    EUR: 0.0073, // Fallback rates
+    EUR: 0.0073,
     GBP: 0.0061,
     KES: 1,
     USD: 0.0077
 };
-let currentCurrency = localStorage.getItem('currency') || '{{ current_currency | safe }}' || 'KES';
+let currentCurrency = localStorage.getItem('currency') || 'KES';
 
 // API Configuration
 const API_URL = '/api/exchange_rates';
-const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort();
 
 // Fetch Exchange Rates from Backend
 async function fetchExchangeRates() {
@@ -84,8 +82,6 @@ async function fetchExchangeRates() {
             console.error('Invalid backend response:', rates);
             throw new Error('Invalid backend response');
         }
-
-        // Update exchange rates
         exchangeRates = { ...rates };
         console.log('Fetched exchange rates:', exchangeRates);
         updatePrices();
@@ -99,25 +95,23 @@ async function fetchExchangeRates() {
 function initializeCurrencyButton() {
     const storedCountry = localStorage.getItem('country') || 'Kenya';
     const storedFlag = localStorage.getItem('flag') || '🇰🇪';
-    const storedCurrency = localStorage.getItem('currency') || '{{ current_currency | safe }}' || 'KES';
+    const storedCurrency = localStorage.getItem('currency') || currentCurrency;
     currentCurrency = storedCurrency;
     const countryBtn = document.getElementById('country-btn');
     const mobileCountryBtn = document.getElementById('mobile-country-btn');
-    if (countryBtn) {
-        countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${currentCurrency}`;
-    } else {
-        console.warn('Desktop country button not found');
+    if (countryBtn && storedCurrency !== countryBtn.textContent.trim().split(' ')[1]) {
+        countryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCurrency}`;
     }
-    if (mobileCountryBtn) {
-        mobileCountryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${currentCurrency}`;
-    } else {
-        console.warn('Mobile country button not found');
+    if (mobileCountryBtn && storedCurrency !== mobileCountryBtn.textContent.trim().split(' ')[1]) {
+        mobileCountryBtn.innerHTML = `<span class="flag">${storedFlag}</span> ${storedCurrency}`;
     }
+    document.querySelectorAll('#country-btn-container, #mobile-country-btn-container').forEach(container => {
+        container.classList.add('currency-loaded');
+    });
     updatePrices();
 }
 
 function updatePrices() {
-    // Validate currency
     if (!exchangeRates[currentCurrency]) {
         console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
         currentCurrency = 'KES';
@@ -128,11 +122,9 @@ function updatePrices() {
         const priceElement = card.querySelector('.ftm-price');
         const oldPriceElement = card.querySelector('.ftm-old-price');
 
-        // Get base prices from data attributes (in KES)
         const basePriceKES = priceElement ? parseFloat(priceElement.getAttribute('data-price')) : NaN;
         const baseOldPriceKES = oldPriceElement ? parseFloat(oldPriceElement.getAttribute('data-old-price')) : null;
 
-        // Debugging: Log prices to identify issues
         if (!priceElement || isNaN(basePriceKES) || (oldPriceElement && isNaN(baseOldPriceKES))) {
             console.warn('Invalid price data for card:', {
                 cardId: card.dataset.productId || 'unknown',
@@ -148,22 +140,11 @@ function updatePrices() {
         }
 
         const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-
-        // Check if the product has a discount (old price exists and is higher)
         if (oldPriceElement && !isNaN(baseOldPriceKES) && baseOldPriceKES > basePriceKES) {
             const convertedOldPrice = (baseOldPriceKES * exchangeRates[currentCurrency]).toFixed(2);
             priceElement.innerHTML = `${currentCurrency} ${convertedPrice} <span class="ftm-old-price" data-old-price="${baseOldPriceKES}">${currentCurrency} ${convertedOldPrice}</span>`;
         } else {
             priceElement.innerHTML = `${currentCurrency} ${convertedPrice}`;
-            if (oldPriceElement && baseOldPriceKES <= basePriceKES) {
-                console.warn('Invalid discount detected:', {
-                    cardId: card.dataset.productId || 'unknown',
-                    productName: card.querySelector('.ftm-product-name')?.textContent || 'unknown',
-                    basePriceKES,
-                    baseOldPriceKES,
-                    tab: card.closest('.ftm-tab-content')?.id || 'unknown'
-                });
-            }
         }
     });
 }
@@ -172,59 +153,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const countryBtn = document.getElementById('country-btn');
     const mobileCountryBtn = document.getElementById('mobile-country-btn');
 
-    // Desktop currency button
     if (countryBtn) {
         countryBtn.addEventListener('click', () => {
             const dropdown = document.getElementById('country-dropdown');
             if (dropdown) {
                 dropdown.classList.toggle('hidden');
-                console.log('Desktop country dropdown toggled:', !dropdown.classList.contains('hidden'));
-            } else {
-                console.error('Desktop country dropdown not found');
             }
         });
-    } else {
-        console.warn('Desktop country button not found');
     }
 
-    // Mobile currency button
     if (mobileCountryBtn) {
         mobileCountryBtn.addEventListener('click', () => {
             const dropdown = document.getElementById('mobile-country-dropdown');
             if (dropdown) {
                 dropdown.classList.toggle('hidden');
-                console.log('Mobile country dropdown toggled:', !dropdown.classList.contains('hidden'));
-            } else {
-                console.error('Mobile country dropdown not found');
             }
         });
-    } else {
-        console.warn('Mobile country button not found');
     }
 
-    // Handle currency selection
     document.querySelectorAll('.country-option').forEach(option => {
         option.addEventListener('click', async (e) => {
             e.preventDefault();
             const country = e.target.getAttribute('data-country');
             const flag = e.target.getAttribute('data-flag');
             currentCurrency = e.target.getAttribute('data-currency');
-            // Update both buttons
             if (countryBtn) {
                 countryBtn.innerHTML = `<span class="flag">${flag}</span> ${currentCurrency}`;
             }
             if (mobileCountryBtn) {
                 mobileCountryBtn.innerHTML = `<span class="flag">${flag}</span> ${currentCurrency}`;
             }
-            // Hide both dropdowns
             const desktopDropdown = document.getElementById('country-dropdown');
             const mobileDropdown = document.getElementById('mobile-country-dropdown');
-            if (desktopDropdown) {
-                desktopDropdown.classList.add('hidden');
-            }
-            if (mobileDropdown) {
-                mobileDropdown.classList.add('hidden');
-            }
+            if (desktopDropdown) desktopDropdown.classList.add('hidden');
+            if (mobileDropdown) mobileDropdown.classList.add('hidden');
             localStorage.setItem('currency', currentCurrency);
             localStorage.setItem('country', country);
             localStorage.setItem('flag', flag);
@@ -245,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initialize currency button and fetch exchange rates
     initializeCurrencyButton();
     fetchExchangeRates();
 });
@@ -261,7 +222,7 @@ function showTab(tabId) {
     if (tabElement && contentElement) {
         tabElement.classList.add('active');
         contentElement.classList.add('active');
-        setTimeout(() => updatePrices(), 0); // Ensure prices update after tab content is visible
+        setTimeout(() => updatePrices(), 0);
     } else {
         console.error('Tab or content not found for tabId:', tabId);
     }

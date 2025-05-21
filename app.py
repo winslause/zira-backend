@@ -320,8 +320,8 @@ with app.app_context():
     
 @app.route('/')
 def index():
-   # if 'user' not in session:
-    #    return redirect(url_for('user_login'))
+    # Get currency from session, default to KES (or USD if preferred)
+    current_currency = session.get('currency', 'KES')  # Changed default to KES for consistency with your site’s Kenyan focus
 
     stories = Story.query.all()
     latest_products = Product.query.order_by(Product.created_at.desc()).limit(4).all()
@@ -343,9 +343,17 @@ def index():
         discount_products=discount_products,
         popular_products=popular_products,
         today=datetime.utcnow().date(),
-        current_currency='USD',
-        stories=stories  
+        current_currency=current_currency,  # Pass the session currency
+        stories=stories
     )
+
+@app.route('/set_currency', methods=['POST'])
+def set_currency():
+    currency = request.json.get('currency')
+    if currency in ['USD', 'EUR', 'GBP', 'KES']:
+        session['currency'] = currency
+        return jsonify({'status': 'success', 'currency': currency})
+    return jsonify({'status': 'error', 'message': 'Invalid currency'}), 400
 
 
 @app.route('/admin')
