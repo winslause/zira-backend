@@ -1225,9 +1225,20 @@ def handle_users():
 
 @app.route('/api/users/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_user(id):
-    if 'admin' not in session:  # Changed from 'user' to 'admin'
+    # Check for admin or user session
+    if 'admin' not in session and 'user' not in session:
+        logging.debug(f"Unauthorized access to user {id}: No admin or user in session")
         return jsonify({'error': 'Unauthorized'}), 401
+
     user = User.query.get_or_404(id)
+
+    # For regular users, ensure they can only access their own profile
+    if 'user' in session and 'admin' not in session:
+        current_user = User.query.filter_by(email=session['user']).first()
+        if not current_user or current_user.id != id:
+            logging.debug(f"Unauthorized: User {session['user']} attempted to access user {id}")
+            return jsonify({'error': 'Unauthorized'}), 403
+
     if request.method == 'GET':
         return jsonify({
             'id': user.id,
@@ -1237,20 +1248,44 @@ def handle_user(id):
             'phone_number': user.phone_number or 'N/A',
             'role': user.role
         })
+
     if request.method == 'PUT':
         try:
             data = request.get_json()
-            if 'username' in data and data['username'] and User.query.filter_by(username=data['username']).filter(User.id != id).first():
-                return jsonify({'error': 'Username already exists'}), 400
-            if 'email' in data and data['email'] and User.query.filter_by(email=data['email']).filter(User.id != id).first():
-                return jsonify({'error': 'Email already exists'}), 400
-            user.username = data.get('username', user.username)
+            if not data:
+                logging.error(f"No data provided for user {id} update")
+                return jsonify({'error': 'No data provided'}), 400
+
+            # Restrict fields for non-admin users
+            if 'user' in session and 'admin' not in session:
+                allowed_fields = ['name', 'phone_number']
+                data = {k: v for k, v in data.items() if k in allowed_fields}
+                logging.debug(f"Non-admin user updating allowed fields: {data}")
+            else:
+                # Validate uniqueness for admin updates
+                if 'username' in data and data['username'] and User.query.filter_by(username=data['username']).filter(User.id != id).first():
+                    logging.error(f"Username {data['username']} already exists")
+                    return jsonify({'error': 'Username already exists'}), 400
+                if 'email' in data and data['email'] and User.query.filter_by(email=data['email']).filter(User.id != id).first():
+                    logging.error(f"Email {data['email']} already exists")
+                    return jsonify({'error': 'Email already exists'}), 400
+
+            # Update fields
+            user.username = data.get('username', user.username) if 'admin' in session else user.username
             user.name = data.get('name', user.name)
-            user.email = data.get('email', user.email)
+            user.email = data.get('email', user.email) if 'admin' in session else user.email
             user.phone_number = data.get('phone_number', user.phone_number)
-            user.role = data.get('role', user.role)
+            user.role = data.get('role', user.role) if 'admin' in session else user.role
+
+            # Validate phone number if provided
+            if 'phone_number' in data and data['phone_number'] and len(data['phone_number']) > 15:
+                logging.error("Phone number too long")
+                return jsonify({'error': 'Phone number must be 15 characters or less'}), 400
+
             db.session.commit()
+            logging.info(f"User {id} updated successfully")
             return jsonify({'message': 'User updated successfully'})
+
         except SQLAlchemyError as e:
             db.session.rollback()
             logging.error(f"Database error in PUT /api/users/{id}: {str(e)}")
@@ -1259,10 +1294,16 @@ def handle_user(id):
             db.session.rollback()
             logging.error(f"Unexpected error in PUT /api/users/{id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
+
     if request.method == 'DELETE':
+        # Only admins can delete users
+        if 'admin' not in session:
+            logging.debug(f"Unauthorized: Non-admin attempted to delete user {id}")
+            return jsonify({'error': 'Unauthorized'}), 401
         try:
             db.session.delete(user)
             db.session.commit()
+            logging.info(f"User {id} deleted successfully")
             return jsonify({'message': 'User deleted successfully'})
         except SQLAlchemyError as e:
             db.session.rollback()
