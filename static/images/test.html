@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailwind Slideshow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .slide {
+        min-width: 100%;
+        transition: transform 0.5s ease-in-out;
+      }
+    </style>
+  </head>
+  <body class="bg-white">
+    <div class="overflow-hidden relative w-full h-screen">
+      <div id="slider" class="flex w-[400%] h-full">
+        <!-- Slide 1: Interior Collection -->
+        <div class="slide flex-shrink-0 flex flex-col md:flex-row items-center justify-center gap-8 px-10 bg-white">
+          <div class="w-1/3">
+            <div class="border-4 border-white rounded-md overflow-hidden">
+              <img src="pot4.jpg" class="w-full object-cover" alt="Mat" />
+            </div>
+          </div>
+          <div class="w-2/3 text-center">
+            <h2 class="text-4xl font-bold mb-4">INTERIOR COLLECTION <span class="italic text-yellow-600">Textiles</span></h2>
+            <div class="flex flex-wrap justify-center gap-6">
+              <img src="pot1.jpg" class="w-40 h-40 object-cover rounded" alt="Throw" />
+              <img src="pot2.jpg" class="w-40 h-40 object-cover rounded" alt="Blanket" />
+              <img src="pot3.jpg" class="w-40 h-40 object-cover rounded" alt="Shawl" />
+            </div>
+            <p class="mt-4 text-lg font-medium">From cozy sofa throws to vibrant picnic blankets and elegant shawls</p>
+            <button class="mt-4 bg-black text-white px-6 py-2 font-semibold">SHOP NOW</button>
+          </div>
+        </div>
+
+        <!-- Slide 2: Dining Essentials -->
+        <div class="slide flex-shrink-0 bg-yellow-50 flex flex-col items-center justify-center py-10 px-6 text-center">
+          <h2 class="text-4xl font-bold mb-6">New Arrival – Dining Essentials</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <img src="curv1.jpg" class="w-full h-auto rounded" alt="Elephant Mat" />
+            <img src="curve2.jpg" class="w-full h-auto rounded" alt="Giraffe Mat" />
+            <img src="curve3.jpg" class="w-full h-auto rounded" alt="Zebra Mat" />
+            <img src="curve4.jpg" class="w-full h-auto rounded" alt="Flamingo Mat" />
+          </div>
+          <button class="mt-6 bg-yellow-700 text-white px-6 py-2 font-semibold">SHOP NOW</button>
+        </div>
+
+        <!-- Slide 3: Wooden Kitchen Collection -->
+        <div class="slide flex-shrink-0 bg-white flex flex-col items-center justify-center px-6 py-10 text-center">
+          <h2 class="text-4xl font-bold mb-4">Wooden - Kitchen Collection</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <img src="art1.jpg" class="w-full h-auto rounded" alt="Tray" />
+            <img src="art3.jpg" class="w-full h-auto rounded" alt="Plates" />
+            <img src="art4.jpg" class="w-full h-auto rounded" alt="Scoops" />
+            <img src="art5.jpg" class="w-full h-auto rounded" alt="Bowls" />
+          </div>
+          <button class="mt-6 bg-yellow-700 text-white px-6 py-2 font-semibold">SHOP NOW</button>
+        </div>
+
+        <!-- Slide 4: Africa Month - Sound & Soul -->
+        <div class="slide flex-shrink-0 bg-orange-100 flex flex-col md:flex-row items-center justify-center gap-8 px-10 py-10 text-left">
+          <div class="w-full md:w-1/2">
+            <h2 class="text-4xl font-bold text-yellow-900">Africa Month</h2>
+            <h3 class="text-2xl font-semibold mt-2">Celebrate with Sound & Soul</h3>
+            <p class="mt-4 text-lg max-w-md">
+              Keep the music alive from the rhythms of the Kayamba to the melodies of the Orutu,
+              every beat tells a story.
+            </p>
+            <button class="mt-6 bg-yellow-800 text-white px-6 py-2 font-semibold">SHOP NOW</button>
+          </div>
+          <div class="w-full md:w-1/2 grid grid-cols-2 gap-4">
+            <img src="https://via.placeholder.com/150" class="w-full h-auto rounded" alt="Kayamba" />
+            <img src="https://via.placeholder.com/150" class="w-full h-auto rounded" alt="Shakers" />
+            <img src="https://via.placeholder.com/150" class="w-full h-auto rounded" alt="Drum" />
+            <img src="https://via.placeholder.com/150" class="w-full h-auto rounded" alt="Orutu" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="absolute inset-0 flex items-center justify-between px-4">
+        <button onclick="prevSlide()" class="bg-white p-2 rounded-full shadow"> ‹ </button>
+        <button onclick="nextSlide()" class="bg-white p-2 rounded-full shadow"> › </button>
+      </div>
+    </div>
+
+    <script>
+      let currentIndex = 0;
+      const slider = document.getElementById("slider");
+
+      function showSlide(index) {
+        const width = slider.clientWidth / 4;
+        slider.style.transform = `translateX(-${index * width}px)`;
+      }
+
+      function nextSlide() {
+        currentIndex = (currentIndex + 1) % 4;
+        showSlide(currentIndex);
+      }
+
+      function prevSlide() {
+        currentIndex = (currentIndex - 1 + 4) % 4;
+        showSlide(currentIndex);
+      }
+    </script>
+  </body>
+</html>

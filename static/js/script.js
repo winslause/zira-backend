@@ -29,6 +29,7 @@ $(document).ready(function() {
     const dots = $('.dot');
     
     slides.eq(currentSlide).addClass('active');
+    dots.eq(currentSlide).addClass('active');
 
     function showSlide(index) {
         slides.eq(currentSlide).removeClass('active');
@@ -38,10 +39,24 @@ $(document).ready(function() {
         dots.eq(currentSlide).addClass('active');
     }
 
-    setInterval(function() {
+    // Auto-slide every 5 seconds
+    let autoSlide = setInterval(function() {
         let nextSlide = (currentSlide + 1) % slides.length;
         showSlide(nextSlide);
     }, 5000);
+
+    // Dot navigation
+    dots.each(function(index) {
+        $(this).click(function() {
+            clearInterval(autoSlide); // Stop auto-slide on manual navigation
+            showSlide(index);
+            // Restart auto-slide
+            autoSlide = setInterval(function() {
+                let nextSlide = (currentSlide + 1) % slides.length;
+                showSlide(nextSlide);
+            }, 5000);
+        });
+    });
 
     // Discount Popup
     $('.discount-btn-container .floating-btn').click(function() {
