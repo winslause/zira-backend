@@ -1,16 +1,706 @@
-class Order(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    total = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), default='Pending')
-    customer_status = db.Column(db.String(20), default='Active')
-    payment_method = db.Column(db.String(20), nullable=False)
-    message_code = db.Column(db.String(50), nullable=True)
-    customer_name = db.Column(db.String(100), nullable=True)  # New field
-    customer_number = db.Column(db.String(15), nullable=True)  # New field
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    order_items = db.relationship('OrderItem', backref='order', lazy=True)
 
 
 
-    Wenny@github1 
+
+/* Custom Animations */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-7px); }
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+@keyframes slideDown {
+    0% { transform: translateY(-100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes appear {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-category {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+@keyframes zoomInOut {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero Slider */
+.hero-slide {
+    opacity: 0;
+    animation: fadeOut 3s forwards ease-in-out;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.hero-slide.active {
+    opacity: 1;
+    animation: fadeIn 3s forwards ease-in-out;
+}
+#hero-slider {
+    background-color: #000;
+    z-index: 5;
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+}
+.dot.active {
+    background-color: #f59e0b;
+}
+
+/* Navbar */
+.navbar {
+    top: 0;
+    z-index: 50;
+}
+.navbar-item {
+    transition: color 0.3s ease;
+}
+.navbar-item:hover {
+    color: #f59e0b;
+    text-decoration: underline;
+}
+.nav-hover:hover .dropdown-menu {
+    display: block;
+    animation: appear 0.3s ease-in;
+}
+.top-layer {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 60;
+}
+@media (min-width: 768px) {
+    .navbar {
+        top: 36px;
+    }
+}
+
+/* Mobile Navbar Adjustments */
+.navbar .md\\:hidden .flex.items-center {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: visible;
+    padding-right: 0.5rem;
+}
+#mobile-country-btn-container {
+    display: inline-flex;
+    flex-direction: column;
+    
+    align-items: center;
+    min-width: 60px;
+    z-index: 60;
+}
+#mobile-country-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    background-color: #d69d24;
+    border: 1px solid #d1d5db;
+    border-radius: 35px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#mobile-country-dropdown {
+    top: 100%;
+    right: 0;
+    min-width: 120px;
+}
+.currency-label {
+    font-size: 0.625rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+@media (max-width: 480px) {
+    #mobile-country-btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    #mobile-country-btn-container {
+        min-width: 50px;
+    }
+    .currency-label {
+        font-size: 0.6rem;
+    }
+}
+
+/* Desktop Currency Button */
+#country-btn-container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+}
+#country-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    background-color: #d69d24;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#country-dropdown {
+    top: 100%;
+    right: 0;
+}
+
+/* Floating Buttons */
+.floating-btn-container {
+    position: fixed;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+}
+.floating-btn {
+    transition: all 0.3s ease;
+    animation: bounce 2s infinite;
+}
+.floating-btn:hover {
+    transform: scale(1.1);
+}
+.whatsapp-btn-container {
+    bottom: 16px;
+    right: 16px;
+}
+.whatsapp-btn-container .floating-btn {
+    width: 48px;
+    height: 48px;
+    background-color: #25D366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.whatsapp-btn-container .floating-btn::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg') no-repeat center center;
+    background-size: 60%;
+}
+.whatsapp-btn-container .floating-text {
+    margin-right: 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.whatsapp-btn-container .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #EF4444;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+}
+.discount-btn-container {
+    bottom: 16px;
+    left: 16px;
+}
+.discount-btn-container .floating-btn {
+    background-color: #EC4899;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    height: 48px;
+}
+.discount-btn-container .floating-btn img {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+@media (max-width: 768px) {
+    .whatsapp-btn-container .floating-btn,
+    .discount-btn-container .floating-btn {
+        height: 36px;
+    }
+    .whatsapp-btn-container .floating-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .whatsapp-btn-container .floating-text {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    .whatsapp-btn-container .badge {
+        font-size: 8px;
+        padding: 1px 4px;
+        top: -2px;
+        right: -2px;
+    }
+    .discount-btn-container .floating-btn {
+        font-size: 10px;
+        padding: 12px;
+    }
+    .discount-btn-container .floating-btn img {
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+    }
+}
+
+/* Search Bar */
+.search-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.search-container input {
+    padding-right: 2.5rem;
+}
+.search-container i {
+    position: absolute;
+    right: 0.75rem;
+    color: #6b7280;
+    pointer-events: none;
+}
+#mobile-search-bar {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    margin-top: 0.5rem;
+    z-index: 40;
+}
+#mobile-search-bar.active {
+    display: block;
+    animation: slideDown 0.3s ease-in-out;
+}
+
+/* Mobile Sidebar */
+#mobile-sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+#mobile-sidebar.active {
+    transform: translateX(0);
+}
+
+/* Shop by Category */
+#shopByCategory .animate-pulse-category {
+    animation: pulse-category 3s infinite ease-in-out;
+}
+#shopByCategory::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://darpanfurnishings.com/wp-content/uploads/2022/02/Untitled-design-34.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    animation: zoomInOut 20s infinite ease-in-out;
+}
+@media (max-width: 768px) {
+    #shopByCategory .flex {
+        gap: 1rem !important;
+    }
+    #shopByCategory .w-64 {
+        width: calc(50% - 0.5rem) !important;
+    }
+    #shopByCategory .w-48 {
+        width: 100% !important;
+        max-width: 150px !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+}
+@media (max-width: 480px) {
+    #shopByCategory .flex {
+        gap: 0.5rem !important;
+    }
+    #shopByCategory .w-64 {
+        width: calc(50% - 0.25rem) !important;
+    }
+    #shopByCategory .w-48 {
+        max-width: 120px !important;
+    }
+}
+
+/* Customer Reviews */
+#zira-customer-reviews {
+    position: relative;
+    z-index: 10;
+}
+#zira-customer-reviews::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('../images/curve7.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    z-index: -1;
+}
+#prevReview,
+#nextReview {
+    position: relative;
+    z-index: 20;
+    transition: all 0.3s ease;
+}
+#prevReview:disabled,
+#nextReview:disabled {
+    background-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+#reviewSliderLarge,
+#reviewSliderSmall {
+    position: relative;
+    z-index: 15;
+}
+#reviewSliderLargeInner,
+#reviewSliderSmallInner {
+    display: flex;
+    transition: transform 0.7s ease-in-out;
+}
+
+/* Featured This Month */
+#featured-this-month {
+    font-family: sans-serif;
+    background: #f9f9f9;
+    padding: 2rem 1rem;
+}
+#featured-this-month .ftm-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #d97706;
+    margin-bottom: 1.5rem;
+}
+#featured-this-month .ftm-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+#featured-this-month .ftm-tab {
+    position: relative;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding-bottom: 0.3rem;
+    color: #333;
+    white-space: nowrap;
+}
+#featured-this-month .ftm-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: black;
+}
+#featured-this-month .ftm-tab-content {
+    position: relative;
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    justify-items: center;
+}
+#featured-this-month .ftm-tab-content.active {
+    display: grid;
+}
+#featured-this-month .ftm-tab-content > div.flex {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+#featured-this-month .ftm-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    width: 240px;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+#featured-this-month .ftm-card:hover {
+    transform: scale(1.05);
+}
+#featured-this-month .ftm-card-img {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+}
+#featured-this-month .ftm-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 1s ease;
+}
+#featured-this-month .ftm-card:hover .ftm-card-img img {
+    transform: scale(1.1);
+}
+#featured-this-month .ftm-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #d97706;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+#featured-this-month .ftm-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    text-align: center;
+}
+#featured-this-month .ftm-product-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+#featured-this-month .ftm-price {
+    font-size: 1rem;
+    color: #d97706;
+    margin-top: 0.5rem;
+}
+#featured-this-month .ftm-old-price {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-decoration: line-through;
+    margin-left: 0.5rem;
+}
+#featured-this-month .wishlist-btn {
+    margin-top: 0.5rem;
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+    color: #1f2937;
+    white-space: nowrap;
+}
+#featured-this-month .wishlist-btn i {
+    margin: 0 0.25rem;
+    font-size: 0.875rem;
+}
+#featured-this-month .wishlist-btn .tooltip {
+    display: none; /* Hide tooltip for simplicity */
+}
+#featured-this-month .wishlist-btn.active {
+    background-color: #d97706;
+    color: #fff;
+}
+@media (max-width: 768px) {
+    #featured-this-month .ftm-tabs {
+        gap: 1rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    #featured-this-month .ftm-tab {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    #featured-this-month .ftm-tab-content {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+    #featured-this-month .ftm-card {
+        width: 160px;
+        min-height: 280px;
+    }
+    #featured-this-month .ftm-card-img {
+        height: 160px;
+    }
+    #featured-this-month .ftm-product-name {
+        font-size: 1rem;
+        -webkit-line-clamp: 1;
+    }
+    #featured-this-month .ftm-price {
+        font-size: 0.875rem;
+    }
+    #featured-this-month .ftm-old-price {
+        font-size: 0.75rem;
+    }
+    #featured-this-month .wishlist-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.25rem;
+    }
+    #featured-this-month .wishlist-btn i {
+        font-size: 0.75rem;
+        margin: 0 0.2rem;
+    }
+}
+@media (max-width: 480px) {
+    #featured-this-month .ftm-title {
+        font-size: 2rem;
+    }
+    #featured-this-month .ftm-tabs {
+        gap: 0.75rem;
+    }
+    #featured-this-month .ftm-tab {
+        font-size: 0.85rem;
+    }
+    #featured-this-month .ftm-tab-content {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+    }
+    #featured-this-month .ftm-card {
+        width: 140px;
+        min-height: 260px;
+    }
+    #featured-this-month .ftm-card-img {
+        height: 140px;
+    }
+    #featured-this-month .wishlist-btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    #featured-this-month .wishlist-btn i {
+        font-size: 0.7rem;
+    }
+}
+
+/* Wholesale Collections */
+#wholesale-collections {
+    position: relative;
+}
+#wholesale-collections .group:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+@media (max-width: 768px) {
+    #wholesale-collections .grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* Know More About Zira Artifacts */
+#mawu-about-section .group:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 768px) {
+    #mawu-about-section .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Our Heritage Stories */
+#craft-stories .min-w-[300px] {
+    cursor: pointer;
+}
+#craft-stories .min-w-[300px]:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+@media (max-width: 768px) {
+    #craft-stories .min-w-[300px] {
+        min-width: 250px;
+    }
+}
+
+/* Story Modal */
+.modal {
+    transition: opacity 0.3s ease;
+}
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-close:hover {
+    transform: scale(1.2);
+}
+@media (max-width: 640px) {
+    .modal-content {
+        width: 90%;
+        margin: 1rem;
+    }
+}
+
+/* Discount Popup */
+#discount-page {
+    transition: transform 0.3s ease-in-out;
+}
+#discount-page.active {
+    transform: translateX(0);
+}
+@media (max-width: 768px) {
+    #discount-page {
+        width: 100%;
+    }
+}
+
+/* Footer */
+footer .bg-gray-900 {
+    transition: background-color 0.3s ease;
+}
+footer a:hover {
+    text-decoration: underline;
+}
+@media (max-width: 768px) {
+    footer .grid-cols-5 {
+        display: none;
+    }
+}
+
+/* General Utility Classes */
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+.pulse {
+    animation: pulse 2s infinite ease-in-out;
+}
