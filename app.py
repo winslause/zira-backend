@@ -1,27 +1,56 @@
+# app.py
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import sessionmaker, joinedload
-from sqlalchemy import desc  # Import desc for ordering
-import requests
+from sqlalchemy import desc
+from datetime import datetime, timedelta
+from slugify import slugify
 import os
-import string
 import secrets
 import random
 import string
-import uuid
-# from models import Story
-from datetime import datetime, timedelta
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
+import base64
 import logging
-from flask_mail import Mail, Message
-from flask_migrate import Migrate  # Add Flask-Migrate
+from sqlalchemy.sql import func
+from sqlalchemy.exc import SQLAlchemyError  
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_NAME'] = 'session'
+
+# Flask-Mail configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'vickiebmochama@gmail.com'
+app.config['MAIL_PASSWORD'] = 'yugj xofc egbp whyn'
+app.config['MAIL_DEFAULT_SENDER'] = 'vickiebmochama@gmail.com'
+
+# Ensure upload folder exists
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+mail = Mail(app)
+
+# Utility functions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-logging.basicConfig(level=logging.INFO)
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -33,77 +62,36 @@ def save_file(file):
         return filename
     return None
 
+def generate_random_password(length=12):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(characters) for _ in range(length))
+
+def generate_reset_token():
+    return secrets.token_urlsafe(32)
+
+def store_reset_token(user, token):
+    user.reset_token = token
+    user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+    db.session.commit()
+
 def validate_reset_token(token):
     user = User.query.filter_by(reset_token=token).first()
     if user and user.reset_token_expiry > datetime.utcnow():
         return user
     return None
 
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')  # Use env var
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow redirects
-app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JS access
-app.config['SESSION_COOKIE_SECURE'] = False  # HTTP
-app.config['SESSION_COOKIE_NAME'] = 'session'  # Explicit name
-
-
-# Flask-Mail configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'vickiebmochama@gmail.com'
-app.config['MAIL_PASSWORD'] = 'yugj xofc egbp whyn'
-app.config['MAIL_DEFAULT_SENDER'] = 'vickiebmochama@gmail.com'
-
-API_URL = 'https://api.apilayer.com/exchangerates_data/latest'
-API_KEY = 'pgAxSoHnw8N0b2AEeap3wfuEd7wsSP2D'
-SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD']
-CACHE_DURATION = timedelta(days=1)  # Changed to 1 day for daily fetching
-
 def get_next_mid_month():
     today = datetime.utcnow()
     if today.day >= 15:
-        # Next month
         next_month = today.replace(day=1) + timedelta(days=32)
         next_month = next_month.replace(day=15)
     else:
-        # Current month
         next_month = today.replace(day=15)
     return next_month
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)  # Initialize Flask-Migrate
-mail = Mail(app)
-# logger.debug("Flask-Mail initialized with mail object: %s", mail)
-
-# Generate random password
-def generate_random_password(length=12):
-    characters = string.ascii_letters + string.digits + string.punctuation
-    return ''.join(random.choice(characters) for _ in range(length))
-
-# Token generation and validation helpers
-def generate_reset_token():
-    return secrets.token_urlsafe(32)
-
-def store_reset_token(user, token):
-    user.reset_token = token
-    user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)  # 1-hour expiry
-    db.session.commit()
-
-# Ensure upload folder exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-
-# Logging setup
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
-
-# Models (unchanged from your code)
+# Models
 class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -114,22 +102,26 @@ class User(db.Model):
     profile_picture = db.Column(db.String(200))
     address = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    reset_token = db.Column(db.String(255))  # New column for reset token
-    reset_token_expiry = db.Column(db.DateTime)  # New column for token expiry
-    
-    
+    reset_token = db.Column(db.String(255))
+    reset_token_expiry = db.Column(db.DateTime)
+
 class Product(db.Model):
+    __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), nullable=False)
+    title = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    image = db.Column(db.String(255), nullable=True)
     price = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(200))
-    description = db.Column(db.Text)
-    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'))
-    discount = db.relationship('Discount', backref='product', uselist=False, foreign_keys=[discount_id])
+    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)  # Add foreign key
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    subcategory_id = db.Column(db.Integer, db.ForeignKey('subcategory.id'), nullable=True)
+    category = db.relationship('Category', back_populates='products')
+    subcategory = db.relationship('Subcategory', back_populates='products')
+    discount = db.relationship('Discount', back_populates='product', uselist=False)  # Add relationship
 
 class Order(db.Model):
+    __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     total = db.Column(db.Float, nullable=False)
@@ -137,13 +129,13 @@ class Order(db.Model):
     customer_status = db.Column(db.String(20), default='Active')
     payment_method = db.Column(db.String(20), nullable=False)
     message_code = db.Column(db.String(50), nullable=True)
-    customer_name = db.Column(db.String(100), nullable=True)  # New field
-    customer_number = db.Column(db.String(15), nullable=True)  # New field
+    customer_name = db.Column(db.String(100), nullable=True)
+    customer_number = db.Column(db.String(15), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     order_items = db.relationship('OrderItem', backref='order', lazy=True)
-    
-    
+
 class OrderItem(db.Model):
+    __tablename__ = 'order_item'
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -151,16 +143,37 @@ class OrderItem(db.Model):
     product = db.relationship('Product', backref='order_items', lazy=True)
 
 class Category(db.Model):
+    __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+    slug = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.Text, nullable=True)  # Already present
+    image = db.Column(db.String(255), nullable=True)  # Add image field
+    products = db.relationship('Product', back_populates='category')
+    subcategories = db.relationship('Subcategory', back_populates='category')
+    gifts = db.relationship('Gift', back_populates='category')
+
+class Subcategory(db.Model):
+    __tablename__ = 'subcategory'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    slug = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category = db.relationship('Category', back_populates='subcategories')
+    products = db.relationship('Product', back_populates='subcategory')
+    gifts = db.relationship('Gift', back_populates='subcategory')
 
 class Discount(db.Model):
+    __tablename__ = 'discount'
     id = db.Column(db.Integer, primary_key=True)
     percent = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
+    product = db.relationship('Product', back_populates='discount', uselist=False)  # One-to-one relationship
 
 class Artisan(db.Model):
+    __tablename__ = 'artisan'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -168,12 +181,14 @@ class Artisan(db.Model):
     status = db.Column(db.String(20), default='Pending')
 
 class Story(db.Model):
+    __tablename__ = 'story'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     image = db.Column(db.String(200))
 
 class Review(db.Model):
+    __tablename__ = 'review'
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -182,140 +197,47 @@ class Review(db.Model):
     status = db.Column(db.String(20), default='Pending')
 
 class Wishlist(db.Model):
+    __tablename__ = 'wishlist'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product = db.relationship('Product', backref='wishlist_items', lazy=True)
 
 class Cart(db.Model):
+    __tablename__ = 'cart'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
     product = db.relationship('Product', backref='cart_items', lazy=True)
-    
+
 class ExchangeRate(db.Model):
+    __tablename__ = 'exchange_rate'
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    eur = db.Column(db.Float, nullable=False)  # 1 KES = X EUR
-    gbp = db.Column(db.Float, nullable=False)  # 1 KES = X GBP
-    kes = db.Column(db.Float, nullable=False, default=1.0)  # 1 KES = 1 KES
-    usd = db.Column(db.Float, nullable=False)  # 1 KES = X USD
-    depletion_timestamp = db.Column(db.DateTime, nullable=True)  # When to retry API after depletion
+    eur = db.Column(db.Float, nullable=False)
+    gbp = db.Column(db.Float, nullable=False)
+    kes = db.Column(db.Float, nullable=False, default=1.0)
+    usd = db.Column(db.Float, nullable=False)
+    depletion_timestamp = db.Column(db.DateTime, nullable=True)
 
-# Database Initialization
-# Database Initialization
-# Database Initialization
-with app.app_context():
-    db.create_all()
-    if not User.query.filter_by(username='admin').first():
-        admin = User(
-            username='admin',
-            name='Admin',
-            email='admin@zira.com',
-            phone_number='1234567890',
-            password=generate_password_hash('admin'),
-            role='admin'
-        )
-        db.session.add(admin)
-        user = User(
-            username='john_doe',
-            name='John Doe',
-            email='john.doe@example.com',
-            phone_number='+1234567890',
-            password=generate_password_hash('password123'),
-            role='buyer',
-            address={
-                'street': '00100 Northern Bypass Road, Intersection',
-                'city': 'Nairobi',
-                'country': 'Kenya',
-                'postal_code': '00100'
-            }
-        )
-        db.session.add(user)
-        db.session.commit()
+class Gift(db.Model):
+    __tablename__ = 'gift'
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100), nullable=False)
+    image = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    subcategory_id = db.Column(db.Integer, db.ForeignKey('subcategory.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category = db.relationship('Category', back_populates='gifts')
+    subcategory = db.relationship('Subcategory', back_populates='gifts')
 
-    if not Category.query.first():
-        categories = [
-            Category(name='Home'),
-            Category(name='Kitchen'),
-            Category(name='Decor'),
-            Category(name='Easter')
-        ]
-        db.session.bulk_save_objects(categories)
-        db.session.commit()
 
-    if not Product.query.first():
-        products = [
-            Product(name='Soap Dish', category='Home', price=1500.00, image='soap_dish.jpg', created_at=datetime(2025, 5, 1)),
-            Product(name='Mortar & Pestle', category='Kitchen', price=2841.99, image='mortar_pestle.jpg', created_at=datetime(2025, 5, 2)),
-            Product(name='Yin Yang Candleholder', category='Decor', price=2453.99, image='candleholder.jpg', created_at=datetime(2025, 5, 3)),
-            Product(name='Pillar Candlesticks', category='Decor', price=2583.99, image='candlesticks.jpg', created_at=datetime(2025, 5, 4)),
-            Product(name='Cup Set', category='Kitchen', price=1299.99, image='cup_set.jpg', created_at=datetime(2025, 4, 30)),
-            Product(name='Marble Tray', category='Decor', price=2099.00, image='marble_tray.jpg', created_at=datetime(2025, 4, 29)),
-            Product(name='Mini Vases', category='Decor', price=799.00, image='mini_vases.jpg', created_at=datetime(2025, 4, 28)),
-            Product(name='Hex Coasters', category='Home', price=1100.00, image='hex_coasters.jpg', created_at=datetime(2025, 4, 27)),
-            Product(name='Bunny Candle', category='Easter', price=1050.00, image='bunny_candle.jpg', created_at=datetime(2025, 4, 26)),
-            Product(name='Egg Holder', category='Easter', price=1200.00, image='egg_holder.jpg', created_at=datetime(2025, 4, 25)),
-            Product(name='Spring Vase', category='Easter', price=1700.00, image='spring_vase.jpg', created_at=datetime(2025, 4, 24)),
-            Product(name='Pastel Tray', category='Easter', price=1600.00, image='pastel_tray.jpg', created_at=datetime(2025, 4, 23)),
-        ]
-        db.session.bulk_save_objects(products)
-        db.session.commit()
-
-        discounts = [
-            Discount(percent=20, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=18, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=26, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=30, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=23, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=26, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=19, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=23, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=24, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=21, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=18, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-            Discount(percent=25, start_date=datetime(2025, 5, 1).date(), end_date=datetime(2025, 5, 31).date()),
-        ]
-        db.session.bulk_save_objects(discounts)
-        db.session.commit()
-
-        product_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-        for idx, product_id in enumerate(product_ids):
-            product = Product.query.get(product_id)
-            discount = Discount.query.get(idx + 1)
-            if product and discount:
-                product.discount_id = discount.id
-        db.session.commit()
-
-    if not Order.query.first():
-        user = User.query.filter_by(email='john.doe@example.com').first()
-        if user:  # Only proceed if user exists
-            orders = [
-                Order(
-                    user_id=user.id,
-                    total=3600.00,
-                    status='Pending',
-                    customer_status='Active',
-                    payment_method='immediate',
-                    created_at=datetime(2025, 5, 1)
-                ),
-                Order(
-                    user_id=user.id,
-                    total=1500.00,
-                    status='Delivered',
-                    customer_status='Active',
-                    payment_method='delivery',
-                    created_at=datetime(2025, 5, 2)
-                ),
-            ]
-            db.session.bulk_save_objects(orders)
-            db.session.commit()
-
-    # Ensure existing orders have customer_status
-    Order.query.filter_by(customer_status=None).update({'customer_status': 'Active'})
-    db.session.commit()
     
     
 @app.route('/')
@@ -602,160 +524,713 @@ def user_logout():
     return redirect(url_for('user_login'))
 
 # Product Routes
-@app.route('/api/discounted_artefacts', methods=['GET', 'POST'])
-def handle_products():
-    if request.method == 'GET':
-        products = Product.query.all()
-        return jsonify([
-            {
-                'id': p.id,
-                'name': p.name,
-                'category': p.category,
-                'price': p.price,
-                'image': p.image,
-                'description': p.description,
-                'discount': p.discount.percent if p.discount else None
-            } for p in products
-        ])
+@app.route('/api/discounted_artefacts', methods=['POST'])
+def add_product():
     if 'admin' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    if request.method == 'POST':
-        try:
-            name = request.form.get('name')
-            category = request.form.get('category')
-            price = request.form.get('price')
-            description = request.form.get('description', '')
-            image = request.files.get('image')
 
-            if not all([name, category, price]):
-                return jsonify({'error': 'Name, category, and price are required'}), 400
-            if not image or not allowed_file(image.filename):
-                return jsonify({'error': 'Valid image (JPG/PNG) is required'}), 400
-            if image.content_length > 3 * 1024 * 1024:
-                return jsonify({'error': 'Image size exceeds 3MB'}), 400
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error('No JSON data provided')
+            return jsonify({'error': 'Invalid request: JSON data required'}), 415
 
-            filename = save_file(image)
-            if not filename:
-                return jsonify({'error': 'Failed to save image'}), 500
+        # Validate required fields
+        required_fields = ['title', 'category_id', 'price']
+        for field in required_fields:
+            if field not in data or data[field] is None:
+                logger.error(f'Missing required field: {field}')
+                return jsonify({'error': f'Missing required field: {field}'}), 400
 
-            product = Product(
-                name=name,
-                category=category,
-                price=float(price),
-                image=filename,
-                description=description
-            )
-            db.session.add(product)
-            db.session.commit()
-            return jsonify({'message': 'Product created successfully', 'id': product.id}), 201
-        except ValueError:
-            return jsonify({'error': 'Invalid price format'}), 400
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logging.error(f"Database error in POST /api/discounted_artefacts: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"Unexpected error in POST /api/discounted_artefacts: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+        # Verify category exists
+        category = Category.query.get(data['category_id'])
+        if not category:
+            logger.error(f'Invalid category_id: {data["category_id"]}')
+            return jsonify({'error': 'Invalid category'}), 400
 
+        # Verify subcategory if provided
+        subcategory = None
+        if data.get('subcategory_id'):
+            subcategory = Subcategory.query.get(data['subcategory_id'])
+            if not subcategory or subcategory.category_id != data['category_id']:
+                logger.error(f'Invalid subcategory_id: {data["subcategory_id"]}')
+                return jsonify({'error': 'Invalid subcategory'}), 400
+
+        # Validate discount if provided
+        discount_id = None
+        if data.get('discount'):
+            try:
+                discount_data = data['discount']
+                percent = float(discount_data.get('percent'))
+                start_date = datetime.strptime(discount_data.get('start_date'), '%Y-%m-%d').date()
+                end_date = datetime.strptime(discount_data.get('end_date'), '%Y-%m-%d').date()
+                if percent < 0 or percent > 100:
+                    logger.error('Discount percent must be between 0 and 100')
+                    return jsonify({'error': 'Discount percent must be between 0 and 100'}), 400
+                if start_date > end_date:
+                    logger.error('Discount start date cannot be after end date')
+                    return jsonify({'error': 'Discount start date cannot be after end date'}), 400
+
+                # Create Discount record
+                discount = Discount(
+                    percent=percent,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+                db.session.add(discount)
+                db.session.flush()  # Ensure discount ID is available
+                discount_id = discount.id
+            except (ValueError, TypeError) as e:
+                logger.error(f'Invalid discount data: {str(e)}')
+                return jsonify({'error': 'Invalid discount data'}), 400
+
+        # Handle image if provided
+        image_filename = None
+        if data.get('image') and data.get('image_type'):
+            try:
+                image_data = base64.b64decode(data['image'])
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                image_filename = f"product_{timestamp}.{data['image_type']}"
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+                with open(image_path, 'wb') as f:
+                    f.write(image_data)
+                logger.debug(f'Image saved: {image_filename}')
+            except Exception as e:
+                logger.error(f'Failed to save image: {str(e)}')
+                return jsonify({'error': 'Failed to process image'}), 400
+
+        # Create new product
+        product = Product(
+            title=data['title'],
+            category_id=data['category_id'],
+            subcategory_id=data.get('subcategory_id'),
+            price=float(data['price']),
+            discount_id=discount_id,  # Set discount_id instead of discount
+            description=data.get('description'),
+            image=image_filename
+        )
+        db.session.add(product)
+        db.session.commit()
+
+        logger.info(f'Product added successfully: {product.id}')
+        return jsonify({'id': product.id, 'message': 'Product added successfully'}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f'Error adding product: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/discounted_artefacts', methods=['GET'])
+def get_products():
+    try:
+        products = db.session.query(Product).options(
+            joinedload(Product.category),
+            joinedload(Product.subcategory),
+            joinedload(Product.discount)
+        ).all()
+        return jsonify([{
+            'id': p.id,
+            'name': p.title,  # Map title to name
+            'category_id': p.category_id,
+            'subcategory_id': p.subcategory_id,
+            'price': float(p.price),
+            'discount': {
+                'percent': float(p.discount.percent),
+                'start_date': p.discount.start_date.isoformat(),
+                'end_date': p.discount.end_date.isoformat()
+            } if p.discount else None,
+            'image': p.image,
+            'description': p.description
+        } for p in products])
+    except SQLAlchemyError as e:
+        logger.error(f'Error fetching products: {str(e)}')
+        return jsonify({'error': 'Database error'}), 500
+    except Exception as e:
+        logger.error(f'Error fetching products: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/api/discounted_artefacts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_product(id):
+    # Fetch product or return 404 if not found
     product = Product.query.get_or_404(id)
+
     if request.method == 'GET':
-        return jsonify({
-            'id': product.id,
-            'name': product.name,
-            'category': product.category,
-            'price': product.price,
-            'image': product.image,
-            'description': product.description,
-            'discount': product.discount.percent if product.discount else None
-        })
-    if 'admin' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    if request.method == 'PUT':
         try:
-            product.name = request.form.get('name', product.name)
-            product.category = request.form.get('category', product.category)
-            product.price = float(request.form.get('price', product.price))
-            product.description = request.form.get('description', product.description)
-            if 'image' in request.files and request.files['image'].filename:
+            # Return product details
+            return jsonify({
+                'id': product.id,
+                'title': product.title,
+                'description': product.description,
+                'price': product.price,
+                'category_id': product.category_id,
+                'subcategory_id': product.subcategory_id,
+                'image': product.image,
+                'discount': {
+                    'percent': product.discount.percent,
+                    'start_date': product.discount.start_date.isoformat(),
+                    'end_date': product.discount.end_date.isoformat()
+                } if product.discount else None
+            })
+        except Exception as e:
+            logger.error(f"Error retrieving product {id}: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'PUT':
+        if 'admin' not in session:
+            logger.error("Unauthorized access to update product")
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        try:
+            # Determine content type and extract data
+            is_json = request.content_type and 'application/json' in request.content_type
+            if is_json:
+                data = request.get_json()
+                if not data:
+                    logger.error("No JSON data provided")
+                    return jsonify({'error': 'Invalid JSON data'}), 400
+                title = data.get('title', product.title)
+                description = data.get('description', product.description)
+                price = data.get('price', product.price)
+                category_id = data.get('category_id', product.category_id)
+                subcategory_id = data.get('subcategory_id', product.subcategory_id)
+                discount_data = data.get('discount')
+                image_data = data.get('image')  # Base64 string
+                image_type = data.get('image_type')  # e.g., 'jpg'
+            else:
+                # Expect multipart/form-data
+                title = request.form.get('title', product.title)
+                description = request.form.get('description', product.description)
+                price = request.form.get('price', product.price)
+                category_id = request.form.get('category_id', product.category_id)
+                subcategory_id = request.form.get('subcategory_id', product.subcategory_id)
+                discount_data = request.form.get('discount')
+                image_data = None
+                image_type = None
+
+            logger.debug(f"Received data: title={title}, price={price}, category_id={category_id}, subcategory_id={subcategory_id}, discount_data={discount_data}")
+
+            # Validate required fields
+            if not title or price is None or category_id is None:
+                logger.error("Missing required fields: title, price, or category_id")
+                return jsonify({'error': 'Title, price, and category_id are required'}), 400
+
+            # Validate price
+            try:
+                price = float(price)
+                if price < 0:
+                    logger.error("Negative price provided")
+                    return jsonify({'error': 'Price cannot be negative'}), 400
+            except (ValueError, TypeError):
+                logger.error("Invalid price value")
+                return jsonify({'error': 'Invalid price value'}), 400
+
+            # Validate category
+            try:
+                category_id = int(category_id)
+            except (ValueError, TypeError):
+                logger.error("Invalid category_id")
+                return jsonify({'error': 'Invalid category_id'}), 400
+            category = Category.query.get(category_id)
+            if not category:
+                logger.error(f"Category not found: {category_id}")
+                return jsonify({'error': 'Category not found'}), 404
+
+            # Validate subcategory
+            subcategory_id = int(subcategory_id) if subcategory_id else None
+            if subcategory_id:
+                subcategory = Subcategory.query.get(subcategory_id)
+                if not subcategory or subcategory.category_id != category_id:
+                    logger.error(f"Invalid subcategory_id: {subcategory_id}")
+                    return jsonify({'error': 'Invalid subcategory for selected category'}), 400
+
+            # Handle discount
+            if discount_data:
+                try:
+                    discount_dict = json.loads(discount_data) if isinstance(discount_data, str) else discount_data
+                    percent = float(discount_dict.get('percent'))
+                    start_date = datetime.strptime(discount_dict.get('start_date'), '%Y-%m-%d').date()
+                    end_date = datetime.strptime(discount_dict.get('end_date'), '%Y-%m-%d').date()
+                    if percent < 0 or percent > 100:
+                        logger.error("Invalid discount percent")
+                        return jsonify({'error': 'Discount percent must be between 0 and 100'}), 400
+                    if start_date > end_date:
+                        logger.error("Invalid discount dates")
+                        return jsonify({'error': 'Discount start date cannot be after end date'}), 400
+
+                    if product.discount:
+                        product.discount.percent = percent
+                        product.discount.start_date = start_date
+                        product.discount.end_date = end_date
+                    else:
+                        discount = Discount(
+                            percent=percent,
+                            start_date=start_date,
+                            end_date=end_date
+                        )
+                        db.session.add(discount)
+                        db.session.flush()
+                        product.discount_id = discount.id
+                except (ValueError, TypeError, json.JSONDecodeError) as e:
+                    logger.error(f"Invalid discount data: {str(e)}")
+                    return jsonify({'error': 'Invalid discount data'}), 400
+            else:
+                if product.discount:
+                    db.session.delete(product.discount)
+                    product.discount_id = None
+
+            # Update product fields
+            product.title = title
+            product.description = description
+            product.price = price
+            product.category_id = category_id
+            product.subcategory_id = subcategory_id
+
+            # Handle image upload
+            if is_json and image_data and image_type:
+                # Handle base64 image
+                try:
+                    image_bytes = base64.b64decode(image_data)
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = secure_filename(f"product_{timestamp}.{image_type}")
+                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    with open(image_path, 'wb') as f:
+                        f.write(image_bytes)
+                    if product.image:
+                        old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+                    product.image = filename
+                    logger.debug(f"Base64 image saved: {filename}")
+                except Exception as e:
+                    logger.error(f"Failed to process base64 image: {str(e)}")
+                    return jsonify({'error': 'Failed to process image'}), 400
+            elif not is_json and 'image' in request.files and request.files['image'].filename:
+                # Handle file upload
                 image = request.files['image']
-                if not allowed_file(image.filename):
-                    return jsonify({'error': 'Invalid image format'}), 400
+                if not image.mimetype in ['image/jpeg', 'image/png']:
+                    logger.error("Invalid image mimetype")
+                    return jsonify({'error': 'Only JPG and PNG images are allowed'}), 400
                 if image.content_length > 3 * 1024 * 1024:
+                    logger.error("Image size exceeds 3MB")
                     return jsonify({'error': 'Image size exceeds 3MB'}), 400
-                filename = save_file(image)
-                if product.image and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], product.image)):
-                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], product.image))
+                if product.image:
+                    old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image)
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+                filename = secure_filename(f"product_{datetime.now().timestamp()}_{image.filename}")
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 product.image = filename
+                logger.debug(f"File image saved: {filename}")
+
             db.session.commit()
-            return jsonify({'message': 'Product updated successfully'})
-        except ValueError:
-            return jsonify({'error': 'Invalid price format'}), 400
+            logger.info(f"Product {id} updated successfully")
+            return jsonify({
+                'message': 'Product updated successfully',
+                'product': {
+                    'id': product.id,
+                    'title': product.title,
+                    'description': product.description,
+                    'price': product.price,
+                    'category_id': product.category_id,
+                    'subcategory_id': product.subcategory_id,
+                    'image': product.image,
+                    'discount': {
+                        'percent': product.discount.percent,
+                        'start_date': product.discount.start_date.isoformat(),
+                        'end_date': product.discount.end_date.isoformat()
+                    } if product.discount else None
+                }
+            })
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in PUT /api/discounted_artefacts/{id}: {str(e)}")
+            logger.error(f"Database error updating product {id}: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in PUT /api/discounted_artefacts/{id}: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
-    if request.method == 'DELETE':
+            logger.error(f"Unexpected error updating product {id}: {str(e)}")
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+
+    elif request.method == 'DELETE':
+        if 'admin' not in session:
+            logger.error("Unauthorized access to delete product")
+            return jsonify({'error': 'Unauthorized'}), 401
+
         try:
-            logging.debug(f"Deleting product ID {id}: {product.name}")
+            # Delete associated discount if exists
+            if product.discount:
+                db.session.delete(product.discount)
 
-            # Delete related cart items
-            cart_items = Cart.query.filter_by(product_id=id).all()
-            if cart_items:
-                logging.debug(f"Found {len(cart_items)} cart items for product ID {id}")
-                Cart.query.filter_by(product_id=id).delete()
+            # Delete product image file if exists
+            if product.image:
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
 
-            # Delete related order items
-            order_items = OrderItem.query.filter_by(product_id=id).all()
-            if order_items:
-                logging.debug(f"Found {len(order_items)} order items for product ID {id}")
-                OrderItem.query.filter_by(product_id=id).delete()
-
-            # Delete related wishlist items
-            wishlist_items = Wishlist.query.filter_by(product_id=id).all()
-            if wishlist_items:
-                logging.debug(f"Found {len(wishlist_items)} wishlist items for product ID {id}")
-                Wishlist.query.filter_by(product_id=id).delete()
-
-            # Delete related reviews
-            reviews = Review.query.filter_by(product_id=id).all()
-            if reviews:
-                logging.debug(f"Found {len(reviews)} reviews for product ID {id}")
-                Review.query.filter_by(product_id=id).delete()
-
-            # Delete related discount
-            if product.discount_id:
-                discount = Discount.query.get(product.discount_id)
-                if discount:
-                    logging.debug(f"Deleting discount ID {discount.id} for product ID {id}")
-                    db.session.delete(discount)
-
-            # Delete product image
-            if product.image and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], product.image)):
-                logging.debug(f"Deleting image: {product.image}")
-                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], product.image))
-
-            # Delete the product
+            # Delete product
             db.session.delete(product)
             db.session.commit()
-            logging.debug(f"Product ID {id} deleted successfully")
-
+            logger.info(f"Product {id} deleted successfully")
             return jsonify({'message': 'Product deleted successfully'})
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in DELETE /api/discounted_artefacts/{id}: {str(e)}")
-            return jsonify({'error': 'Cannot delete product due to database constraints'}), 500
+            logger.error(f"Database error deleting product {id}: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in DELETE /api/discounted_artefacts/{id}: {str(e)}")
+            logger.error(f"Unexpected error deleting product {id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
+        
+@app.route('/api/gifts', methods=['GET'])
+def get_gifts():
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    gifts = Gift.query.all()
+    return jsonify([{
+        'id': gift.id,
+        'product_name': gift.product_name,
+        'description': gift.description,
+        'price': gift.price,
+        'start_date': gift.start_date.isoformat(),
+        'end_date': gift.end_date.isoformat(),
+        'category_id': gift.category_id,
+        'subcategory_id': gift.subcategory_id,
+        'category': gift.category.name if gift.category else 'N/A',
+        'subcategory': gift.subcategory.name if gift.subcategory else 'None',
+        'image': gift.image,
+        'created_at': gift.created_at.isoformat()
+    } for gift in gifts])
+
+@app.route('/api/gifts', methods=['POST'])
+def create_gift():
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if not request.form or not request.files:
+        return jsonify({'error': 'Missing form data or file'}), 400
+    
+    product_name = request.form.get('product_name')
+    description = request.form.get('description')
+    price = request.form.get('price')
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    category_id = request.form.get('category_id')
+    subcategory_id = request.form.get('subcategory_id')
+    image = request.files.get('image')
+    
+    if not all([product_name, description, price, start_date, end_date, category_id]):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        price = float(price)
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        category_id = int(category_id)
+        subcategory_id = int(subcategory_id) if subcategory_id else None
+    except ValueError:
+        return jsonify({'error': 'Invalid price, date, category_id, or subcategory_id format'}), 400
+    
+    if start_date > end_date:
+        return jsonify({'error': 'End date must be after start date'}), 400
+    
+    category = Category.query.get(category_id)
+    if not category:
+        return jsonify({'error': 'Category not found'}), 404
+    
+    if subcategory_id:
+        subcategory = Subcategory.query.get(subcategory_id)
+        if not subcategory or subcategory.category_id != category_id:
+            return jsonify({'error': 'Invalid subcategory for selected category'}), 400
+    
+    if not image or not image.filename:
+        return jsonify({'error': 'Image is required'}), 400
+    
+    if not image.mimetype in ['image/jpeg', 'image/png']:
+        return jsonify({'error': 'Only JPG and PNG images are allowed'}), 400
+    if image.content_length > 3 * 1024 * 1024:
+        return jsonify({'error': 'Image size must be less than 3MB'}), 400
+    
+    filename = secure_filename(f"gift_{datetime.now().timestamp()}_{image.filename}")
+    image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    
+    gift = Gift(
+        product_name=product_name,
+        description=description,
+        price=price,
+        start_date=start_date,
+        end_date=end_date,
+        category_id=category_id,
+        subcategory_id=subcategory_id,
+        image=filename
+    )
+    db.session.add(gift)
+    db.session.commit()
+    
+    return jsonify({'message': 'Gift created successfully', 'id': gift.id}), 201
+
+@app.route('/api/gifts/<int:id>', methods=['GET'])
+def get_gift(id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    gift = Gift.query.get_or_404(id)
+    return jsonify({
+        'id': gift.id,
+        'product_name': gift.product_name,
+        'description': gift.description,
+        'price': gift.price,
+        'start_date': gift.start_date.isoformat(),
+        'end_date': gift.end_date.isoformat(),
+        'category_id': gift.category_id,
+        'subcategory_id': gift.subcategory_id,
+        'image': gift.image,
+        'created_at': gift.created_at.isoformat()
+    })
+
+@app.route('/api/gifts/<int:id>', methods=['PUT'])
+def update_gift(id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    gift = Gift.query.get_or_404(id)
+    
+    if not request.form:
+        return jsonify({'error': 'Missing form data'}), 400
+    
+    product_name = request.form.get('product_name')
+    description = request.form.get('description')
+    price = request.form.get('price')
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    category_id = request.form.get('category_id')
+    subcategory_id = request.form.get('subcategory_id')
+    image = request.files.get('image')
+    
+    if not all([product_name, description, price, start_date, end_date, category_id]):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        price = float(price)
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        category_id = int(category_id)
+        subcategory_id = int(subcategory_id) if subcategory_id else None
+    except ValueError:
+        return jsonify({'error': 'Invalid price, date, category_id, or subcategory_id format'}), 400
+    
+    if start_date > end_date:
+        return jsonify({'error': 'End date must be after start date'}), 400
+    
+    category = Category.query.get(category_id)
+    if not category:
+        return jsonify({'error': 'Category not found'}), 404
+    
+    if subcategory_id:
+        subcategory = Subcategory.query.get(subcategory_id)
+        if not subcategory or subcategory.category_id != category_id:
+            return jsonify({'error': 'Invalid subcategory for selected category'}), 400
+    
+    gift.product_name = product_name
+    gift.description = description
+    gift.price = price
+    gift.start_date = start_date
+    gift.end_date = end_date
+    gift.category_id = category_id
+    gift.subcategory_id = subcategory_id
+    
+    if image and image.filename:
+        if not image.mimetype in ['image/jpeg', 'image/png']:
+            return jsonify({'error': 'Only JPG and PNG images are allowed'}), 400
+        if image.content_length > 3 * 1024 * 1024:
+            return jsonify({'error': 'Image size must be less than 3MB'}), 400
+        if gift.image:
+            old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], gift.image)
+            if os.path.exists(old_image_path):
+                os.remove(old_image_path)
+        filename = secure_filename(f"gift_{datetime.now().timestamp()}_{image.filename}")
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        gift.image = filename
+    
+    db.session.commit()
+    return jsonify({'message': 'Gift updated successfully'})
+
+@app.route('/api/gifts/<int:id>', methods=['DELETE'])
+def delete_gift(id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    gift = Gift.query.get_or_404(id)
+    if gift.image:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], gift.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+    db.session.delete(gift)
+    db.session.commit()
+    return jsonify({'message': 'Gift deleted successfully'})
+
+@app.route('/api/subcategories', methods=['GET', 'POST'])
+@app.route('/api/subcategories/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_subcategories(id=None):
+    if 'admin' not in session:
+        app.logger.debug("No admin in session")
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if request.method == 'GET':
+        try:
+            if id:
+                subcategory = db.session.get(Subcategory, id)
+                if not subcategory:
+                    app.logger.debug(f"Subcategory ID {id} not found")
+                    return jsonify({'error': 'Subcategory not found'}), 404
+                return jsonify({
+                    'id': subcategory.id,
+                    'name': subcategory.name,
+                    'slug': subcategory.slug,
+                    'description': subcategory.description,
+                    'category_id': subcategory.category_id
+                }), 200
+            else:
+                subcategories = Subcategory.query.all()
+                app.logger.debug(f"Fetched {len(subcategories)} subcategories")
+                return jsonify([{
+                    'id': s.id,
+                    'name': s.name,
+                    'slug': s.slug,
+                    'description': s.description,
+                    'category_id': s.category_id
+                } for s in subcategories]), 200
+        except SQLAlchemyError as e:
+            app.logger.error(f"Database error fetching subcategories: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            app.logger.error(f"Unexpected error fetching subcategories: {str(e)}")
+            return jsonify({'error': 'Failed to fetch subcategories'}), 500
+
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            app.logger.debug(f"Received POST /api/subcategories data: {data}")
+            required_fields = ['name', 'category_id']
+            missing_fields = [field for field in required_fields if field not in data or not data[field]]
+            if missing_fields:
+                return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+            category = db.session.get(Category, data['category_id'])
+            if not category:
+                return jsonify({'error': 'Category not found'}), 404
+
+            subcategory = Subcategory(
+                name=data['name'],
+                slug=slugify(data['name']),
+                description=data.get('description'),
+                category_id=data['category_id']
+            )
+            db.session.add(subcategory)
+            db.session.commit()
+            app.logger.debug(f"Created subcategory: {subcategory.name}")
+            return jsonify({'message': 'Subcategory created successfully', 'id': subcategory.id}), 201
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f"Database error creating subcategory: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Unexpected error creating subcategory: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    if request.method == 'PUT':
+        try:
+            subcategory = db.session.get(Subcategory, id)
+            if not subcategory:
+                app.logger.debug(f"Subcategory ID {id} not found")
+                return jsonify({'error': 'Subcategory not found'}), 404
+
+            data = request.get_json()
+            app.logger.debug(f"Received PUT /api/subcategories/{id} data: {data}")
+            if 'name' in data:
+                subcategory.name = data['name']
+                subcategory.slug = slugify(data['name'])
+            if 'description' in data:
+                subcategory.description = data['description']
+            if 'category_id' in data:
+                category = db.session.get(Category, data['category_id'])
+                if not category:
+                    return jsonify({'error': 'Category not found'}), 404
+                subcategory.category_id = data['category_id']
+
+            db.session.commit()
+            app.logger.debug(f"Updated subcategory ID {id}")
+            return jsonify({'message': 'Subcategory updated successfully'}), 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f"Database error updating subcategory: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Unexpected error updating subcategory: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    if request.method == 'DELETE':
+        try:
+            subcategory = db.session.get(Subcategory, id)
+            if not subcategory:
+                app.logger.debug(f"Subcategory ID {id} not found")
+                return jsonify({'error': 'Subcategory not found'}), 404
+
+            # Check for dependent products or gifts
+            products = Product.query.filter_by(subcategory_id=id).count()
+            gifts = Gift.query.filter_by(subcategory_id=id).count()
+            if products > 0 or gifts > 0:
+                app.logger.debug(f"Subcategory ID {id} has {products} products and {gifts} gifts")
+                return jsonify({'error': 'Cannot delete subcategory with associated products or gifts'}), 400
+
+            db.session.delete(subcategory)
+            db.session.commit()
+            app.logger.debug(f"Deleted subcategory ID {id}")
+            return jsonify({'message': 'Subcategory deleted successfully'}), 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f"Database error deleting subcategory: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Unexpected error deleting subcategory: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/subcategories/<int:id>', methods=['PUT'])
+def update_subcategory(id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    subcategory = Subcategory.query.get_or_404(id)
+    data = request.get_json()
+    if not data or not data.get('name') or not data.get('category_id'):
+        return jsonify({'error': 'Missing name or category_id'}), 400
+    
+    if Subcategory.query.filter_by(name=data['name'], category_id=data['category_id']).filter(Subcategory.id != id).first():
+        return jsonify({'error': 'Subcategory already exists in this category'}), 400
+    
+    category = Category.query.get(data['category_id'])
+    if not category:
+        return jsonify({'error': 'Category not found'}), 404
+    
+    subcategory.name = data['name']
+    subcategory.slug = slugify(data['name'])
+    subcategory.description = data.get('description')
+    subcategory.category_id = data['category_id']
+    db.session.commit()
+    return jsonify({'message': 'Subcategory updated successfully'})
+
+@app.route('/api/subcategories/<int:id>', methods=['DELETE'])
+def delete_subcategory(id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    subcategory = Subcategory.query.get_or_404(id)
+    if Product.query.filter_by(subcategory_id=id).first() or Gift.query.filter_by(subcategory_id=id).first():
+        return jsonify({'error': 'Cannot delete subcategory with associated products or gifts'}), 400
+    
+    db.session.delete(subcategory)
+    db.session.commit()
+    return jsonify({'message': 'Subcategory deleted successfully'})
 
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
@@ -781,7 +1256,7 @@ def get_orders():
         orders_data = []
         for order in orders:
             # Fetch user details
-            user = User.query.get(order.user_id)
+            user = db.session.get(User, order.user_id)  # Use session.get
             customer_name = order.customer_name or (user.name if user else 'Unknown')
             customer_number = order.customer_number or (user.phone_number if user and user.phone_number else 'N/A')
             location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
@@ -793,7 +1268,7 @@ def get_orders():
                 product = item.product
                 items_data.append({
                     'product_id': item.product_id,
-                    'product_name': product.name if product else 'Deleted Product',
+                    'product_name': product.title if product else 'Deleted Product',  # Use title
                     'quantity': item.quantity,
                     'image': product.image if product and product.image else 'default.jpg'
                 })
@@ -825,7 +1300,6 @@ def get_orders():
     except Exception as e:
         app.logger.error(f"Unexpected error fetching orders: {str(e)}")
         return jsonify({'error': 'Failed to fetch orders'}), 500
-
 
 
 @app.route('/api/orders/<int:id>', methods=['GET', 'PUT', 'DELETE'])
@@ -1017,34 +1491,39 @@ def create_manual_order():
         logging.error(f"Unexpected error in POST /api/manual_orders: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-# Discount Routes
 @app.route('/api/discounts', methods=['GET', 'POST'])
 def handle_discounts():
     if 'admin' not in session:
+        logger.debug("No admin in session")
         return jsonify({'error': 'Unauthorized'}), 401
+
     if request.method == 'GET':
         try:
-            discounts = Discount.query.all()
-            return jsonify([
-                {
+            discounts = db.session.query(Discount).options(joinedload(Discount.product)).all()
+            logger.debug(f"Fetched {len(discounts)} discounts")
+            discount_data = []
+            for d in discounts:
+                logger.debug(f"Discount ID: {d.id}, Product: {d.product.title if d.product else 'None'}")
+                discount_data.append({
                     'id': d.id,
-                    'productId': p.id if (p := Product.query.filter_by(discount_id=d.id).first()) else None,
-                    'productName': p.name if (p := Product.query.filter_by(discount_id=d.id).first()) else 'N/A',
+                    'productId': d.product.id if d.product else None,
+                    'productName': d.product.title if d.product else 'N/A',
                     'percent': d.percent,
-                    'startDate': d.start_date.strftime('%Y-%m-%d'),
-                    'endDate': d.end_date.strftime('%Y-%m-%d')
-                } for d in discounts
-            ])
+                    'startDate': d.start_date.isoformat() if d.start_date else None,
+                    'endDate': d.end_date.isoformat() if d.end_date else None
+                })
+            return jsonify(discount_data), 200
         except SQLAlchemyError as e:
-            logging.error(f"Database error in GET /api/discounts: {str(e)}")
+            logger.error(f"Database error fetching discounts: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
-            logging.error(f"Unexpected error in GET /api/discounts: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logger.error(f"Unexpected error fetching discounts: {str(e)}")
+            return jsonify({'error': 'Failed to fetch discounts'}), 500
+
     if request.method == 'POST':
         try:
             data = request.get_json()
-            logging.debug(f"Received POST /api/discounts data: {data}")
+            logger.debug(f"Received POST /api/discounts data: {data}")
             required_fields = ['productId', 'percent', 'startDate', 'endDate']
             missing_fields = [field for field in required_fields if field not in data or not data[field]]
             if missing_fields:
@@ -1066,7 +1545,7 @@ def handle_discounts():
             except ValueError:
                 return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
 
-            product = Product.query.get(product_id)
+            product = db.session.get(Product, product_id)
             if not product:
                 return jsonify({'error': 'Product not found'}), 404
             if product.discount_id:
@@ -1088,26 +1567,27 @@ def handle_discounts():
             }), 201
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in POST /api/discounts: {str(e)}")
+            logger.error(f"Database error in POST /api/discounts: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in POST /api/discounts: {str(e)}")
+            logger.error(f"Unexpected error in POST /api/discounts: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
-
+        
+        
 @app.route('/api/discounts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_discount(id):
     if 'admin' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    discount = Discount.query.get_or_404(id)
+    discount = Discount.query.options(joinedload(Discount.product)).get_or_404(id)
     if request.method == 'GET':
         return jsonify({
             'id': discount.id,
             'productId': discount.product.id if discount.product else None,
-            'productName': discount.product.name if discount.product else 'N/A',
+            'productName': discount.product.title if discount.product else 'N/A',  # Use title
             'percent': discount.percent,
-            'startDate': discount.start_date.strftime('%Y-%m-%d'),
-            'endDate': discount.end_date.strftime('%Y-%m-%d')
+            'startDate': discount.start_date.isoformat(),
+            'endDate': discount.end_date.isoformat()
         })
     if request.method == 'PUT':
         try:
@@ -1318,20 +1798,41 @@ def handle_user(id):
 def handle_categories():
     if request.method == 'GET':
         categories = Category.query.all()
-        return jsonify([{'id': c.id, 'name': c.name} for c in categories])
+        return jsonify([{
+            'id': c.id,
+            'name': c.name,
+            'description': c.description,
+            'image': c.image
+        } for c in categories])
     if 'admin' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     if request.method == 'POST':
         try:
-            data = request.get_json()
-            if not data.get('name'):
+            # Expect form data for name, description, and image
+            if not request.form.get('name'):
                 return jsonify({'error': 'Category name is required'}), 400
-            if Category.query.filter_by(name=data['name']).first():
+            if Category.query.filter_by(name=request.form['name']).first():
                 return jsonify({'error': 'Category already exists'}), 400
-            category = Category(name=data['name'])
+
+            # Handle image upload
+            image_filename = None
+            if 'image' in request.files and request.files['image'].filename:
+                image = request.files['image']
+                if not allowed_file(image.filename):
+                    return jsonify({'error': 'Invalid image format (use PNG, JPG, JPEG, GIF)'}), 400
+                if image.content_length > 3 * 1024 * 1024:  # 3MB limit
+                    return jsonify({'error': 'Image size exceeds 3MB'}), 400
+                image_filename = save_file(image)
+
+            category = Category(
+                name=request.form['name'],
+                slug=slugify(request.form['name']),
+                description=request.form.get('description'),
+                image=image_filename
+            )
             db.session.add(category)
             db.session.commit()
-            return jsonify({'message': 'Category created successfully'}), 201
+            return jsonify({'message': 'Category created successfully', 'id': category.id}), 201
         except SQLAlchemyError as e:
             db.session.rollback()
             logging.error(f"Database error in POST /api/categories: {str(e)}")
@@ -1340,32 +1841,27 @@ def handle_categories():
             db.session.rollback()
             logging.error(f"Unexpected error in POST /api/categories: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
-
+        
+        
 @app.route('/api/categories/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_category(id):
     category = Category.query.get_or_404(id)
-    if request.method == 'GET':
-        return jsonify({'id': category.id, 'name': category.name})
-    if 'admin' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    if request.method == 'PUT':
-        try:
-            data = request.get_json()
-            if 'name' in data and data['name'] and Category.query.filter_by(name=data['name']).filter(Category.id != id).first():
-                return jsonify({'error': 'Category already exists'}), 400
-            category.name = data.get('name', category.name)
-            db.session.commit()
-            return jsonify({'message': 'Category updated successfully'})
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logging.error(f"Database error in PUT /api/categories/{id}: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
-        except Exception as e:
-            db.session.rollback()
-            logging.error(f"Unexpected error in PUT /api/categories/{id}: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
     if request.method == 'DELETE':
         try:
+            # Check for associated subcategories
+            subcategories = Subcategory.query.filter_by(category_id=id).count()
+            if subcategories > 0:
+                return jsonify({'error': 'Please remove its subcategories first.'}), 400
+            # Check for associated products or gifts
+            products = Product.query.filter_by(category_id=id).count()
+            gifts = Gift.query.filter_by(category_id=id).count()
+            if products > 0 or gifts > 0:
+                return jsonify({'error': 'Cannot delete category with associated products or gifts'}), 400
+            # Remove image file if exists
+            if category.image:
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], category.image)
+                if os.path.exists(image_path):
+                    os.remove(image_path)
             db.session.delete(category)
             db.session.commit()
             return jsonify({'message': 'Category deleted successfully'})
@@ -1377,7 +1873,7 @@ def handle_category(id):
             db.session.rollback()
             logging.error(f"Unexpected error in DELETE /api/categories/{id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
-
+        
 @app.route('/api/artisans', methods=['GET', 'POST'])
 def handle_artisans():
     if 'admin' not in session:
@@ -1658,123 +2154,93 @@ logger = logging.getLogger(__name__)
 def dashboard_stats():
     logger.debug('Entering /api/dashboard_stats')
     
-    # Check session
     if 'admin' not in session:
         logger.debug('No admin in session')
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        # Define date range: last 30 days
         end_date = datetime.utcnow().date()
         start_date = end_date - timedelta(days=30)
         logger.debug(f'Date range: {start_date} to {end_date}')
 
-        # Sales data: Aggregate total sales by day
-        try:
-            sales_query = db.session.query(
-                func.date(Order.created_at).label('date'),
-                func.sum(Order.total).label('total')
-            ).filter(
-                Order.created_at >= start_date,
-                Order.status != 'Canceled'
-            ).group_by(
-                func.date(Order.created_at)
-            ).order_by(
-                func.date(Order.created_at)
-            ).all()
-            logger.debug(f'Sales query result: {len(sales_query)} rows')
-        except Exception as e:
-            logger.error(f'Sales query failed: {str(e)}')
-            sales_query = []
+        # Sales data
+        sales_query = db.session.query(
+            func.date(Order.created_at).label('date'),
+            func.sum(Order.total).label('total')
+        ).filter(
+            Order.created_at >= start_date,
+            Order.status != 'Canceled'
+        ).group_by(
+            func.date(Order.created_at)
+        ).order_by(
+            func.date(Order.created_at)
+        ).all()
+        logger.debug(f'Sales query result: {len(sales_query)} rows')
 
         sales_data = [
             {'date': str(row.date), 'total': float(row.total or 0.0)}
             for row in sales_query
         ]
 
-        # Fill missing days with zero sales
         all_dates = [(start_date + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(31)]
         sales_data_dict = {item['date']: item['total'] for item in sales_data}
         sales_data = [
             {'date': date, 'total': sales_data_dict.get(date, 0.0)}
             for date in all_dates
         ]
-        logger.debug(f'Sales data length: {len(sales_data)}')
 
-        # Users data: Aggregate new users by day
-        try:
-            users_query = db.session.query(
-                func.date(User.created_at).label('date'),
-                func.count(User.id).label('count')
-            ).filter(
-                User.created_at >= start_date
-            ).group_by(
-                func.date(User.created_at)
-            ).order_by(
-                func.date(User.created_at)
-            ).all()
-            logger.debug(f'Users query result: {len(users_query)} rows')
-        except Exception as e:
-            logger.error(f'Users query failed: {str(e)}')
-            users_query = []
+        # Users data
+        users_query = db.session.query(
+            func.date(User.created_at).label('date'),
+            func.count(User.id).label('count')
+        ).filter(
+            User.created_at >= start_date
+        ).group_by(
+            func.date(User.created_at)
+        ).order_by(
+            func.date(User.created_at)
+        ).all()
+        logger.debug(f'Users query result: {len(users_query)} rows')
 
         users_data = [
             {'date': str(row.date), 'count': int(row.count or 0)}
             for row in users_query
         ]
 
-        # Fill missing days with zero users
         users_data_dict = {item['date']: item['count'] for item in users_data}
         users_data = [
             {'date': date, 'count': users_data_dict.get(date, 0)}
             for date in all_dates
         ]
-        logger.debug(f'Users data length: {len(users_data)}')
 
-        # Total sales (all time, only Delivered orders)
-        try:
-            total_sales = db.session.query(func.sum(Order.total)).filter(Order.status == 'Delivered').scalar() or 0.0
-            logger.debug(f'Total sales: {total_sales}')
-        except Exception as e:
-            logger.error(f'Total sales query failed: {str(e)}')
-            total_sales = 0.0
+        # Total sales
+        total_sales = db.session.query(func.sum(Order.total)).filter(Order.status == 'Delivered').scalar() or 0.0
+        logger.debug(f'Total sales: {total_sales}')
 
-        # New users (last 30 days)
-        try:
-            new_users = db.session.query(func.count(User.id)).filter(User.created_at >= start_date).scalar() or 0
-            logger.debug(f'New users: {new_users}')
-        except Exception as e:
-            logger.error(f'New users query failed: {str(e)}')
-            new_users = 0
+        # New users
+        new_users = db.session.query(func.count(User.id)).filter(User.created_at >= start_date).scalar() or 0
+        logger.debug(f'New users: {new_users}')
 
         # Pending orders
-        try:
-            pending_orders = db.session.query(func.count(Order.id)).filter(Order.status == 'Pending').scalar() or 0
-            logger.debug(f'Pending orders: {pending_orders}')
-        except Exception as e:
-            logger.error(f'Pending orders query failed: {str(e)}')
-            pending_orders = 0
+        pending_orders = db.session.query(func.count(Order.id)).filter(Order.status == 'Pending').scalar() or 0
+        logger.debug(f'Pending orders: {pending_orders}')
 
-        # Top product (by total quantity in completed orders in last 30 days)
-        try:
-            top_product_query = db.session.query(
-                Product.name,
-                func.sum(OrderItem.quantity).label('total_quantity')
-            ).join(OrderItem, Product.id == OrderItem.product_id).join(
-                Order, OrderItem.order_id == Order.id
-            ).filter(
-                Order.created_at >= start_date,
-                Order.status == 'Delivered'
-            ).group_by(
-                Product.name
-            ).order_by(
-                func.sum(OrderItem.quantity).desc()
-            ).first()
-            top_product = top_product_query.name if top_product_query else 'None'
-            logger.debug(f'Top product: {top_product} (Total quantity: {top_product_query.total_quantity if top_product_query else 0})')
-        except Exception as e:
-            logger.error(f'Top product query failed: {str(e)}')
-            top_product = 'None'
+        # Top product
+        top_product_query = db.session.query(
+            Product.title,
+            func.sum(OrderItem.quantity).label('total_quantity')
+        ).join(OrderItem, Product.id == OrderItem.product_id).join(
+            Order, OrderItem.order_id == Order.id
+        ).filter(
+            Order.created_at >= start_date,
+            Order.status == 'Delivered'
+        ).group_by(
+            Product.title
+        ).order_by(
+            func.sum(OrderItem.quantity).desc()
+        ).first()
+        top_product = top_product_query.title if top_product_query else 'None'
+        logger.debug(f'Top product: {top_product}')
 
         response = {
             'total_sales': float(total_sales),
@@ -1790,7 +2256,6 @@ def dashboard_stats():
     except Exception as e:
         logger.error(f'Unexpected error in dashboard_stats: {str(e)}')
         return jsonify({'error': 'Internal server error'}), 500
-    
     
 @app.route('/api/orders/<int:id>/cancel', methods=['POST'])
 def cancel_order(id):
@@ -2079,6 +2544,46 @@ def our_products():
         today=datetime.utcnow().date(),
         current_currency='USD'
     )
+    
+@app.route('/categories')
+@app.route('/categories/<string:slug>')
+def categories(slug=None):
+    try:
+        # Get current currency from session (default to KES)
+        current_currency = session.get('currency', 'KES')
+
+        # Fetch all categories for display (e.g., in a sidebar or dropdown)
+        categories = Category.query.all()
+
+        if slug:
+            # If a category slug is provided, fetch products for that category
+            category = Category.query.filter_by(slug=slug).first_or_404()
+            products = Product.query.filter_by(category_id=category.id).order_by(Product.created_at.desc()).all()
+            page_title = f"{category.name} - Zira Collections"
+        else:
+            # If no slug, show all categories or a general category overview
+            products = Product.query.order_by(Product.created_at.desc()).limit(12).all()  # Limit for overview
+            page_title = "Categories - Zira Collections"
+
+        # Log the fetched data for debugging
+        logging.debug(f"Rendering category.html: slug={slug}, categories={len(categories)}, products={len(products)}")
+
+        return render_template(
+            'category.html',
+            categories=categories,
+            products=products,
+            selected_category=category if slug else None,
+            today=datetime.utcnow().date(),
+            current_currency=current_currency,
+            page_title=page_title
+        )
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database error in /categories: {str(e)}")
+        return render_template('500.html'), 500
+    except Exception as e:
+        logging.error(f"Unexpected error in /categories: {str(e)}")
+        return render_template('500.html'), 500
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
 def products():
