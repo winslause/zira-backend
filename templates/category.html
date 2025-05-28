@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }}</title>
+    <title>Zira Collection - Explore Timeless Treasures</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
@@ -448,42 +448,6 @@
         #mobile-sidebar button i {
             font-size: 0.75rem; /* Smaller icon size */
         }
-
-        /* Currency Dropdown Styling */
-        .currency-dropdown {
-            position: relative;
-        }
-        .currency-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 0.375rem;
-            min-width: 100px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            z-index: 1000;
-        }
-        .currency-dropdown:hover .currency-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .currency-item {
-            display: block;
-            padding: 0.5rem 1rem;
-            color: #374151;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .currency-item:hover {
-            background-color: #f3f4f6;
-            color: #d97706;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -496,48 +460,50 @@
             </button>
             <!-- Logo (Center on Mobile, Left on Desktop) -->
             <div class="flex items-center nav-logo order-2 md:order-1">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-12">
+                <img src="../static/images/logo.png" alt="Zira Collection Logo" class="h-12">
             </div>
             <!-- Desktop Menu (Center) -->
             <div class="hidden md:flex flex-1 justify-center space-x-8 items-center order-2">
                 <div class="relative group">
-                    <a href="{{ url_for('categories') }}" class="nav-item text-gray-700 text-lg category-filter" 
+                    <a href="#" class="nav-item text-gray-700 text-lg category-filter" 
                        data-category="all" style="--index: 1;">All Categories</a>
                 </div>
-                {% for category in categories %}
                 <div class="relative group">
-                    <a href="{{ url_for('categories', slug=category.slug) }}" class="nav-item text-gray-700 text-lg" style="--index: {{ loop.index + 1 }}">{{ category.name }}</a>
-                    {% set subcategories = category.products | map(attribute='subcategory') | unique | list %}
-                    {% if subcategories %}
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 2;">Soapstone Carvings</a>
                     <div class="dropdown-menu">
-                        {% for subcategory in subcategories %}
-                        <a href="{{ url_for('categories', slug=category.slug) }}#{{ subcategory | lower | replace(' ', '-') }}" 
-                           class="dropdown-item subcategory-filter" 
-                           data-category="{{ category.slug }}" 
-                           data-subcategory="{{ subcategory | lower | replace(' ', '-') }}" 
-                           style="--index: {{ loop.index }}">{{ subcategory }}</a>
-                        {% endfor %}
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="animals" style="--index: 1;">Animals</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="abstract" style="--index: 2;">Abstract</a>
                     </div>
-                    {% endif %}
                 </div>
-                {% endfor %}
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 3;">Wooden Artifacts</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="masks" style="--index: 1;">Masks</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="sculptures" style="--index: 2;">Sculptures</a>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 4;">Beadwork</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="jewelry" style="--index: 1;">Jewelry</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="decor" style="--index: 2;">Decor</a>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 5;">Giftings</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="personalized" style="--index: 1;">Personalized Gifts</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="baskets" style="--index: 2;">Gift Baskets</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="keepsakes" style="--index: 3;">Keepsakes</a>
+                    </div>
+                </div>
             </div>
             <!-- Icons (Right) -->
             <div class="flex items-center space-x-4 order-3">
-                <button id="search-toggle" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories | length + 2 }};"><i class="fas fa-search"></i></button>
-                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories | length + 3 }};"><i class="fas fa-heart"></i></a>
-                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories | length + 4 }};"><i class="fas fa-shopping-cart"></i></a>
-                <div class="currency-dropdown nav-icon" style="--index: {{ categories | length + 5 }};">
-                    <button class="text-gray-700 hover:text-yellow-600 flex items-center">
-                        <i class="fas fa-dollar-sign mr-1"></i> {{ current_currency }}
-                    </button>
-                    <div class="currency-menu">
-                        <a href="#" class="currency-item" data-currency="KES">KES</a>
-                        <a href="#" class="currency-item" data-currency="USD">USD</a>
-                        <a href="#" class="currency-item" data-currency="EUR">EUR</a>
-                        <a href="#" class="currency-item" data-currency="GBP">GBP</a>
-                    </div>
-                </div>
+                <button id="search-toggle" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 6;"><i class="fas fa-search"></i></button>
+                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 7;"><i class="fas fa-heart"></i></a>
+                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 8;"><i class="fas fa-shopping-cart"></i></a>
+                <button class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 9;"><i class="fas fa-dollar-sign"></i></button>
             </div>
         </div>
         <!-- Search Bar -->
@@ -551,23 +517,44 @@
                 <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50">
                     <i class="fas fa-times text-lg"></i>
                 </button>
-                <a href="{{ url_for('categories') }}" class="text-gray-700 hover:text-yellow-600 category-filter" data-category="all">All Categories</a>
-                {% for category in categories %}
+                <a href="#" class="text-gray-700 hover:text-yellow-600 category-filter" data-category="all">All Categories</a>
                 <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('{{ category.slug }}-mobile')">
-                        <span>{{ category.name }} <i class="fas fa-chevron-down"></i></span>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('soapstone-mobile')">
+                        <span>Soapstone Carvings <i class="fas fa-chevron-down"></i></span>
                     </button>
-                    {% set subcategories = category.products | map(attribute='subcategory') | unique | list %}
-                    <div id="{{ category.slug }}-mobile" class="hidden pl-4 space-y-2">
-                        {% for subcategory in subcategories %}
-                        <a href="{{ url_for('categories', slug=category.slug) }}#{{ subcategory | lower | replace(' ', '-') }}" 
-                           class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" 
-                           data-category="{{ category.slug }}" 
-                           data-subcategory="{{ subcategory | lower | replace(' ', '-') }}">{{ subcategory }}</a>
-                        {% endfor %}
+                    <div id="soapstone-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="animals">Animals</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="abstract">Abstract</a>
                     </div>
                 </div>
-                {% endfor %}
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('wooden-mobile')">
+                        <span>Wooden Artifacts <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="wooden-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="masks">Masks</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="sculptures">Sculptures</a>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('beadwork-mobile')">
+                        <span>Beadwork <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="beadwork-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="jewelry">Jewelry</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="decor">Decor</a>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('giftings-mobile')">
+                        <span>Giftings <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="giftings-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="personalized">Personalized Gifts</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="baskets">Gift Baskets</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="keepsakes">Keepsakes</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -611,11 +598,10 @@
                             <div id="all-categories" class="mt-2 hidden"></div>
                             <div class="category-divider"></div>
                         </div>
-                        {% for category in categories %}
                         <div>
                             <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="{{ category.slug }}" onclick="toggleDropdown('{{ category.slug }}')" style="--index: {{ loop.index + 1 }}">
-                                {{ category.name }}
+                                    data-category="soapstone" onclick="toggleDropdown('soapstone')" style="--index: 2;">
+                                Soapstone Carvings
                                 <span class="chevron-container">
                                     <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -625,18 +611,78 @@
                                     </svg>
                                 </span>
                             </button>
-                            {% set subcategories = category.products | map(attribute='subcategory') | unique | list %}
-                            <div id="{{ category.slug }}" class="mt-2 hidden">
-                                {% for subcategory in subcategories %}
-                                <a href="{{ url_for('categories', slug=category.slug) }}#{{ subcategory | lower | replace(' ', '-') }}" 
-                                   class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="{{ category.slug }}" 
-                                   data-subcategory="{{ subcategory | lower | replace(' ', '-') }}" 
-                                   style="--index: {{ loop.index + loop.parent.loop.index + 1 }}">{{ subcategory }}</a>
-                                {% endfor %}
+                            <div id="soapstone" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="soapstone" data-subcategory="animals" style="--index: 3;">Animals</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="soapstone" data-subcategory="abstract" style="--index: 4;">Abstract</a>
                             </div>
                             <div class="category-divider"></div>
-                        {% endfor %}
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="wooden" onclick="toggleDropdown('wooden')" style="--index: 5;">
+                                Wooden Artifacts
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="wooden" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="wooden" data-subcategory="masks" style="--index: 6;">Masks</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="wooden" data-subcategory="sculptures" style="--index: 7;">Sculptures</a>
+                            </div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="beadwork" onclick="toggleDropdown('beadwork')" style="--index: 8;">
+                                Beadwork
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="beadwork" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="beadwork" data-subcategory="jewelry" style="--index: 9;">Jewelry</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="beadwork" data-subcategory="decor" style="--index: 10;">Decor</a>
+                            </div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="giftings" onclick="toggleDropdown('giftings')" style="--index: 11;">
+                                Giftings
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="giftings" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="personalized" style="--index: 12;">Personalized Gifts</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="baskets" style="--index: 13;">Gift Baskets</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="keepsakes" style="--index: 14;">Keepsakes</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -667,28 +713,117 @@
 
                     <!-- Product Grid -->
                     <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8">
-                        {% for product in products %}
+                        <!-- Soapstone Products -->
                         <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="{{ product.category.slug }}" 
-                             data-subcategory="{{ product.subcategory | lower | replace(' ', '-') if product.subcategory else '' }}" 
-                             data-price-kes="{{ product.price }}" 
-                             style="--index: {{ loop.index }}">
+                             data-category="soapstone" data-subcategory="animals" style="--index: 1;">
                             <div class="product-image-container">
-                                <img src="{{ url_for('static', filename='uploads/' + product.image) if product.image else url_for('static', filename='images/default.jpg') }}" 
-                                     alt="{{ product.title }}">
+                                <img src="https://images.pexels.com/photos/8229660/pexels-photo-8229660.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" 
+                                     alt="Soapstone Elephant">
                                 <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
                                     Quick View
                                 </button>
                             </div>
                             <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">{{ product.title }}</h3>
-                                <p class="text-gray-600 text-sm">{{ product.subcategory if product.subcategory else product.category.name }}</p>
-                                <p class="text-gray-800 font-semibold mt-2 price-text">{{ product.price | format_currency(current_currency) }}</p>
+                                <h3 class="text-lg font-medium text-gray-800">Soapstone Elephant</h3>
+                                <p class="text-gray-600 text-sm">Animals</p>
+                                <p class="text-gray-800 font-semibold mt-2">$45.00</p>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="soapstone" data-subcategory="abstract" style="--index: 2;">
+                            <div class="product-image-container">
+                                <img src="https://live.staticflickr.com/579/23126540934_dd47029055_b.jpg" 
+                                     alt="Soapstone Abstract">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Soapstone Abstract</h3>
+                                <p class="text-gray-600 text-sm">Abstract</p>
+                                <p class="text-gray-800 font-semibold mt-2">$60.00</p>
+                            </div>
+                        </div>
+                        <!-- Wooden Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="wooden" data-subcategory="masks" style="--index: 3;">
+                            <div class="product-image-container">
+                                <img src="https://www.al-monitor.com/sites/default/files/styles/article_header/public/2021-06/GettyImages-460492878.jpg?h=a5ae579a&itok=ItBhGKfX" 
+                                     alt="Wooden Mask">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Wooden Mask</h3>
+                                <p class="text-gray-600 text-sm">Masks</p>
+                                <p class="text-gray-800 font-semibold mt-2">$75.00</p>
+                            </div>
+                        </div>
+                        <!-- Beadwork Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="beadwork" data-subcategory="jewelry" style="--index: 4;">
+                            <div class="product-image-container">
+                                <img src="https://egymonuments.gov.eg/storage/events/May2024/1y0KT0K4REkCMEWpf0z1.jpg" 
+                                     alt="Beaded Necklace">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Beaded Necklace</h3>
+                                <p class="text-gray-600 text-sm">Jewelry</p>
+                                <p class="text-gray-800 font-semibold mt-2">$30.00</p>
+                            </div>
+                        </div>
+                        <!-- Giftings Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="personalized" style="--index: 5;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1607349913338-fca6f7fc42d0?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Personalized Gift Box">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Personalized Gift Box</h3>
+                                <p class="text-gray-600 text-sm">Personalized Gifts</p>
+                                <p class="text-gray-800 font-semibold mt-2">$50.00</p>
+                            </div>
+                        </div>
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="baskets" style="--index: 6;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1607344642600-0fcaa5d7b65f?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Artisan Gift Basket">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Artisan Gift Basket</h3>
+                                <p class="text-gray-600 text-sm">Gift Baskets</p>
+                                <p class="text-gray-800 font-semibold mt-2">$80.00</p>
+                            </div>
+                        </div>
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="keepsakes" style="--index: 7;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1513028589963-f6c0a58ba0b0?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Engraved Keepsake">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Engraved Keepsake</h3>
+                                <p class="text-gray-600 text-sm">Keepsakes</p>
+                                <p class="text-gray-800 font-semibold mt-2">$35.00</p>
+                            </div>
+                        </div>
                     </div>
-                    <p id="no-results" class="text-gray-600 text-center mt-8 hidden">No products found.</p>
+                    <p id="no-results" class="text-gray-600 text-center mt-8 hidden">No products found in this category.</p>
                 </div>
             </div>
         </div>
@@ -700,13 +835,13 @@
             <h3 class="text-2xl font-semibold text-yellow-600 mb-4 footer-item" style="--index: 1;">Zira Collection</h3>
             <p class="text-sm mb-6 footer-item" style="--index: 2;">Celebrating African Artistry Since 2015</p>
             <div class="flex justify-center gap-4 text-xl mb-6">
-                <a href="#" class="hover:text-yellow-600 footer-itemにかくstyle="--index: 3;"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 3;"><i class="fab fa-pinterest"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 4;"><i class="fab fa-facebook"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 5;"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 6;"><i class="fab fa-youtube"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 7;"><i class="fab fa-whatsapp"></i></a>
             </div>
-            <p class="text-sm footer-item" style="--index: 8;">© {{ today.year }} Zira Collection. All rights reserved.</p>
+            <p class="text-sm footer-item" style="--index: 8;">© 2025 Zira Collection. All rights reserved.</p>
         </div>
     </footer>
 
@@ -855,13 +990,13 @@
                 const name = productCard.querySelector('h3').textContent;
                 const category = productCard.getAttribute('data-category');
                 const subcategory = productCard.getAttribute('data-subcategory');
-                const price = productCard.querySelector('.price-text').textContent;
+                const price = productCard.querySelector('.text-gray-800.font-semibold').textContent;
 
                 modalImage.src = image;
                 modalImage.alt = name;
                 modalName.textContent = name;
                 modalCategory.textContent = `Category: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
-                modalSubcategory.textContent = `Subcategory: ${subcategory ? (subcategory.charAt(0).toUpperCase() + subcategory.slice(1)).replace('-', ' ') : 'None'}`;
+                modalSubcategory.textContent = `Subcategory: ${subcategory.charAt(0).toUpperCase() + subcategory.slice(1)}`;
                 modalPrice.textContent = price;
 
                 modal.classList.remove('hidden');
@@ -886,73 +1021,6 @@
                 e.preventDefault();
                 modal.classList.add('hidden');
             }
-        });
-
-        // Currency Toggle
-        const currencyItems = document.querySelectorAll('.currency-item');
-        let exchangeRates = {};
-
-        // Fetch exchange rates on page load
-        fetch('/get_exchange_rates')
-            .then(response => response.json())
-            .then(data => {
-                exchangeRates = data;
-            })
-            .catch(error => console.error('Error fetching exchange rates:', error));
-
-        function formatPrice(price, currency) {
-            const rate = exchangeRates[currency] || 1.0;
-            const convertedPrice = price * rate;
-            switch (currency) {
-                case 'USD':
-                    return `$${convertedPrice.toFixed(2)}`;
-                case 'EUR':
-                    return `€${convertedPrice.toFixed(2)}`;
-                case 'GBP':
-                    return `£${convertedPrice.toFixed(2)}`;
-                case 'KES':
-                    return `${convertedPrice.toFixed(0)} KES`;
-                default:
-                    return `${convertedPrice.toFixed(2)} ${currency}`;
-            }
-        }
-
-        currencyItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const newCurrency = item.getAttribute('data-currency');
-                
-                // Update session currency via POST request
-                fetch('/set_currency', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `currency=${newCurrency}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Update currency display
-                        document.querySelector('.currency-dropdown button').innerHTML = `<i class="fas fa-dollar-sign mr-1"></i> ${newCurrency}`;
-                        
-                        // Update all prices
-                        document.querySelectorAll('.product-card').forEach(card => {
-                            const priceKES = parseFloat(card.getAttribute('data-price-kes'));
-                            const priceElement = card.querySelector('.price-text');
-                            priceElement.textContent = formatPrice(priceKES, newCurrency);
-                        });
-
-                        // Update modal price if open
-                        if (!modal.classList.contains('hidden')) {
-                            const activeCard = document.querySelector('.product-card.active'); // Add active class if needed
-                            if (activeCard) {
-                                const priceKES = parseFloat(activeCard.getAttribute('data-price-kes'));
-                                modalPrice.textContent = formatPrice(priceKES, newCurrency);
-                            }
-                        }
-                    }
-                })
-                .catch(error => console.error('Error setting currency:', error));
-            });
         });
 
         // Initialize Filters

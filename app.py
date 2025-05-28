@@ -10,13 +10,21 @@ from sqlalchemy import desc
 from datetime import datetime, timedelta
 from slugify import slugify
 import os
+from dotenv import load_dotenv
 import secrets
 import random
 import string
 import base64
 import logging
+import requests
 from sqlalchemy.sql import func
-from sqlalchemy.exc import SQLAlchemyError  
+from sqlalchemy.exc import SQLAlchemyError 
+from datetime import datetime, timedelta 
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+atexit.register(lambda: scheduler.shutdown())
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
@@ -40,6 +48,11 @@ app.config['MAIL_USERNAME'] = 'vickiebmochama@gmail.com'
 app.config['MAIL_PASSWORD'] = 'yugj xofc egbp whyn'
 app.config['MAIL_DEFAULT_SENDER'] = 'vickiebmochama@gmail.com'
 
+API_URL = 'https://api.apilayer.com/exchangerates_data/latest'
+API_KEY = os.environ.get('EXCHANGE_RATE_API_KEY')
+SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD']
+CACHE_DURATION = timedelta(days=1)
+
 # Ensure upload folder exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -47,6 +60,41 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
+
+
+def update_exchange_rates():
+    with app.app_context():
+        try:
+            headers = {'apikey': API_KEY}
+            params = {'base': 'KES', 'symbols': ','.join(SUPPORTED_CURRENCIES)}
+            response = requests.get(API_URL, headers=headers, params=params, timeout=5)
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get('success') or 'rates' not in data:
+                raise ValueError("Invalid API response")
+
+            rates = {currency: data['rates'].get(currency, 1.0) for currency in SUPPORTED_CURRENCIES}
+            rates['KES'] = 1.0
+
+            new_rate = ExchangeRate(
+                eur=rates['EUR'],
+                gbp=rates['GBP'],
+                kes=rates['KES'],
+                usd=rates['USD'],
+                updated_at=datetime.utcnow()
+            )
+            db.session.add(new_rate)
+            db.session.commit()
+            app.logger.info("Daily exchange rates updated")
+        except Exception as e:
+            app.logger.error(f"Failed to update exchange rates: {str(e)}")
+
+# Initialize scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(update_exchange_rates, 'interval', days=1, next_run_time=datetime.utcnow())
+scheduler.start()
+
 
 # Utility functions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -221,6 +269,7 @@ class ExchangeRate(db.Model):
     kes = db.Column(db.Float, nullable=False, default=1.0)
     usd = db.Column(db.Float, nullable=False)
     depletion_timestamp = db.Column(db.DateTime, nullable=True)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 class Gift(db.Model):
     __tablename__ = 'gift'
@@ -2527,19 +2576,24 @@ def our_products():
         if not p.discount or p.discount.percent == 0
     ]
 
-    # Validate and log product data
+    # Prepare product data for rendering
+    product_data = []
     for p in products:
-        p.name = p.name.strip() if p.name else "Unnamed Product"
-        p.category = p.category.strip() if p.category else "Uncategorized"
-        p.price = float(p.price) if p.price is not None else 0.0
-        p.description = p.description if p.description else "No description available."
-        p.image = p.image if p.image else "default.jpg"
-        print(f"Product: id={p.id}, name={p.name}, category={p.category}, price={p.price}, description={p.description}, image={p.image}")
+        product_dict = {
+            'id': p.id,
+            'name': p.title.strip() if p.title else "Unnamed Product",
+            'category': p.category.name.strip() if p.category and p.category.name else "Uncategorized",
+            'price': float(p.price) if p.price is not None else 0.0,
+            'description': p.description if p.description else "No description available.",
+            'image': p.image if p.image else "default.jpg"
+        }
+        print(f"Product: id={product_dict['id']}, name={product_dict['name']}, category={product_dict['category']}, price={product_dict['price']}, description={product_dict['description']}, image={product_dict['image']}")
+        product_data.append(product_dict)
 
     categories = Category.query.all()
     return render_template(
         'artefacts.html',
-        products=products,
+        products=product_data,  # Pass the transformed data
         categories=categories,
         today=datetime.utcnow().date(),
         current_currency='USD'
@@ -3064,103 +3118,56 @@ def change_password():
     
 @app.route('/api/exchange_rates', methods=['GET'])
 def get_exchange_rates():
-    # Check for latest valid rates in database
-    latest_rate = ExchangeRate.query.order_by(desc(ExchangeRate.timestamp)).first()
-    now = datetime.utcnow()
-
-    if latest_rate:
-        is_cache_valid = (now - latest_rate.timestamp) < CACHE_DURATION
-        is_depleted = latest_rate.depletion_timestamp and now < latest_rate.depletion_timestamp
-
-        if is_cache_valid and not is_depleted:
-            rates = {
-                'EUR': latest_rate.eur,
-                'GBP': latest_rate.gbp,
-                'KES': latest_rate.kes,
-                'USD': latest_rate.usd
-            }
-            return jsonify(rates), 200
-
-        if is_depleted:
-            rates = {
-                'EUR': latest_rate.eur,
-                'GBP': latest_rate.gbp,
-                'KES': latest_rate.kes,
-                'USD': latest_rate.usd
-            }
-            return jsonify(rates), 200
-
-    # Fetch new rates from API
     try:
-        response = requests.get(
-            f'{API_URL}?base=KES&symbols={",".join(SUPPORTED_CURRENCIES)}',
-            headers={'apikey': API_KEY}
-        )
+        # Check for cached rates
+        recent_rate = ExchangeRate.query.order_by(ExchangeRate.updated_at.desc()).first()
+        if recent_rate and recent_rate.updated_at > datetime.utcnow() - CACHE_DURATION:
+            rates = {
+                'EUR': recent_rate.eur,
+                'GBP': recent_rate.gbp,
+                'KES': recent_rate.kes,
+                'USD': recent_rate.usd
+            }
+            app.logger.info("Returning cached exchange rates")
+            return jsonify(rates), 200
 
-        if response.status_code == 429:
-            if latest_rate:
-                rates = {
-                    'EUR': latest_rate.eur,
-                    'GBP': latest_rate.gbp,
-                    'KES': latest_rate.kes,
-                    'USD': latest_rate.usd
-                }
-                # Update depletion timestamp
-                latest_rate.depletion_timestamp = get_next_mid_month()
-                db.session.commit()
-                return jsonify(rates), 200
-            else:
-                # Fallback to static rates
-                rates = {
-                    'EUR': 0.0073,
-                    'GBP': 0.0061,
-                    'KES': 1.0,
-                    'USD': 0.0077
-                }
-                return jsonify(rates), 200
-
+        # Fetch new rates
+        headers = {'apikey': API_KEY}
+        params = {'base': 'KES', 'symbols': ','.join(SUPPORTED_CURRENCIES)}
+        response = requests.get(API_URL, headers=headers, params=params, timeout=5)
         response.raise_for_status()
         data = response.json()
-        if not data.get('success') or not data.get('rates'):
-            return jsonify({'error': 'Invalid API response'}), 500
 
-        # Store new rates
+        if not data.get('success') or 'rates' not in data:
+            raise ValueError("Invalid API response")
+
+        rates = {currency: data['rates'].get(currency, 1.0) for currency in SUPPORTED_CURRENCIES}
+        rates['KES'] = 1.0  # Ensure base currency is 1
+
+        # Save to database
         new_rate = ExchangeRate(
-            eur=data['rates']['EUR'],
-            gbp=data['rates']['GBP'],
-            kes=data['rates']['KES'],
-            usd=data['rates']['USD'],
-            timestamp=now,
-            depletion_timestamp=None
+            eur=rates['EUR'],
+            gbp=rates['GBP'],
+            kes=rates['KES'],
+            usd=rates['USD'],
+            updated_at=datetime.utcnow()
         )
         db.session.add(new_rate)
         db.session.commit()
+        app.logger.info("Fetched and saved new exchange rates")
 
-        rates = {
-            'EUR': new_rate.eur,
-            'GBP': new_rate.gbp,
-            'KES': new_rate.kes,
-            'USD': new_rate.usd
-        }
         return jsonify(rates), 200
 
-    except requests.RequestException as e:
-        if latest_rate:
-            rates = {
-                'EUR': latest_rate.eur,
-                'GBP': latest_rate.gbp,
-                'KES': latest_rate.kes,
-                'USD': latest_rate.usd
-            }
-            return jsonify(rates), 200
-        # Fallback to static rates
-        rates = {
+    except (requests.RequestException, ValueError) as e:
+        app.logger.error(f"Error fetching exchange rates: {str(e)}")
+        # Fallback rates
+        fallback_rates = {
             'EUR': 0.0073,
             'GBP': 0.0061,
             'KES': 1.0,
             'USD': 0.0077
         }
-        return jsonify(rates), 200
+        return jsonify(fallback_rates), 200
     
     
 @app.errorhandler(404)

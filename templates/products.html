@@ -1107,11 +1107,11 @@ body, .navbar {
                 <div class="product-grid grid gap-8 flex-1 cols-3" id="product-grid">
                     {% for product in products if product.discount and product.discount.percent > 1 and product.discount.start_date <= today and product.discount.end_date >= today %}
                     <div class="group bg-white shadow-lg rounded-lg overflow-hidden transform transition duration-500 hover:scale-105 animate-bounceIn delay-[{{ loop.index0 * 100 }}ms] product-card cursor-pointer" 
-                         data-category="{{ product.category }}" 
-                         data-name="{{ product.name | lower }}"
+                         data-category="{{ product.category.name }}" 
+                         data-name="{{ product.title | lower }}"
                          data-product-id="{{ product.id }}"
-                         data-product-name="{{ product.name }}"
-                         data-product-category="{{ product.category }}"
+                         data-product-name="{{ product.title }}"
+                         data-product-category="{{ product.category.name }}"
                          data-product-description="{{ product.description }}"
                          data-product-image="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}"
                          data-product-price="{{ product.price }}"
@@ -1119,8 +1119,8 @@ body, .navbar {
                          data-product-discount-percent="{{ product.discount.percent }}"
                          onclick="openProductModal(this)">
                         <div class="relative w-full h-64 overflow-hidden">
-                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
-                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.title }}" class="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 absolute top-0 left-0">
+                            <img loading="lazy" src="{{ url_for('static', filename='uploads/' + product.image) | default('https://via.placeholder.com/300x200') }}" alt="{{ product.title }}" class="w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100 absolute top-0 left-0">
                             <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-semibold px-2 py-1 rounded">{{ product.discount.percent }}% OFF</span>
                             <!-- Wishlist Button -->
                             <button class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist({{ product.id }})">
@@ -1130,9 +1130,9 @@ body, .navbar {
                         </div>
                         <div class="p-4">
                             <h3 class="text-lg font-medium text-center text-gray-800 group-hover:text-yellow-600 transition duration-300 border-b-2 border-transparent group-hover:border-yellow-600 inline-block">
-                                {{ product.name }}
+                                {{ product.title }}
                             </h3>
-                            <p class="text-center text-gray-600 text-sm mt-2">{{ product.category }}</p>
+                            <p class="text-center text-gray-600 text-sm mt-2">{{ product.category.name }}</p>
                             <p class="text-center text-gray-600 mt-2 price line-through" data-price="{{ product.price }}">
                                 {{ current_currency }} {{ product.price | round(2) }}
                             </p>
