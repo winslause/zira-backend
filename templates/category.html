@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zira Collection - Explore Timeless Treasures</title>
+    <title>{{ page_title }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         /* Custom Fonts */
         body {
@@ -32,6 +34,7 @@
             position: relative;
             height: 100vh;
             overflow: hidden;
+            display: block !important;
         }
         .hero-bg {
             position: absolute;
@@ -46,20 +49,20 @@
             transform-origin: center;
         }
         .hero-bg:nth-child(1) { 
-            background-image: url('https://egymonuments.gov.eg/storage/events/May2024/1y0KT0K4REkCMEWpf0z1.jpg'); 
+            background-image: url('https://s1.bwallpapers.com/wallpapers/2014/06/18/digital-art-desktop-wallpapers_052436925.jpg');
             animation-delay: 0s; 
         }
         .hero-bg:nth-child(2) { 
-            background-image: url('https://media.tacdn.com/media/attractions-splice-spp-674x446/06/df/55/b8.jpg'); 
+            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230610/pngtree-ancient-artifacts-display-in-an-exhibit-image_2923820.jpg');
             animation-delay: 13s; 
         }
         .hero-bg:nth-child(3) { 
-            background-image: url('https://www.pelago.co/img/products/EG-Egypt/egyptian-museum-half-day-tour/33021db1-a51c-49ea-a2ad-b286dad82b4f_egyptian-museum-half-day-tour.jpg'); 
+            background-image: url('https://curiousmatrix.com/wp-content/uploads/2024/01/Ancient-artifacts-696x397.jpg.webp');
             animation-delay: 26s; 
         }
         .hero-bg:nth-child(4) { 
-            background-image: url('https://cdn.pixabay.com/photo/2017/08/02/13/09/confetti-2571539_640.jpg'); 
-            animation-delay: 39s; 
+            background-image: url('https://cdn.pixabay.com/photo/2017/08/02/13/09/confetti-2571539_640.jpg');
+            animation-delay: 39s;
         }
 
         @keyframes showroomTour {
@@ -73,21 +76,18 @@
                 transform: scale(1.15) rotate(0deg) translateX(0%) translateY(0%);
                 background-position: 50% 50%;
             }
-            30% {
+            20% {
+                opacity: 1;
                 transform: scale(1.1) rotate(-1deg) translateX(3%) translateY(3%);
                 background-position: 60% 60%;
             }
-            55% {
-                transform: scale(1.15) rotate(0deg) translateX(-2%) translateY(-2%);
-                background-position: 45% 45%;
-            }
-            61.5% {
+            25% {
                 opacity: 1;
                 transform: scale(1.15) rotate(0deg) translateX(-2%) translateY(-2%);
                 background-position: 45% 45%;
             }
-            90% {
-                opacity: 1;
+            30% {
+                opacity: 0;
                 transform: scale(1.2) rotate(1deg) translateX(5%) translateY(5%);
                 background-position: 55% 55%;
             }
@@ -166,7 +166,7 @@
 
         /* Navbar Animations */
         .nav-item, .nav-icon {
-            animation: fadeInDown 0.5s ease-out forwards;
+            animation: slideDown 0.5s ease-out forwards;
             animation-delay: calc(0.1s * var(--index));
         }
 
@@ -177,6 +177,11 @@
         #mobile-menu-toggle {
             animation: fadeInRight 0.5s ease-out forwards;
             display: none;
+            padding: 10px;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 3000;
+            font-size: 1.5rem;
         }
 
         @media (max-width: 767px) {
@@ -185,7 +190,7 @@
             }
         }
 
-        /* Dropdown Menu Styling */
+        /* Dropdown Menu Styling (Navbar) */
         .dropdown-menu {
             position: absolute;
             top: 100%;
@@ -228,6 +233,9 @@
         .nav-item {
             position: relative;
             transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.95rem;
+            margin: 0 0.5rem;
         }
 
         .nav-item:hover {
@@ -250,23 +258,42 @@
             width: 100%;
         }
 
+        /* Dropdown Chevron for Navbar */
+        .nav-item-chevron {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .nav-chevron-icon {
+            display: none;
+            width: 1px;
+            height: 1px;
+            transition: transform 0.3s ease;
+        }
+
+        .group:hover .nav-chevron-icon {
+            transform: rotate(180deg);
+        }
+
         /* Mobile Sidebar */
         #mobile-sidebar {
             position: fixed;
             top: 0;
             left: 0;
             width: 250px;
-            height: 100%;
+            min-height: 100vh;
             background: white;
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            visibility: hidden;
+            transition: transform 0.3s ease, visibility 0.3s ease;
+            z-index: 2500;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
         }
 
         #mobile-sidebar.open {
-            transform: translateX(0);
-            animation: slideInLeft 0.3s ease-out;
+            transform: translateX(0) !important;
+            visibility: visible !important;
         }
 
         /* Search Bar */
@@ -346,6 +373,19 @@
             opacity: 1;
         }
 
+        /* Sidebar Dropdown Styling */
+        .sidebar-dropdown {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .sidebar-dropdown.open {
+            max-height: 500px;
+            opacity: 1;
+        }
+
         /* Modal Animation */
         .modal-open {
             animation: fadeIn 0.3s ease-in-out;
@@ -398,6 +438,24 @@
             background: transparent;
         }
 
+        /* Wishlist Icon Styling */
+        .wishlist-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 1.5rem;
+            color: #374151;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+        .wishlist-icon:hover {
+            color: #d97706;
+        }
+        .wishlist-icon.filled {
+            color: #d97706;
+        }
+
         /* Custom Horizontal Line for Categories */
         .category-divider {
             border-top: 1px solid #e5e7eb;
@@ -424,7 +482,7 @@
         }
 
         /* Modal Close Button */
-        #close-modal {
+        #close-modal, #close-cart-modal {
             z-index: 10;
         }
 
@@ -435,126 +493,181 @@
 
         /* Mobile Sidebar Adjustments */
         #mobile-sidebar .text-xl {
-            font-size: 0.95rem; /* Reduced text size for categories */
+            font-size: 0.95rem;
         }
         #mobile-sidebar .text-sm {
-            font-size: 0.75rem; /* Reduced text size for subcategories */
+            font-size: 0.75rem;
         }
         #mobile-sidebar button span {
             display: flex;
             align-items: center;
-            gap: 0.5rem; /* Space between text and icon */
+            gap: 0.5rem;
         }
         #mobile-sidebar button i {
-            font-size: 0.75rem; /* Smaller icon size */
+            font-size: 0.75rem;
+        }
+
+        /* Cart Modal Styling */
+        #cart-modal input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        #cart-modal input:focus {
+            border-color: #d97706;
+        }
+
+        /* Gifts Popup Styling */
+        #gifts-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: white;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            transition: transform 0.5s ease-in-out;
+            transform: translateY(-100%);
+        }
+
+        #gifts-popup.open {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 767px) {
+            #gifts-popup {
+                width: 100%;
+                height: 50vh;
+                border-bottom-left-radius: 1rem;
+                border-bottom-right-radius: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #gifts-popup {
+                width: 50%;
+                height: 100vh;
+                border-top-right-radius: 1rem;
+                border-bottom-right-radius: 1rem;
+            }
+        }
+
+        #gifts-popup .close-gifts-popup {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            background: white;
+            color: #d97706;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #gifts-popup .close-gifts-popup:hover {
+            background: #f3f4f6;
         }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Gifts Popup -->
+    <div id="gifts-popup">
+        <button class="close-gifts-popup" onclick="closeGiftsPopup()">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Our Exquisite Gifts</h2>
+        <p class="text-lg md:text-xl mb-6">Celebrate special moments with unique African-inspired gifts, crafted with love and tradition.</p>
+        <a href="#products" class="bg-white text-yellow-600 px-6 py-3 rounded-full hover:bg-gray-100 transition animate-pulse" onclick="closeGiftsPopup()">Shop Gifts Now</a>
+    </div>
+
     <!-- Navbar -->
     <nav class="bg-white fixed w-full z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <!-- Mobile Toggler (Left, Small Devices Only) -->
-            <button id="mobile-menu-toggle" class="text-gray-700 text-2xl order-1">
+            <button id="mobile-menu-toggle" class="text-gray-700 text-2xl order-1" onclick="window.toggleSidebar(event)">
                 <i class="fas fa-bars"></i>
             </button>
             <!-- Logo (Center on Mobile, Left on Desktop) -->
             <div class="flex items-center nav-logo order-2 md:order-1">
-                <img src="../static/images/logo.png" alt="Zira Collection Logo" class="h-12">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-12">
             </div>
             <!-- Desktop Menu (Center) -->
-            <div class="hidden md:flex flex-1 justify-center space-x-8 items-center order-2">
+            <div class="hidden md:flex flex-1 justify-center items-center space-x-4">
+                <a href="{{ url_for('index') }}" class="nav-item text-gray-700" style="--index: 1;">Home</a>
+                <a href="{{ url_for('discounted_artefacts') }}" class="nav-item text-gray-700" style="--index: 2;">Special Discount</a>
+                <a href="{{ url_for('our_products') }}" class="nav-item text-gray-700" style="--index: 3;">Our Products</a>
                 <div class="relative group">
-                    <a href="#" class="nav-item text-gray-700 text-lg category-filter" 
-                       data-category="all" style="--index: 1;">All Categories</a>
-                </div>
-                <div class="relative group">
-                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 2;">Soapstone Carvings</a>
+                    <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="nav-item text-gray-700 category-filter" style="--index: 4;">
+                        <!-- <span class="nav-item-chevron">All Categories<i class="fas fa-chevron-down nav-chevron-icon hidden md:inline"></i></span> -->
+                    </a>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="animals" style="--index: 1;">Animals</a>
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="abstract" style="--index: 2;">Abstract</a>
+                        {% for category in categories %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="dropdown-item subcategory-filter" style="--index: {{ loop.index }}">{{ category.name }}</a>
+                        {% endfor %}
                     </div>
                 </div>
+                {% for category in categories %}
                 <div class="relative group">
-                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 3;">Wooden Artifacts</a>
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="nav-item text-gray-700" style="--index: {{ loop.index + 4 }}">
+                        <span class="nav-item-chevron">{{ category.name }}</span>
+                    </a>
+                    {% if category.subcategories %}
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="masks" style="--index: 1;">Masks</a>
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="sculptures" style="--index: 2;">Sculptures</a>
+                        {% for subcategory in category.subcategories %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="dropdown-item subcategory-filter" style="--index: {{ loop.index }}">{{ subcategory.name }}</a>
+                        {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
-                <div class="relative group">
-                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 4;">Beadwork</a>
-                    <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="jewelry" style="--index: 1;">Jewelry</a>
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="decor" style="--index: 2;">Decor</a>
-                    </div>
-                </div>
-                <div class="relative group">
-                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 5;">Giftings</a>
-                    <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="personalized" style="--index: 1;">Personalized Gifts</a>
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="baskets" style="--index: 2;">Gift Baskets</a>
-                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="keepsakes" style="--index: 3;">Keepsakes</a>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
             <!-- Icons (Right) -->
             <div class="flex items-center space-x-4 order-3">
-                <button id="search-toggle" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 6;"><i class="fas fa-search"></i></button>
-                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 7;"><i class="fas fa-heart"></i></a>
-                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 8;"><i class="fas fa-shopping-cart"></i></a>
-                <button class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 9;"><i class="fas fa-dollar-sign"></i></button>
+                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories|length + 6 }};"><i class="fas fa-heart"></i></a>
+                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories|length + 7 }};"><i class="fas fa-shopping-cart"></i></a>
+                <select style="background-color:#d97706;" id="currency" class="border rounded p-1 text-gray-700 nav-icon" style="--index: {{ categories|length + 8 }};">
+                    <option value="KES" {% if current_currency == 'KES' %}selected{% endif %}>KES</option>
+                    <option value="USD" {% if current_currency == 'USD' %}selected{% endif %}>USD</option>
+                    <option value="EUR" {% if current_currency == 'EUR' %}selected{% endif %}>EUR</option>
+                    <option value="GBP" {% if current_currency == 'GBP' %}selected{% endif %}>GBP</option>
+                </select>
             </div>
-        </div>
-        <!-- Search Bar -->
-        <div id="search-bar" class="bg-gray-100 px-4 py-2">
-            <input type="text" placeholder="Search artifacts..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-yellow-600">
         </div>
         <!-- Mobile Sidebar -->
         <div id="mobile-sidebar" class="md:hidden">
             <div class="flex flex-col p-4 space-y-4 h-full relative">
                 <!-- Close Button -->
-                <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50">
+                <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50" onclick="window.toggleSidebar(event)">
                     <i class="fas fa-times text-lg"></i>
                 </button>
-                <a href="#" class="text-gray-700 hover:text-yellow-600 category-filter" data-category="all">All Categories</a>
+                <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-yellow-600" style="margin-top:40px; padding-top:40px;">Home</a>
+                <a href="{{ url_for('discounted_artefacts') }}" class="text-gray-700 hover:text-yellow-600">Special Discount</a>
+                <a href="{{ url_for('our_products') }}" class="text-gray-700 hover:text-yellow-600">Our Products</a>
+                <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="text-gray-700 hover:text-yellow-600 category-filter">All Categories</a>
+                {% for category in categories %}
                 <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('soapstone-mobile')">
-                        <span>Soapstone Carvings <i class="fas fa-chevron-down"></i></span>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600 flex justify-between items-center" onclick="toggleMobileDropdown('{{ category.slug }}-mobile')">
+                        <span>{{ category.name }}</span>
+                        <span class="chevron-container">
+                            <i class="fas fa-chevron-down chevron-icon chevron-down"></i>
+                            <i class="fas fa-chevron-right chevron-icon chevron-right"></i>
+                        </span>
                     </button>
-                    <div id="soapstone-mobile" class="hidden pl-4 space-y-2">
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="animals">Animals</a>
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="abstract">Abstract</a>
+                    <div id="{{ category.slug }}-mobile" class="sidebar-dropdown pl-4 space-y-2">
+                        {% for subcategory in category.subcategories %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter">{{ subcategory.name }}</a>
+                        {% endfor %}
                     </div>
                 </div>
-                <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('wooden-mobile')">
-                        <span>Wooden Artifacts <i class="fas fa-chevron-down"></i></span>
-                    </button>
-                    <div id="wooden-mobile" class="hidden pl-4 space-y-2">
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="masks">Masks</a>
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="sculptures">Sculptures</a>
-                    </div>
-                </div>
-                <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('beadwork-mobile')">
-                        <span>Beadwork <i class="fas fa-chevron-down"></i></span>
-                    </button>
-                    <div id="beadwork-mobile" class="hidden pl-4 space-y-2">
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="jewelry">Jewelry</a>
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="decor">Decor</a>
-                    </div>
-                </div>
-                <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('giftings-mobile')">
-                        <span>Giftings <i class="fas fa-chevron-down"></i></span>
-                    </button>
-                    <div id="giftings-mobile" class="hidden pl-4 space-y-2">
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="personalized">Personalized Gifts</a>
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="baskets">Gift Baskets</a>
-                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="keepsakes">Keepsakes</a>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </nav>
@@ -567,8 +680,36 @@
         <div class="hero-bg"></div>
         <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
             <div class="text-center text-white">
-                <h1 class="text-5xl md:text-7xl font-bold mb-4 animate-fadeIn">Timeless Treasures</h1>
-                <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-200">Discover the Artistry of Africa</p>
+                <h1 class="text-5xl md:text-7xl font-bold mb-4 animate-fadeIn">
+                    {% if selected_subcategory %}
+                        {{ selected_category.name }} - {{ selected_subcategory.name }}
+                    {% elif selected_category %}
+                        {{ selected_category.name }}
+                    {% else %}
+                        All Categories
+                    {% endif %}
+                </h1>
+                <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-200">
+                    {% if selected_subcategory %}
+                        Discover Exquisite {{ selected_subcategory.name }} in {{ selected_category.name }}
+                    {% elif selected_category %}
+                        {% if selected_category.name|lower == 'home' %}
+                            Elevate Your Space with Authentic African Home Artifacts
+                        {% elif selected_category.name|lower == 'kitchen' %}
+                            Crafted for Culinary Art: Explore African Kitchen Treasures
+                        {% elif selected_category.name|lower == 'decor' %}
+                            Transform Your Home: Authentic African Decor
+                        {% elif selected_category.name|lower == 'easter' %}
+                            Celebrate Easter with Unique African Artifacts
+                        {% elif selected_category.name|lower == 'gifts' %}
+                            Unique African Gifts for Every Occasion
+                        {% else %}
+                            Unveil the Artistry of {{ selected_category.name }}
+                        {% endif %}
+                    {% else %}
+                        Celebrate the Timeless Spirit of African Craftsmanship
+                    {% endif %}
+                </p>
                 <a href="#products" class="explore-button bg-yellow-600 text-white px-6 py-3 rounded-full hover:bg-yellow-700 transition animate-fadeIn delay-400">Explore Artifacts</a>
             </div>
         </div>
@@ -583,106 +724,38 @@
                     <h3 class="text-2xl font-semibold text-yellow-600 mb-4 uppercase">Categories</h3>
                     <div class="space-y-4">
                         <div>
-                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="all" onclick="toggleDropdown('all-categories')" style="--index: 1;">
+                            <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" data-category="all" style="--index: 1;">
                                 All Categories
-                                <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </button>
-                            <div id="all-categories" class="mt-2 hidden"></div>
+                            </a>
                             <div class="category-divider"></div>
                         </div>
+                        {% set category_index = 2 %}
+                        {% for category in categories %}
                         <div>
                             <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="soapstone" onclick="toggleDropdown('soapstone')" style="--index: 2;">
-                                Soapstone Carvings
+                                    data-category="{{ category.slug }}" onclick="toggleDropdown('category-{{ category.slug }}-{{ loop.index }}')" style="--index: {{ category_index }}">
+                                {{ category.name }}
                                 <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
                                     <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        <path stroke="round" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                 </span>
                             </button>
-                            <div id="soapstone" class="mt-2 hidden">
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="soapstone" data-subcategory="animals" style="--index: 3;">Animals</a>
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="soapstone" data-subcategory="abstract" style="--index: 4;">Abstract</a>
+                            <div id="category-{{ category.slug }}-{{ loop.index }}" class="sidebar-dropdown mt-2">
+                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="{{ category.slug }}" data-subcategory="all" style="--index: {{ category_index + 1 }}">All {{ category.name }}</a>
+                                {% for subcategory in category.subcategories %}
+                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="{{ category.slug }}" data-subcategory="{{ subcategory.slug }}" style="--index: {{ category_index + loop.index + 2 }}">{{ subcategory.name }}</a>
+                                {% endfor %}
                             </div>
                             <div class="category-divider"></div>
+                            {% set category_index = category_index + (category.subcategories|length) + 2 %}
                         </div>
-                        <div>
-                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="wooden" onclick="toggleDropdown('wooden')" style="--index: 5;">
-                                Wooden Artifacts
-                                <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </button>
-                            <div id="wooden" class="mt-2 hidden">
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="wooden" data-subcategory="masks" style="--index: 6;">Masks</a>
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="wooden" data-subcategory="sculptures" style="--index: 7;">Sculptures</a>
-                            </div>
-                            <div class="category-divider"></div>
-                        </div>
-                        <div>
-                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="beadwork" onclick="toggleDropdown('beadwork')" style="--index: 8;">
-                                Beadwork
-                                <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </button>
-                            <div id="beadwork" class="mt-2 hidden">
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="beadwork" data-subcategory="jewelry" style="--index: 9;">Jewelry</a>
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="beadwork" data-subcategory="decor" style="--index: 10;">Decor</a>
-                            </div>
-                            <div class="category-divider"></div>
-                        </div>
-                        <div>
-                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="giftings" onclick="toggleDropdown('giftings')" style="--index: 11;">
-                                Giftings
-                                <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </button>
-                            <div id="giftings" class="mt-2 hidden">
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="giftings" data-subcategory="personalized" style="--index: 12;">Personalized Gifts</a>
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="giftings" data-subcategory="baskets" style="--index: 13;">Gift Baskets</a>
-                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="giftings" data-subcategory="keepsakes" style="--index: 14;">Keepsakes</a>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -691,139 +764,53 @@
 
                 <!-- Main Content (Right) -->
                 <div class="flex-1">
-                    <!-- Best Selling Section -->
+                    <!-- Category Section (Replaced Best Selling) -->
                     <div class="best-selling-container flex flex-col lg:flex-row gap-6 items-start mb-12">
                         <div class="flex-shrink-0 best-selling-image">
-                            <img src="https://onlinejpgtools.com/images/examples-onlinejpgtools/light-bulb-with-plant.jpg" 
-                                 alt="Soapstone Carving" class="rounded-full w-64 h-64 object-cover">
+                            <img src="{{ category_image }}" 
+                                 alt="{{ selected_category.name|default('All Categories') }}" 
+                                 class="rounded-full w-64 h-64 object-cover"
+                                 onerror="this.src='https://png.pngtree.com/background/20230611/original/pngtree-ancient-artifacts-from-an-archaeological-site-in-the-united-states-and-picture-image_3167955.jpg'; this.onerror=null;">
                         </div>
                         <div class="flex-1 inter-font best-selling-text">
-                            <h2 class="text-xl font-medium mb-4 uppercase">Best Selling</h2>
-                            <p class="mb-4 text-gray-600">
-                                Our Soapstone is carved by the artists of SMOLArt, a group of artisans in Tabaka, Kenya, the heart of soapstone crafts. Established in 1990, SMOLArt, a WFTO member, ensures fair wages and supports community projects for better living conditions, education, and health.
-                            </p>
-                            <p class="mb-4 text-gray-600">
-                                Soapstone is mined in Kiisi, Kenya, and carved into sculptures ranging from cream to black. Artisans smooth the stone with sandpaper and water, polishing it to a high gloss or painting it with vibrant African motifs.
-                            </p>
-                            <p class="text-gray-600">
-                                All soapstone products are handmade using simple tools like screwdrivers and pangas, reflecting the artisans' skill and dedication.
-                            </p>
+                            <h2 class="text-xl font-medium mb-4 uppercase">{{ selected_category.name|default('All Categories') }}</h2>
+                            <p class="text-gray-600">{{ category_description }}</p>
                         </div>
                     </div>
 
                     <!-- Product Grid -->
                     <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8">
-                        <!-- Soapstone Products -->
+                        {% for product in products %}
                         <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="soapstone" data-subcategory="animals" style="--index: 1;">
+                             data-category="{{ product.category|lower }}" data-subcategory="{{ product.subcategory|lower }}" style="--index: {{ loop.index }}" data-product-id="{{ product.id }}">
                             <div class="product-image-container">
-                                <img src="https://images.pexels.com/photos/8229660/pexels-photo-8229660.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" 
-                                     alt="Soapstone Elephant">
+                                <img src="{{ product.image }}" alt="{{ product.title }}">
                                 <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
                                     Quick View
                                 </button>
+                                <i class="far fa-heart wishlist-icon add-to-wishlist" data-product-id="{{ product.id }}"></i>
                             </div>
                             <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Soapstone Elephant</h3>
-                                <p class="text-gray-600 text-sm">Animals</p>
-                                <p class="text-gray-800 font-semibold mt-2">$45.00</p>
+                                <h3 class="text-lg font-medium text-gray-800">{{ product.title }}</h3>
+                                <p class="text-gray-600">{{ product.subcategory }}</p>
+                                <div class="flex justify-center items-center mt-2">
+                                    {% if product.is_discounted %}
+                                    <p class="text-gray-800 font-semibold price" data-base-price="{{ product.discounted_price }}">{{ (product.discounted_price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
+                                    <p class="text-gray-600 text-sm line-through ml-2 original-price" data-base-price="{{ product.price }}">{{ (product.price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
+                                    {% else %}
+                                    <p class="text-gray-800 font-semibold price" data-base-price="{{ product.price }}">{{ (product.price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="flex justify-center gap-2 mt-2">
+                                    <button class="add-to-cart bg-yellow-600 text-white px-3 py-1 rounded-full hover:bg-yellow-700 transition-colors flex items-center" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-cart-plus mr-1"></i> Cart
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="soapstone" data-subcategory="abstract" style="--index: 2;">
-                            <div class="product-image-container">
-                                <img src="https://live.staticflickr.com/579/23126540934_dd47029055_b.jpg" 
-                                     alt="Soapstone Abstract">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Soapstone Abstract</h3>
-                                <p class="text-gray-600 text-sm">Abstract</p>
-                                <p class="text-gray-800 font-semibold mt-2">$60.00</p>
-                            </div>
-                        </div>
-                        <!-- Wooden Products -->
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="wooden" data-subcategory="masks" style="--index: 3;">
-                            <div class="product-image-container">
-                                <img src="https://www.al-monitor.com/sites/default/files/styles/article_header/public/2021-06/GettyImages-460492878.jpg?h=a5ae579a&itok=ItBhGKfX" 
-                                     alt="Wooden Mask">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Wooden Mask</h3>
-                                <p class="text-gray-600 text-sm">Masks</p>
-                                <p class="text-gray-800 font-semibold mt-2">$75.00</p>
-                            </div>
-                        </div>
-                        <!-- Beadwork Products -->
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="beadwork" data-subcategory="jewelry" style="--index: 4;">
-                            <div class="product-image-container">
-                                <img src="https://egymonuments.gov.eg/storage/events/May2024/1y0KT0K4REkCMEWpf0z1.jpg" 
-                                     alt="Beaded Necklace">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Beaded Necklace</h3>
-                                <p class="text-gray-600 text-sm">Jewelry</p>
-                                <p class="text-gray-800 font-semibold mt-2">$30.00</p>
-                            </div>
-                        </div>
-                        <!-- Giftings Products -->
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="giftings" data-subcategory="personalized" style="--index: 5;">
-                            <div class="product-image-container">
-                                <img src="https://images.unsplash.com/photo/1607349913338-fca6f7fc42d0?auto=format&fit=crop&w=500&q=60" 
-                                     alt="Personalized Gift Box">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Personalized Gift Box</h3>
-                                <p class="text-gray-600 text-sm">Personalized Gifts</p>
-                                <p class="text-gray-800 font-semibold mt-2">$50.00</p>
-                            </div>
-                        </div>
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="giftings" data-subcategory="baskets" style="--index: 6;">
-                            <div class="product-image-container">
-                                <img src="https://images.unsplash.com/photo/1607344642600-0fcaa5d7b65f?auto=format&fit=crop&w=500&q=60" 
-                                     alt="Artisan Gift Basket">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Artisan Gift Basket</h3>
-                                <p class="text-gray-600 text-sm">Gift Baskets</p>
-                                <p class="text-gray-800 font-semibold mt-2">$80.00</p>
-                            </div>
-                        </div>
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="giftings" data-subcategory="keepsakes" style="--index: 7;">
-                            <div class="product-image-container">
-                                <img src="https://images.unsplash.com/photo/1513028589963-f6c0a58ba0b0?auto=format&fit=crop&w=500&q=60" 
-                                     alt="Engraved Keepsake">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                                    Quick View
-                                </button>
-                            </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">Engraved Keepsake</h3>
-                                <p class="text-gray-600 text-sm">Keepsakes</p>
-                                <p class="text-gray-800 font-semibold mt-2">$35.00</p>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    <p id="no-results" class="text-gray-600 text-center mt-8 hidden">No products found in this category.</p>
+                    <p id="no-results" class="text-gray-600 text-center mt-8 {{ 'hidden' if products else '' }}">No products found in this category.</p>
                 </div>
             </div>
         </div>
@@ -847,83 +834,247 @@
 
     <!-- Quick View Modal -->
     <div id="quick-view-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative modal-open">
-            <button id="close-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50">
+        <div class="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative modal-open">
+            <button id="close-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition-colors z-50">
                 <i class="fas fa-times text-lg"></i>
             </button>
-            <div class="space-y-4">
+            <div class="modal-content space-y-4">
                 <img id="modal-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-md">
                 <h3 id="modal-name" class="text-2xl font-semibold text-gray-800"></h3>
                 <p id="modal-category" class="text-gray-600"></p>
                 <p id="modal-subcategory" class="text-gray-600"></p>
                 <p id="modal-price" class="text-gray-800 font-semibold"></p>
+                <p id="modal-description" class="text-gray-600"></p>
                 <div class="flex justify-end gap-2">
-                    <button class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition flex items-center">
+                    <button id="modal-add-to-cart" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition-colors flex items-center" data-product-id="">
                         <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+                    </button>
+                    <button id="modal-add-to-wishlist" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition-colors flex items-center" data-product-id="">
+                        <i class="fas fa-heart mr-2"></i> Add to Wishlist
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Cart Quantity Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full relative">
+            <button id="close-cart-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition-colors z-50">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800">Add to Cart</h3>
+                <p class="text-gray-600">Enter the number of items:</p>
+                <input type="number" id="cart-quantity" min="1" value="1" class="w-full">
+                <div class="flex justify-end gap-2">
+                    <button id="confirm-cart" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition-colors" data-product-id="">
+                        Confirm
+                    </button>
+                    <button id="cancel-cart" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- JavaScript -->
     <script>
-        // Mobile Sidebar Toggle
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileSidebar = document.getElementById('mobile-sidebar');
-        const closeSidebar = document.getElementById('close-sidebar');
-
-        function toggleSidebar() {
-            mobileSidebar.classList.toggle('open');
-            const icon = mobileMenuToggle.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
+        // Toastify Notification
+        function showToast(message, type = 'success') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: type === 'success' ? '#22c55e' : '#ef4444',
+                stopOnFocus: true
+            }).showToast();
         }
 
-        mobileMenuToggle.addEventListener('click', toggleSidebar);
-        closeSidebar.addEventListener('click', toggleSidebar);
+        // Mobile Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+                const mobileSidebar = document.getElementById('mobile-sidebar');
+                const closeSidebar = document.getElementById('close-sidebar');
+
+                // Initialize sidebar
+                if (mobileSidebar) {
+                    mobileSidebar.style.transform = 'translateX(-100%)';
+                    mobileSidebar.style.visibility = 'hidden';
+                    console.log('Sidebar init style:', mobileSidebar.getAttribute('style'));
+                }
+
+                window.toggleSidebar = function(event) {
+                    event.preventDefault();
+                    console.log('Toggling sidebar');
+                    if (mobileSidebar) {
+                        const isOpen = mobileSidebar.classList.toggle('open');
+                        const icon = mobileMenuToggle.querySelector('i');
+                        icon.classList.toggle('fa-bars');
+                        icon.classList.toggle('fa-times');
+                        mobileSidebar.style.transform = isOpen ? 'translateX(0%)' : 'translateX(-100%)';
+                        mobileSidebar.style.visibility = isOpen ? 'visible' : 'hidden';
+                        mobileSidebar.style.transition = 'transform 0.3s ease, visibility 0.3s ease';
+                        mobileSidebar.offsetHeight;
+                        console.log('Sidebar inline style:', mobileSidebar.getAttribute('style'));
+                        console.log('Sidebar classList:', mobileSidebar.classList);
+                        console.log('Sidebar transform:', window.getComputedStyle(mobileSidebar).transform);
+                    } else {
+                        console.error('Mobile sidebar not found');
+                    }
+                };
+
+                if (closeSidebar) {
+                    closeSidebar.addEventListener('click', window.toggleSidebar);
+                    console.log('Close listener attached');
+                } else {
+                    console.warn('Close button not found, but sidebar toggle is still operational');
+                }
+
+                // Gifts Popup Logic
+                const giftsPopup = document.getElementById('gifts-popup');
+                const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}'.toLowerCase();
+                const currentUrl = window.location.pathname.toLowerCase();
+                const isGiftsPage = selectedCategory === 'gifts' || currentUrl.includes('gifts');
+                const popupClosed = sessionStorage.getItem('giftsPopupClosed');
+
+                if (giftsPopup) {
+                    if (isGiftsPage && !popupClosed) {
+                        giftsPopup.classList.add('open');
+                        giftsPopup.style.transform = 'translateY(0)';
+                        console.log('Gifts popup shown on load:', { selectedCategory, currentUrl });
+                    } else {
+                        console.log('Gifts popup not shown:', { selectedCategory, currentUrl, popupClosed });
+                    }
+                } else {
+                    console.error('Gifts popup element not found');
+                }
+            } catch (error) {
+                console.error('Sidebar or popup init error:', error);
+            }
+        });
+
+        // Gifts Popup
+        function closeGiftsPopup() {
+            const popup = document.getElementById('gifts-popup');
+            if (popup) {
+                popup.classList.remove('open');
+                popup.style.transform = 'translateY(-100%)';
+                sessionStorage.setItem('giftsPopupClosed', 'true');
+                console.log('Gifts popup closed');
+            }
+        }
 
         // Search Bar Toggle
         const searchToggle = document.getElementById('search-toggle');
         const searchBar = document.getElementById('search-bar');
-        searchToggle.addEventListener('click', () => {
-            searchBar.classList.toggle('open');
-        });
+        if (searchToggle) {
+            searchToggle.addEventListener('click', () => {
+                searchBar.classList.toggle('open');
+            });
+        }
 
         // Mobile Dropdown Toggle
         function toggleMobileDropdown(id) {
+            console.log('Toggling mobile dropdown:', id);
             const dropdown = document.getElementById(id);
-            dropdown.classList.toggle('hidden');
+            if (!dropdown) {
+                console.error('Dropdown not found:', id);
+                return;
+            }
             const button = dropdown.previousElementSibling;
-            const icon = button.querySelector('i');
-            icon.classList.toggle('fa-chevron-down');
-            icon.classList.toggle('fa-chevron-right');
+            const isOpen = dropdown.classList.toggle('open');
+            button.classList.toggle('dropdown-open', isOpen);
+            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                if (d.id !== id && d.classList.contains('open')) {
+                    d.classList.remove('open');
+                    d.previousElementSibling.classList.remove('dropdown-open');
+                }
+            });
+            dropdown.offsetHeight;
+            console.log('Dropdown isOpen:', isOpen, 'Dropdown style:', dropdown.getAttribute('style'));
         }
 
         // Sidebar Dropdown Toggle
         function toggleDropdown(id) {
+            console.log('Toggling dropdown:', id);
             const dropdown = document.getElementById(id);
+            if (!dropdown) {
+                console.error('Dropdown not found:', id);
+                return;
+            }
             const button = dropdown.previousElementSibling;
-            document.querySelectorAll('.mt-2').forEach(d => {
+            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
                 if (d.id !== id) {
-                    d.classList.add('hidden');
-                    const otherButton = d.previousElementSibling;
-                    otherButton.classList.remove('dropdown-open');
+                    d.classList.remove('open');
+                    d.previousElementSibling.classList.remove('dropdown-open');
                 }
             });
-            const isOpen = dropdown.classList.toggle('hidden');
-            button.classList.toggle('dropdown-open', !isOpen);
+            const isOpen = dropdown.classList.toggle('open');
+            button.classList.toggle('dropdown-open', isOpen);
         }
 
-        // Category and Subcategory Filtering
-        let selectedCategory = 'all';
-        let selectedSubcategory = '';
+        // Currency Handling
+        const currencySelect = document.getElementById('currency');
+        let exchangeRates = JSON.parse('{{ exchange_rates|tojson|safe }}');
+        let currentCurrency = '{{ current_currency|safe }}';
 
+        currencySelect.addEventListener('change', async () => {
+            currentCurrency = currencySelect.value;
+            try {
+                const response = await fetch('/api/exchange_rates');
+                exchangeRates = await response.json();
+                updatePrices();
+                await fetch('/set_currency', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currency: currentCurrency })
+                });
+            } catch (error) {
+                console.error('Error updating currency:', error);
+                showToast('Error updating currency', 'error');
+            }
+        });
+
+        function updatePrices() {
+            document.querySelectorAll('.product-card').forEach(card => {
+                const priceElement = card.querySelector('.price');
+                const originalPriceElement = card.querySelector('.original-price');
+                const basePrice = parseFloat(priceElement.dataset.basePrice);
+                priceElement.textContent = `${(basePrice * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+                if (originalPriceElement) {
+                    const baseOriginalPrice = parseFloat(originalPriceElement.dataset.basePrice);
+                    originalPriceElement.textContent = `${(baseOriginalPrice * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+                }
+            });
+            const modal = document.getElementById('quick-view-modal');
+            if (!modal.classList.contains('hidden')) {
+                const productId = modal.querySelector('#modal-add-to-cart').dataset.productId;
+                const product = products.find(p => p.id == productId);
+                if (product) {
+                    document.getElementById('modal-price').textContent = product.is_discounted 
+                        ? `${(product.discounted_price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency} (Was ${(product.price * exchangeRates[currentCurrency]).toFixed(2)})`
+                        : `${(product.price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+                }
+            }
+        }
+
+        // Product Data
+        const products = JSON.parse('{{ products|tojson|safe }}');
+
+        // Category and Subcategory Filtering
         function applyFilters() {
             let visibleProducts = 0;
             document.querySelectorAll('.product-card').forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
-                const cardSubcategory = card.getAttribute('data-subcategory');
+                const cardCategory = card.getAttribute('data-category').toLowerCase();
+                const cardSubcategory = card.getAttribute('data-subcategory').toLowerCase();
+                const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}'.toLowerCase();
+                const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else ""|safe }}'.toLowerCase();
                 
                 const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
                 const subcategoryMatch = !selectedSubcategory || cardSubcategory === selectedSubcategory;
@@ -940,37 +1091,96 @@
             noResults.style.display = visibleProducts === 0 ? 'block' : 'none';
         }
 
-        // Category Filter Event Listeners
-        document.querySelectorAll('.category-filter').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                selectedCategory = item.getAttribute('data-category');
-                selectedSubcategory = '';
-                document.querySelectorAll('.category-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
-                document.querySelectorAll('.subcategory-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
-                item.classList.add('text-yellow-600', 'font-semibold');
-                applyFilters();
-                mobileSidebar.classList.remove('open');
-                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
-                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+        // Add to Cart
+        const cartModal = document.getElementById('cart-modal');
+        const closeCartModal = document.getElementById('close-cart-modal');
+        const confirmCart = document.getElementById('confirm-cart');
+        const cancelCart = document.getElementById('cancel-cart');
+        const cartQuantity = document.getElementById('cart-quantity');
+
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const productId = button.dataset.productId;
+                confirmCart.dataset.productId = productId;
+                cartModal.classList.remove('hidden');
+                cartQuantity.value = 1;
             });
         });
 
-        // Subcategory Filter Event Listeners
-        document.querySelectorAll('.subcategory-filter').forEach(item => {
-            item.addEventListener('click', (e) => {
+        confirmCart.addEventListener('click', async () => {
+            const productId = confirmCart.dataset.productId;
+            const quantity = parseInt(cartQuantity.value) || 1;
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: parseInt(productId), quantity })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast('Product added to cart!');
+                    cartModal.classList.add('hidden');
+                } else {
+                    showToast(result.error || 'Failed to add to cart', 'error');
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showToast('Error adding to cart', 'error');
+            }
+        });
+
+        cancelCart.addEventListener('click', () => {
+            cartModal.classList.add('hidden');
+        });
+
+        closeCartModal.addEventListener('click', () => {
+            cartModal.classList.add('hidden');
+        });
+
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) {
+                cartModal.classList.add('hidden');
+            }
+        });
+
+        closeCartModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                selectedCategory = item.getAttribute('data-category');
-                selectedSubcategory = item.getAttribute('data-subcategory');
-                document.querySelectorAll('.category-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
-                document.querySelectorAll('.subcategory-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
-                item.classList.add('text-yellow-600', 'font-semibold');
-                const categoryBtn = document.querySelector(`.category-filter[data-category="${selectedCategory}"]`);
-                if (categoryBtn) categoryBtn.classList.add('text-yellow-600', 'font-semibold');
-                applyFilters();
-                mobileSidebar.classList.remove('open');
-                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
-                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+                cartModal.classList.add('hidden');
+            }
+        });
+
+        // Add to Wishlist
+        document.querySelectorAll('.add-to-wishlist').forEach(icon => {
+            icon.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const productId = icon.dataset.productId;
+                try {
+                    const response = await fetch('/api/wishlist', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ product_id: parseInt(productId) })
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        icon.classList.toggle('far');
+                        icon.classList.toggle('fas');
+                        icon.classList.toggle('filled');
+                        showToast('Product added to wishlist!');
+                    } else {
+                        showToast(result.error || 'Failed to add to wishlist', 'error');
+                        if (result.error === 'Unauthorized') {
+                            window.location.href = '/login';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error adding to wishlist:', error);
+                    showToast('Error adding to wishlist', 'error');
+                }
             });
         });
 
@@ -982,25 +1192,66 @@
         const modalCategory = document.getElementById('modal-category');
         const modalSubcategory = document.getElementById('modal-subcategory');
         const modalPrice = document.getElementById('modal-price');
+        const modalDescription = document.getElementById('modal-description');
+        const modalAddToCart = document.getElementById('modal-add-to-cart');
+        const modalAddToWishlist = document.getElementById('modal-add-to-wishlist');
 
         document.querySelectorAll('.quick-view').forEach(button => {
             button.addEventListener('click', (e) => {
+                e.preventDefault();
                 const productCard = button.closest('.product-card');
-                const image = productCard.querySelector('img').src;
-                const name = productCard.querySelector('h3').textContent;
-                const category = productCard.getAttribute('data-category');
-                const subcategory = productCard.getAttribute('data-subcategory');
-                const price = productCard.querySelector('.text-gray-800.font-semibold').textContent;
+                const productId = productCard.dataset.productId;
+                const product = products.find(p => p.id == productId);
 
-                modalImage.src = image;
-                modalImage.alt = name;
-                modalName.textContent = name;
-                modalCategory.textContent = `Category: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
-                modalSubcategory.textContent = `Subcategory: ${subcategory.charAt(0).toUpperCase() + subcategory.slice(1)}`;
-                modalPrice.textContent = price;
+                modalImage.src = product.image;
+                modalImage.alt = product.title;
+                modalName.textContent = product.title;
+                modalCategory.textContent = `Category: ${product.category}`;
+                modalSubcategory.textContent = `Subcategory: ${product.subcategory}`;
+                modalPrice.textContent = product.is_discounted ? 
+                    `${(product.discounted_price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency} (Was ${(product.price * exchangeRates[currentCurrency]).toFixed(2)})`
+                    : `${(product.price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+                modalDescription.textContent = product.description;
+                modalAddToCart.dataset.productId = productId;
+                modalAddToWishlist.dataset.productId = productId;
 
                 modal.classList.remove('hidden');
             });
+        });
+
+        // Modal Add to Cart
+        modalAddToCart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const productId = modalAddToCart.dataset.productId;
+            confirmCart.dataset.productId = productId;
+            cartModal.classList.remove('hidden');
+            cartQuantity.value = 1;
+        });
+
+        // Modal Add to Wishlist
+        modalAddToWishlist.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const productId = modalAddToWishlist.dataset.productId;
+            try {
+                const response = await fetch('/api/wishlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: parseInt(productId) })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast('Product added to wishlist!');
+                    modal.classList.add('hidden');
+                } else {
+                    showToast(result.error || 'Failed to add to wishlist', 'error');
+                    if (result.error === 'Unauthorized') {
+                        window.location.href = '/login';
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+                showToast('Error adding to wishlist', 'error');
+            }
         });
 
         // Close Modal
@@ -1015,7 +1266,7 @@
             }
         });
 
-        // Keyboard Accessibility for Modal Close
+        // Keyboard Accessibility
         closeModal.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -1025,6 +1276,38 @@
 
         // Initialize Filters
         applyFilters();
+
+        // Highlight Active Filters
+        const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}';
+        const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else ""|safe }}';
+        if (selectedCategory !== 'all') {
+            const categoryBtn = document.querySelector(`.category-filter[data-category="${selectedCategory}"]`);
+            if (categoryBtn) {
+                categoryBtn.classList.add('text-yellow-600', 'font-semibold');
+            }
+        }
+        if (selectedSubcategory) {
+            const subcategoryBtn = document.querySelector(`.subcategory-filter[data-subcategory="${selectedSubcategory}"]`);
+            if (subcategoryBtn) {
+                subcategoryBtn.classList.add('text-yellow-600', 'font-semibold');
+            }
+        }
+
+        // Ensure Hero Section Visibility
+        window.addEventListener('load', () => {
+            const heroSection = document.getElementById('home');
+            heroSection.style.display = 'block';
+            heroSection.style.opacity = '1';
+        });
+
+        // Prevent Hero Section Hiding
+        document.querySelectorAll('.category-filter, .subcategory-filter').forEach(link => {
+            link.addEventListener('click', () => {
+                const heroSection = document.getElementById('home');
+                heroSection.style.display = 'block';
+                heroSection.style.opacity = '1';
+            });
+        });
     </script>
 </body>
 </html>

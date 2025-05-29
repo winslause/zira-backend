@@ -10,6 +10,7 @@ from sqlalchemy import desc
 from datetime import datetime, timedelta
 from slugify import slugify
 import os
+import uuid 
 from dotenv import load_dotenv
 import secrets
 import random
@@ -56,6 +57,11 @@ CACHE_DURATION = timedelta(days=1)
 # Ensure upload folder exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -1843,59 +1849,142 @@ def handle_user(id):
             logging.error(f"Unexpected error in DELETE /api/users/{id}: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
 
+        
+        
+# Route to handle GET (all categories) and POST (create category)
 @app.route('/api/categories', methods=['GET', 'POST'])
 def handle_categories():
     if request.method == 'GET':
-        categories = Category.query.all()
-        return jsonify([{
-            'id': c.id,
-            'name': c.name,
-            'description': c.description,
-            'image': c.image
-        } for c in categories])
-    if 'admin' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    if request.method == 'POST':
         try:
-            # Expect form data for name, description, and image
+            categories = Category.query.all()
+            return jsonify([
+                {
+                    'id': category.id,
+                    'name': category.name,
+                    'description': category.description,
+                    'image': category.image
+                } for category in categories
+            ])
+        except SQLAlchemyError as e:
+            logging.error(f"Database error in GET /api/categories: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            logging.error(f"Unexpected error in GET /api/categories: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'POST':
+        try:
+            # Check if the request contains FormData
             if not request.form.get('name'):
                 return jsonify({'error': 'Category name is required'}), 400
-            if Category.query.filter_by(name=request.form['name']).first():
-                return jsonify({'error': 'Category already exists'}), 400
+
+            # Initialize category data
+            name = request.form.get('name').strip()
+            description = request.form.get('description', '').strip()
 
             # Handle image upload
             image_filename = None
-            if 'image' in request.files and request.files['image'].filename:
-                image = request.files['image']
-                if not allowed_file(image.filename):
-                    return jsonify({'error': 'Invalid image format (use PNG, JPG, JPEG, GIF)'}), 400
-                if image.content_length > 3 * 1024 * 1024:  # 3MB limit
-                    return jsonify({'error': 'Image size exceeds 3MB'}), 400
-                image_filename = save_file(image)
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename and allowed_file(file.filename):
+                    # Secure the filename to prevent malicious input
+                    filename = secure_filename(file.filename)
+                    # Generate a unique filename to avoid conflicts
+                    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(file_path)
+                    image_filename = unique_filename
+                else:
+                    return jsonify({'error': 'Invalid or unsupported image file. Only JPG and PNG are allowed.'}), 400
 
-            category = Category(
-                name=request.form['name'],
-                slug=slugify(request.form['name']),
-                description=request.form.get('description'),
+            # Create new category
+            new_category = Category(
+                name=name,
+                description=description or None,
                 image=image_filename
             )
-            db.session.add(category)
+            db.session.add(new_category)
             db.session.commit()
-            return jsonify({'message': 'Category created successfully', 'id': category.id}), 201
+
+            return jsonify({
+                'message': 'Category added successfully',
+                'id': new_category.id,
+                'name': new_category.name,
+                'description': new_category.description,
+                'image': new_category.image
+            }), 201
+
         except SQLAlchemyError as e:
             db.session.rollback()
             logging.error(f"Database error in POST /api/categories: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
+            if image_filename and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], image_filename)):
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))  # Clean up uploaded file on error
             logging.error(f"Unexpected error in POST /api/categories: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
-        
-        
+
+# Route to handle GET, PUT, DELETE for a specific category
 @app.route('/api/categories/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_category(id):
     category = Category.query.get_or_404(id)
-    if request.method == 'DELETE':
+    
+    if request.method == 'GET':
+        try:
+            return jsonify({
+                'id': category.id,
+                'name': category.name,
+                'description': category.description,
+                'image': category.image
+            })
+        except Exception as e:
+            logging.error(f"Error in GET /api/categories/{id}: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+    
+    elif request.method == 'PUT':
+        try:
+            if not request.form.get('name'):
+                return jsonify({'error': 'Category name is required'}), 400
+
+            category.name = request.form.get('name').strip()
+            category.description = request.form.get('description', '').strip() or None
+
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename and allowed_file(file.filename):
+                    # Delete old image if exists
+                    if category.image:
+                        old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], category.image)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+                    # Save new image
+                    filename = secure_filename(file.filename)
+                    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(file_path)
+                    category.image = unique_filename
+                else:
+                    return jsonify({'error': 'Invalid or unsupported image file. Only JPG and PNG are allowed.'}), 400
+
+            db.session.commit()
+            return jsonify({
+                'message': 'Category updated successfully',
+                'id': category.id,
+                'name': category.name,
+                'description': category.description,
+                'image': category.image
+            })
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            logging.error(f"Database error in PUT /api/categories/{id}: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Unexpected error in PUT /api/categories/{id}: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'DELETE':
         try:
             # Check for associated subcategories
             subcategories = Subcategory.query.filter_by(category_id=id).count()
@@ -2599,6 +2688,129 @@ def our_products():
         current_currency='USD'
     )
     
+@app.route('/category/', defaults={'category_slug': 'all', 'subcategory_slug': 'all'})
+@app.route('/category/<category_slug>/', defaults={'subcategory_slug': 'all'})
+@app.route('/category/<category_slug>/<subcategory_slug>')
+def category_page(category_slug='all', subcategory_slug='all'):
+    try:
+        # Get current currency from session, default to KES
+        current_currency = session.get('currency', 'KES')
+
+        # Fetch all categories for navbar
+        categories = Category.query.all()
+
+        # Fetch exchange rates
+        exchange_rates = {
+            'EUR': 0.0073,
+            'GBP': 0.0061,
+            'KES': 1.0,
+            'USD': 0.0077
+        }
+        recent_rate = ExchangeRate.query.order_by(ExchangeRate.updated_at.desc()).first()
+        if recent_rate and recent_rate.updated_at > datetime.utcnow() - CACHE_DURATION:
+            exchange_rates = {
+                'EUR': recent_rate.eur,
+                'GBP': recent_rate.gbp,
+                'KES': recent_rate.kes,
+                'USD': recent_rate.usd
+            }
+
+        # Initialize variables
+        products = []
+        selected_category = None
+        selected_subcategory = None
+        page_title = "All Categories - Zira Collections"
+        category_image = "https://png.pngtree.com/background/20230611/original/pngtree-ancient-artifacts-from-an-archaeological-site-in-the-united-kingdom-picture-image_3167955.jpg"
+        category_description = "Explore a wide range of African artistry across all our categories."
+
+        # Handle category and subcategory filtering
+        if category_slug.lower() != 'all':
+            selected_category = Category.query.filter_by(slug=category_slug).first()
+            if not selected_category:
+                logging.error(f"Category not found: {category_slug}")
+                return render_template('404.html'), 404
+            category_image = f"/static/uploads/{selected_category.image}" if selected_category.image else category_image
+            category_description = selected_category.description or category_description
+            page_title = f"{selected_category.name} - Zira Collections"
+
+            if subcategory_slug.lower() != 'all':
+                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug, category_id=selected_category.id).first()
+                if not selected_subcategory:
+                    logging.error(f"Subcategory not found: {subcategory_slug} for category {category_slug}")
+                    return render_template('404.html'), 404
+                products = Product.query.filter_by(category_id=selected_category.id, subcategory_id=selected_subcategory.id).options(
+                    joinedload(Product.discount)
+                ).order_by(Product.created_at.desc()).all()
+                page_title = f"{selected_category.name} - {selected_subcategory.name} - Zira Collections"
+            else:
+                products = Product.query.filter_by(category_id=selected_category.id).options(
+                    joinedload(Product.discount)
+                ).order_by(Product.created_at.desc()).all()
+        else:
+            if subcategory_slug.lower() != 'all':
+                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug).first()
+                if not selected_subcategory:
+                    logging.error(f"Subcategory not found: {subcategory_slug}")
+                    return render_template('404.html'), 404
+                products = Product.query.filter_by(subcategory_id=selected_subcategory.id).options(
+                    joinedload(Product.discount)
+                ).order_by(Product.created_at.desc()).all()
+                page_title = f"All Categories - {selected_subcategory.name} - Zira Collections"
+            else:
+                products = Product.query.options(joinedload(Product.discount)).order_by(Product.created_at.desc()).all()
+
+        # Prepare product data
+        today = datetime.utcnow().date()
+        product_data = []
+        for p in products:
+            discounted_price = p.price
+            is_discounted = False
+            if p.discount and p.discount.start_date <= today <= p.discount.end_date:
+                discounted_price = p.price * (1 - p.discount.percent / 100)
+                is_discounted = True
+            product_data.append({
+                'id': p.id,
+                'title': p.title.strip() if p.title else "Unnamed Product",
+                'category': p.category.name.strip() if p.category and p.category.name else "Uncategorized",
+                'subcategory': p.subcategory.name.strip() if p.subcategory and p.subcategory.name else "None",
+                'price': float(p.price),
+                'discounted_price': float(discounted_price),
+                'is_discounted': is_discounted,
+                'discount_percent': p.discount.percent if is_discounted else None,
+                'image': f"/static/uploads/{p.image}" if p.image else "https://via.placeholder.com/300x200",
+                'description': p.description if p.description else "No description available."
+            })
+
+        # Log for debugging
+        logging.debug(f"Rendering category.html: category_slug={category_slug}, subcategory_slug={subcategory_slug}, products={len(product_data)}")
+        logging.debug(f"selected_category.image: {selected_category.image if selected_category else None}, category_image: {category_image}")
+
+        return render_template(
+            'category.html',
+            categories=categories,
+            products=product_data,
+            selected_category=selected_category,
+            selected_subcategory=selected_subcategory,
+            category_image=category_image,
+            category_description=category_description,
+            exchange_rates=exchange_rates,
+            current_currency=current_currency,
+            page_title=page_title,
+            today=today,
+            debug=True
+        )
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database error in /category/{category_slug}/{subcategory_slug}: {str(e)}")
+        return render_template('500.html'), 500
+    except Exception as e:
+        logging.error(f"Unexpected error in /category/{category_slug}/{subcategory_slug}: {str(e)}")
+        return render_template('500.html'), 500
+    
+@app.route('/categories')
+def default_category_page():
+    return category_page(category_slug='all', subcategory_slug='all')
+    
 @app.route('/categories')
 @app.route('/categories/<string:slug>')
 def categories(slug=None):
@@ -2693,8 +2905,10 @@ def handle_wishlist():
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in POST /api/wishlist: {str(e)}")
+            logging.error(f"Unexpected error i/wishn POST /api/wishlist: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
+        
+        
 
 @app.route('/api/wishlist/<int:id>', methods=['DELETE'])
 def delete_wishlist_item(id):

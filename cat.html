@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zira Collection - Explore Timeless Treasures</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Fonts */
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        .inter-font {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Section Photo Video Background */
+        .hero-container {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: showroomTour 52s infinite ease-in-out;
+            transform-origin: center;
+        }
+        .hero-bg:nth-child(1) { 
+            background-image: url('https://egymonuments.gov.eg/storage/events/May2024/1y0KT0K4REkCMEWpf0z1.jpg'); 
+            animation-delay: 0s; 
+        }
+        .hero-bg:nth-child(2) { 
+            background-image: url('https://media.tacdn.com/media/attractions-splice-spp-674x446/06/df/55/b8.jpg'); 
+            animation-delay: 13s; 
+        }
+        .hero-bg:nth-child(3) { 
+            background-image: url('https://www.pelago.co/img/products/EG-Egypt/egyptian-museum-half-day-tour/33021db1-a51c-49ea-a2ad-b286dad82b4f_egyptian-museum-half-day-tour.jpg'); 
+            animation-delay: 26s; 
+        }
+        .hero-bg:nth-child(4) { 
+            background-image: url('https://cdn.pixabay.com/photo/2017/08/02/13/09/confetti-2571539_640.jpg'); 
+            animation-delay: 39s; 
+        }
+
+        @keyframes showroomTour {
+            0% {
+                opacity: 0;
+                transform: scale(1.2) rotate(1deg) translateX(-5%) translateY(-5%);
+                background-position: 40% 40%;
+            }
+            5% {
+                opacity: 1;
+                transform: scale(1.15) rotate(0deg) translateX(0%) translateY(0%);
+                background-position: 50% 50%;
+            }
+            30% {
+                transform: scale(1.1) rotate(-1deg) translateX(3%) translateY(3%);
+                background-position: 60% 60%;
+            }
+            55% {
+                transform: scale(1.15) rotate(0deg) translateX(-2%) translateY(-2%);
+                background-position: 45% 45%;
+            }
+            61.5% {
+                opacity: 1;
+                transform: scale(1.15) rotate(0deg) translateX(-2%) translateY(-2%);
+                background-position: 45% 45%;
+            }
+            90% {
+                opacity: 1;
+                transform: scale(1.2) rotate(1deg) translateX(5%) translateY(5%);
+                background-position: 55% 55%;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* General Page Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Navbar Animations */
+        .nav-item, .nav-icon {
+            animation: fadeInDown 0.5s ease-out forwards;
+            animation-delay: calc(0.1s * var(--index));
+        }
+
+        .nav-logo {
+            animation: fadeInLeft 0.5s ease-out forwards;
+        }
+
+        #mobile-menu-toggle {
+            animation: fadeInRight 0.5s ease-out forwards;
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            #mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+
+        /* Dropdown Menu Styling */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 0.375rem;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 1000;
+        }
+
+        .group:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            animation: slideDown 0.3s ease-out forwards;
+            animation-delay: calc(0.05s * var(--index));
+        }
+
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+            color: #d97706;
+            transform: translateX(5px);
+        }
+
+        /* Navbar Hover Underline Effect */
+        .nav-item {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            color: #d97706;
+            transform: scale(1.05);
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #d97706;
+            transition: width 0.3s ease;
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        /* Mobile Sidebar */
+        #mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background: white;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #mobile-sidebar.open {
+            transform: translateX(0);
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        /* Search Bar */
+        #search-bar {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        #search-bar.open {
+            max-height: 60px;
+            opacity: 1;
+        }
+
+        /* Product Card Animations */
+        .product-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: calc(0.1s * var(--index));
+        }
+
+        /* Category Sidebar Animations */
+        .category-filter, .subcategory-item {
+            animation: fadeInLeft 0.5s ease-out forwards;
+            animation-delay: calc(0.1s * var(--index));
+        }
+
+        /* Best Selling Section Animations */
+        .best-selling-image {
+            animation: fadeInRight 0.5s ease-out forwards;
+        }
+
+        .best-selling-text {
+            animation: fadeInLeft 0.5s ease-out forwards;
+            animation-delay: 0.2s;
+        }
+
+        /* Footer Animations */
+        .footer-item {
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: calc(0.1s * var(--index));
+        }
+
+        /* Explore Button Animation */
+        .explore-button {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Dropdown Icon Styling */
+        .chevron-container {
+            display: flex;
+            align-items: center;
+            width: 16px;
+            height: 16px;
+        }
+
+        .chevron-icon {
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease;
+        }
+
+        .chevron-down {
+            opacity: 1;
+        }
+
+        .chevron-right {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .dropdown-open .chevron-down {
+            opacity: 0;
+        }
+
+        .dropdown-open .chevron-right {
+            opacity: 1;
+        }
+
+        /* Modal Animation */
+        .modal-open {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Hover Effects for Quick View */
+        .product-card:hover .quick-view {
+            opacity: 1;
+        }
+        .quick-view {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Category Hover Effects */
+        .category-item:hover, .subcategory-item:hover {
+            color: #d97706;
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+
+        /* Product Card Styling */
+        .product-card {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            height: 16rem;
+            overflow: hidden;
+        }
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent;
+        }
+        .product-details {
+            text-align: center;
+            padding: 1rem 0;
+            background: transparent;
+        }
+        .product-details h3, .product-details p {
+            background: transparent;
+        }
+
+        /* Custom Horizontal Line for Categories */
+        .category-divider {
+            border-top: 1px solid #e5e7eb;
+            width: 90%;
+            margin: 0.5rem 0;
+        }
+
+        /* Vertical Line Separator */
+        .vertical-divider {
+            border-left: 1px solid #e5e7eb;
+            height: auto;
+        }
+
+        /* Center Best Selling Image on Small Devices */
+        @media (max-width: 767px) {
+            .best-selling-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .best-selling-image {
+                margin: 0 auto;
+            }
+        }
+
+        /* Modal Close Button */
+        #close-modal {
+            z-index: 10;
+        }
+
+        /* Mobile Sidebar Close Button */
+        #close-sidebar {
+            z-index: 10;
+        }
+
+        /* Mobile Sidebar Adjustments */
+        #mobile-sidebar .text-xl {
+            font-size: 0.95rem; /* Reduced text size for categories */
+        }
+        #mobile-sidebar .text-sm {
+            font-size: 0.75rem; /* Reduced text size for subcategories */
+        }
+        #mobile-sidebar button span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Space between text and icon */
+        }
+        #mobile-sidebar button i {
+            font-size: 0.75rem; /* Smaller icon size */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white fixed w-full z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <!-- Mobile Toggler (Left, Small Devices Only) -->
+            <button id="mobile-menu-toggle" class="text-gray-700 text-2xl order-1">
+                <i class="fas fa-bars"></i>
+            </button>
+            <!-- Logo (Center on Mobile, Left on Desktop) -->
+            <div class="flex items-center nav-logo order-2 md:order-1">
+                <img src="../static/images/logo.png" alt="Zira Collection Logo" class="h-12">
+            </div>
+            <!-- Desktop Menu (Center) -->
+            <div class="hidden md:flex flex-1 justify-center space-x-8 items-center order-2">
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg category-filter" 
+                       data-category="all" style="--index: 1;">All Categories</a>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 2;">Soapstone Carvings</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="animals" style="--index: 1;">Animals</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="soapstone" data-subcategory="abstract" style="--index: 2;">Abstract</a>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 3;">Wooden Artifacts</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="masks" style="--index: 1;">Masks</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="wooden" data-subcategory="sculptures" style="--index: 2;">Sculptures</a>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 4;">Beadwork</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="jewelry" style="--index: 1;">Jewelry</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="beadwork" data-subcategory="decor" style="--index: 2;">Decor</a>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <a href="#" class="nav-item text-gray-700 text-lg" style="--index: 5;">Giftings</a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="personalized" style="--index: 1;">Personalized Gifts</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="baskets" style="--index: 2;">Gift Baskets</a>
+                        <a href="#" class="dropdown-item subcategory-filter" data-category="giftings" data-subcategory="keepsakes" style="--index: 3;">Keepsakes</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Icons (Right) -->
+            <div class="flex items-center space-x-4 order-3">
+                <button id="search-toggle" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 6;"><i class="fas fa-search"></i></button>
+                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 7;"><i class="fas fa-heart"></i></a>
+                <a href="#" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 8;"><i class="fas fa-shopping-cart"></i></a>
+                <button class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 9;"><i class="fas fa-dollar-sign"></i></button>
+            </div>
+        </div>
+        <!-- Search Bar -->
+        <div id="search-bar" class="bg-gray-100 px-4 py-2">
+            <input type="text" placeholder="Search artifacts..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-yellow-600">
+        </div>
+        <!-- Mobile Sidebar -->
+        <div id="mobile-sidebar" class="md:hidden">
+            <div class="flex flex-col p-4 space-y-4 h-full relative">
+                <!-- Close Button -->
+                <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+                <a href="#" class="text-gray-700 hover:text-yellow-600 category-filter" data-category="all">All Categories</a>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('soapstone-mobile')">
+                        <span>Soapstone Carvings <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="soapstone-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="animals">Animals</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="soapstone" data-subcategory="abstract">Abstract</a>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('wooden-mobile')">
+                        <span>Wooden Artifacts <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="wooden-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="masks">Masks</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="wooden" data-subcategory="sculptures">Sculptures</a>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('beadwork-mobile')">
+                        <span>Beadwork <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="beadwork-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="jewelry">Jewelry</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="beadwork" data-subcategory="decor">Decor</a>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full text-left text-gray-700 hover:text-yellow-600" onclick="toggleMobileDropdown('giftings-mobile')">
+                        <span>Giftings <i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div id="giftings-mobile" class="hidden pl-4 space-y-2">
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="personalized">Personalized Gifts</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="baskets">Gift Baskets</a>
+                        <a href="#" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter" data-category="giftings" data-subcategory="keepsakes">Keepsakes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-container">
+        <div class="hero-bg"></div>
+        <div class="hero-bg"></div>
+        <div class="hero-bg"></div>
+        <div class="hero-bg"></div>
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+            <div class="text-center text-white">
+                <h1 class="text-5xl md:text-7xl font-bold mb-4 animate-fadeIn">Timeless Treasures</h1>
+                <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-200">Discover the Artistry of Africa</p>
+                <a href="#products" class="explore-button bg-yellow-600 text-white px-6 py-3 rounded-full hover:bg-yellow-700 transition animate-fadeIn delay-400">Explore Artifacts</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Combined Products Section with Sidebar on Left -->
+    <section id="products" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Sidebar Filters (Left) -->
+                <div class="w-full md:w-64 bg-gray-100 p-6 rounded-lg inter-font">
+                    <h3 class="text-2xl font-semibold text-yellow-600 mb-4 uppercase">Categories</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="all" onclick="toggleDropdown('all-categories')" style="--index: 1;">
+                                All Categories
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="all-categories" class="mt-2 hidden"></div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="soapstone" onclick="toggleDropdown('soapstone')" style="--index: 2;">
+                                Soapstone Carvings
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="soapstone" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="soapstone" data-subcategory="animals" style="--index: 3;">Animals</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="soapstone" data-subcategory="abstract" style="--index: 4;">Abstract</a>
+                            </div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="wooden" onclick="toggleDropdown('wooden')" style="--index: 5;">
+                                Wooden Artifacts
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="wooden" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="wooden" data-subcategory="masks" style="--index: 6;">Masks</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="wooden" data-subcategory="sculptures" style="--index: 7;">Sculptures</a>
+                            </div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="beadwork" onclick="toggleDropdown('beadwork')" style="--index: 8;">
+                                Beadwork
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="beadwork" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="beadwork" data-subcategory="jewelry" style="--index: 9;">Jewelry</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="beadwork" data-subcategory="decor" style="--index: 10;">Decor</a>
+                            </div>
+                            <div class="category-divider"></div>
+                        </div>
+                        <div>
+                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
+                                    data-category="giftings" onclick="toggleDropdown('giftings')" style="--index: 11;">
+                                Giftings
+                                <span class="chevron-container">
+                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div id="giftings" class="mt-2 hidden">
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="personalized" style="--index: 12;">Personalized Gifts</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="baskets" style="--index: 13;">Gift Baskets</a>
+                                <a href="#" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
+                                   data-category="giftings" data-subcategory="keepsakes" style="--index: 14;">Keepsakes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vertical Divider -->
+                <div class="vertical-divider hidden md:block"></div>
+
+                <!-- Main Content (Right) -->
+                <div class="flex-1">
+                    <!-- Best Selling Section -->
+                    <div class="best-selling-container flex flex-col lg:flex-row gap-6 items-start mb-12">
+                        <div class="flex-shrink-0 best-selling-image">
+                            <img src="https://onlinejpgtools.com/images/examples-onlinejpgtools/light-bulb-with-plant.jpg" 
+                                 alt="Soapstone Carving" class="rounded-full w-64 h-64 object-cover">
+                        </div>
+                        <div class="flex-1 inter-font best-selling-text">
+                            <h2 class="text-xl font-medium mb-4 uppercase">Best Selling</h2>
+                            <p class="mb-4 text-gray-600">
+                                Our Soapstone is carved by the artists of SMOLArt, a group of artisans in Tabaka, Kenya, the heart of soapstone crafts. Established in 1990, SMOLArt, a WFTO member, ensures fair wages and supports community projects for better living conditions, education, and health.
+                            </p>
+                            <p class="mb-4 text-gray-600">
+                                Soapstone is mined in Kiisi, Kenya, and carved into sculptures ranging from cream to black. Artisans smooth the stone with sandpaper and water, polishing it to a high gloss or painting it with vibrant African motifs.
+                            </p>
+                            <p class="text-gray-600">
+                                All soapstone products are handmade using simple tools like screwdrivers and pangas, reflecting the artisans' skill and dedication.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Product Grid -->
+                    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8">
+                        <!-- Soapstone Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="soapstone" data-subcategory="animals" style="--index: 1;">
+                            <div class="product-image-container">
+                                <img src="https://images.pexels.com/photos/8229660/pexels-photo-8229660.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" 
+                                     alt="Soapstone Elephant">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Soapstone Elephant</h3>
+                                <p class="text-gray-600 text-sm">Animals</p>
+                                <p class="text-gray-800 font-semibold mt-2">$45.00</p>
+                            </div>
+                        </div>
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="soapstone" data-subcategory="abstract" style="--index: 2;">
+                            <div class="product-image-container">
+                                <img src="https://live.staticflickr.com/579/23126540934_dd47029055_b.jpg" 
+                                     alt="Soapstone Abstract">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Soapstone Abstract</h3>
+                                <p class="text-gray-600 text-sm">Abstract</p>
+                                <p class="text-gray-800 font-semibold mt-2">$60.00</p>
+                            </div>
+                        </div>
+                        <!-- Wooden Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="wooden" data-subcategory="masks" style="--index: 3;">
+                            <div class="product-image-container">
+                                <img src="https://www.al-monitor.com/sites/default/files/styles/article_header/public/2021-06/GettyImages-460492878.jpg?h=a5ae579a&itok=ItBhGKfX" 
+                                     alt="Wooden Mask">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Wooden Mask</h3>
+                                <p class="text-gray-600 text-sm">Masks</p>
+                                <p class="text-gray-800 font-semibold mt-2">$75.00</p>
+                            </div>
+                        </div>
+                        <!-- Beadwork Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="beadwork" data-subcategory="jewelry" style="--index: 4;">
+                            <div class="product-image-container">
+                                <img src="https://egymonuments.gov.eg/storage/events/May2024/1y0KT0K4REkCMEWpf0z1.jpg" 
+                                     alt="Beaded Necklace">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Beaded Necklace</h3>
+                                <p class="text-gray-600 text-sm">Jewelry</p>
+                                <p class="text-gray-800 font-semibold mt-2">$30.00</p>
+                            </div>
+                        </div>
+                        <!-- Giftings Products -->
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="personalized" style="--index: 5;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1607349913338-fca6f7fc42d0?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Personalized Gift Box">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Personalized Gift Box</h3>
+                                <p class="text-gray-600 text-sm">Personalized Gifts</p>
+                                <p class="text-gray-800 font-semibold mt-2">$50.00</p>
+                            </div>
+                        </div>
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="baskets" style="--index: 6;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1607344642600-0fcaa5d7b65f?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Artisan Gift Basket">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Artisan Gift Basket</h3>
+                                <p class="text-gray-600 text-sm">Gift Baskets</p>
+                                <p class="text-gray-800 font-semibold mt-2">$80.00</p>
+                            </div>
+                        </div>
+                        <div class="product-card transform transition duration-500 hover:scale-105" 
+                             data-category="giftings" data-subcategory="keepsakes" style="--index: 7;">
+                            <div class="product-image-container">
+                                <img src="https://images.unsplash.com/photo/1513028589963-f6c0a58ba0b0?auto=format&fit=crop&w=500&q=60" 
+                                     alt="Engraved Keepsake">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                    Quick View
+                                </button>
+                            </div>
+                            <div class="product-details inter-font">
+                                <h3 class="text-lg font-medium text-gray-800">Engraved Keepsake</h3>
+                                <p class="text-gray-600 text-sm">Keepsakes</p>
+                                <p class="text-gray-800 font-semibold mt-2">$35.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="no-results" class="text-gray-600 text-center mt-8 hidden">No products found in this category.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h3 class="text-2xl font-semibold text-yellow-600 mb-4 footer-item" style="--index: 1;">Zira Collection</h3>
+            <p class="text-sm mb-6 footer-item" style="--index: 2;">Celebrating African Artistry Since 2015</p>
+            <div class="flex justify-center gap-4 text-xl mb-6">
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 3;"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 4;"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 5;"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 6;"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 7;"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            <p class="text-sm footer-item" style="--index: 8;">© 2025 Zira Collection. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Quick View Modal -->
+    <div id="quick-view-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative modal-open">
+            <button id="close-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="space-y-4">
+                <img id="modal-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-md">
+                <h3 id="modal-name" class="text-2xl font-semibold text-gray-800"></h3>
+                <p id="modal-category" class="text-gray-600"></p>
+                <p id="modal-subcategory" class="text-gray-600"></p>
+                <p id="modal-price" class="text-gray-800 font-semibold"></p>
+                <div class="flex justify-end gap-2">
+                    <button class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition flex items-center">
+                        <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Sidebar Toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const closeSidebar = document.getElementById('close-sidebar');
+
+        function toggleSidebar() {
+            mobileSidebar.classList.toggle('open');
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        }
+
+        mobileMenuToggle.addEventListener('click', toggleSidebar);
+        closeSidebar.addEventListener('click', toggleSidebar);
+
+        // Search Bar Toggle
+        const searchToggle = document.getElementById('search-toggle');
+        const searchBar = document.getElementById('search-bar');
+        searchToggle.addEventListener('click', () => {
+            searchBar.classList.toggle('open');
+        });
+
+        // Mobile Dropdown Toggle
+        function toggleMobileDropdown(id) {
+            const dropdown = document.getElementById(id);
+            dropdown.classList.toggle('hidden');
+            const button = dropdown.previousElementSibling;
+            const icon = button.querySelector('i');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-right');
+        }
+
+        // Sidebar Dropdown Toggle
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const button = dropdown.previousElementSibling;
+            document.querySelectorAll('.mt-2').forEach(d => {
+                if (d.id !== id) {
+                    d.classList.add('hidden');
+                    const otherButton = d.previousElementSibling;
+                    otherButton.classList.remove('dropdown-open');
+                }
+            });
+            const isOpen = dropdown.classList.toggle('hidden');
+            button.classList.toggle('dropdown-open', !isOpen);
+        }
+
+        // Category and Subcategory Filtering
+        let selectedCategory = 'all';
+        let selectedSubcategory = '';
+
+        function applyFilters() {
+            let visibleProducts = 0;
+            document.querySelectorAll('.product-card').forEach(card => {
+                const cardCategory = card.getAttribute('data-category');
+                const cardSubcategory = card.getAttribute('data-subcategory');
+                
+                const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
+                const subcategoryMatch = !selectedSubcategory || cardSubcategory === selectedSubcategory;
+
+                if (categoryMatch && subcategoryMatch) {
+                    card.style.display = 'block';
+                    visibleProducts++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const noResults = document.getElementById('no-results');
+            noResults.style.display = visibleProducts === 0 ? 'block' : 'none';
+        }
+
+        // Category Filter Event Listeners
+        document.querySelectorAll('.category-filter').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedCategory = item.getAttribute('data-category');
+                selectedSubcategory = '';
+                document.querySelectorAll('.category-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
+                document.querySelectorAll('.subcategory-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
+                item.classList.add('text-yellow-600', 'font-semibold');
+                applyFilters();
+                mobileSidebar.classList.remove('open');
+                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+            });
+        });
+
+        // Subcategory Filter Event Listeners
+        document.querySelectorAll('.subcategory-filter').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedCategory = item.getAttribute('data-category');
+                selectedSubcategory = item.getAttribute('data-subcategory');
+                document.querySelectorAll('.category-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
+                document.querySelectorAll('.subcategory-filter').forEach(i => i.classList.remove('text-yellow-600', 'font-semibold'));
+                item.classList.add('text-yellow-600', 'font-semibold');
+                const categoryBtn = document.querySelector(`.category-filter[data-category="${selectedCategory}"]`);
+                if (categoryBtn) categoryBtn.classList.add('text-yellow-600', 'font-semibold');
+                applyFilters();
+                mobileSidebar.classList.remove('open');
+                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+            });
+        });
+
+        // Quick View Modal
+        const modal = document.getElementById('quick-view-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalName = document.getElementById('modal-name');
+        const modalCategory = document.getElementById('modal-category');
+        const modalSubcategory = document.getElementById('modal-subcategory');
+        const modalPrice = document.getElementById('modal-price');
+
+        document.querySelectorAll('.quick-view').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const productCard = button.closest('.product-card');
+                const image = productCard.querySelector('img').src;
+                const name = productCard.querySelector('h3').textContent;
+                const category = productCard.getAttribute('data-category');
+                const subcategory = productCard.getAttribute('data-subcategory');
+                const price = productCard.querySelector('.text-gray-800.font-semibold').textContent;
+
+                modalImage.src = image;
+                modalImage.alt = name;
+                modalName.textContent = name;
+                modalCategory.textContent = `Category: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+                modalSubcategory.textContent = `Subcategory: ${subcategory.charAt(0).toUpperCase() + subcategory.slice(1)}`;
+                modalPrice.textContent = price;
+
+                modal.classList.remove('hidden');
+            });
+        });
+
+        // Close Modal
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Close Modal on Outside Click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Keyboard Accessibility for Modal Close
+        closeModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Initialize Filters
+        applyFilters();
+    </script>
+</body>
+</html>
