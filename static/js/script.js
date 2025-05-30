@@ -509,3 +509,57 @@ document.querySelectorAll('.modal').forEach(modal => {
         }
     });
 });
+
+
+
+
+$(document).ready(function() {
+    // Initialize Category Dropdowns for Desktop
+    $('.nav-hover').each(function() {
+        const $dropdown = $(this).find('.dropdown-menu');
+        if ($dropdown.length) {
+            $(this).hover(
+                function() {
+                    $dropdown.removeClass('hidden').css({
+                        opacity: 1,
+                        visibility: 'visible',
+                        transform: 'translateY(0)'
+                    });
+                },
+                function() {
+                    $dropdown.addClass('hidden').css({
+                        opacity: 0,
+                        visibility: 'hidden',
+                        transform: 'translateY(-10px)'
+                    });
+                }
+            );
+        }
+    });
+
+    // Mobile Sidebar Subcategory Toggle
+    $('.toggle-subcategories').click(function() {
+        const $button = $(this);
+        const $icon = $button.find('.fa-chevron-down');
+        const $subcategories = $button.closest('.category-item').find('.subcategories');
+
+        $subcategories.slideToggle(300, function() {
+            $subcategories.toggleClass('active');
+            $icon.toggleClass('active');
+        });
+    });
+
+    // Mobile Sidebar Toggle
+    $('#nav-toggler').click(function() {
+        $('#mobile-sidebar').removeClass('-translate-x-full');
+    });
+
+    $('#close-sidebar').click(function() {
+        $('#mobile-sidebar').addClass('-translate-x-full');
+    });
+
+    // Mobile Search Toggle
+    $('#mobile-search-icon').click(function() {
+        $('#mobile-search-bar').toggleClass('hidden');
+    });
+});

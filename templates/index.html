@@ -67,75 +67,124 @@
                 </div>
             </div>
             <!-- Desktop Navbar -->
-            <div class="hidden md:flex items-center justify-between w-full">
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12">
-                <div class="flex space-x-6">
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700">Products</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
-                    </div>
-                </div>
-                <!-- Search and Icons -->
-                <div class="flex items-center space-x-4">
-                    <div class="search-container">
-                        <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
-                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                    <!-- Desktop Currency Button -->
-                    <!-- Desktop Currency Button -->
-<div id="country-btn-container" class="relative">
-    <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
-    <button style="border-radius: 35px;" id="country-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
-        <span class="flag">
-            {% if current_currency == 'USD' %}🇺🇸
-            {% elif current_currency == 'EUR' %}🇩🇪
-            {% elif current_currency == 'GBP' %}🇬🇧
-            {% else %}🇰🇪{% endif %}
-        </span>
-        {{ current_currency }}
-    </button>
-    <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
-        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-        <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+            <!-- Desktop Navbar -->
+<div class="hidden md:flex items-center justify-between w-full">
+    <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+    <div class="flex space-x-6">
+        <div class="relative nav-hover">
+            <a href="{{ url_for('index') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'index' }}">Home</a>
+        </div>
+        <div class="relative nav-hover">
+            <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'our_products' }}">Products</a>
+        </div>
+        <div class="relative nav-hover">
+            <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+        </div>
+        <!-- Dynamic Categories -->
+        <!-- Dynamic Categories -->
+{% for category in categories %}
+<div class="relative nav-hover group">
+    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+       class="navbar-item text-gray-700 {{ 'active' if selected_category and selected_category.slug == category.slug else '' }} flex items-center">
+        {{ category.name }}
+        {% if category.subcategories %}
+        <i class="fas fa-chevron-down text-sm ml-1 transition-transform duration-200 group-hover:rotate-180 hidden md:inline-block"></i>
+        {% endif %}
+    </a>
+    {% if category.subcategories %}
+    <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-20 min-w-[200px]">
+        {% for subcategory in category.subcategories %}
+        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+           class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}">
+            {{ subcategory.name }}
+        </a>
+        {% endfor %}
     </div>
+    {% endif %}
 </div>
-                </div>
+{% endfor %}
+    </div>
+    <!-- Search and Icons -->
+    <div class="flex items-center space-x-4">
+        <div class="search-container">
+            <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
+            <i class="fas fa-search"></i>
+        </div>
+        <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900" aria-label="View wishlist"></a>
+        <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900" aria-label="View cart"></a>
+        <!-- Desktop Currency Button -->
+        <div id="country-btn-container" class="relative">
+            <div class="currency-label text-xs text-gray-700 mb-1 text-center">Currency</div>
+            <button style="border-radius: 35px;" id="country-btn" class="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md flex items-center text-sm shadow-sm hover:bg-gray-100" aria-label="Select currency">
+                <span class="flag">
+                    {% if current_currency == 'USD' %}🇺🇸
+                    {% elif current_currency == 'EUR' %}🇩🇪
+                    {% elif current_currency == 'GBP' %}🇬🇧
+                    {% else %}🇰🇪{% endif %}
+                </span>
+                {{ current_currency }}
+            </button>
+            <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 right-0 mt-2 z-50">
+                <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</span></a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+            </div>
+        </div>
+    </div>
+</div>                </div>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Sidebar -->
-    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
-        <div class="p-4">
-            <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
-            <div class="space-y-4">
-                <div>
-                    <a href="{{ url_for('index') }}" class="block text-gray-700 hover:text-gray-900" style="margin-top: 20px; padding-top:20px">Home</a>
-                </div>
-                <div>
-                    <a href="{{ url_for('our_products') }}" class="block text-gray-700 hover:text-gray-900">Products</a>
-                </div>
-                <div>
-                    <a href="{{ url_for('discounted_artefacts') }}" class="block text-gray-700 hover:text-gray-900">Special Discount</a>
-                </div>
-                <div>
-                    <a href="{{ url_for('account') }}" class="block text-gray-700 hover:text-gray-900">My Account</a>
-                </div>
-
-
-                <!-- <a href="{{ url_for('account') }}" class="mobile-sidebar-item active">My Account</a> -->
+    <!-- Mobile Sidebar -->
+<div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-30">
+    <div class="p-4">
+        <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
+        <div class="space-y-4">
+            <div>
+                <a href="{{ url_for('index') }}" class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'index' }}">Home</a>
+            </div>
+            <div>
+                <a href="{{ url_for('our_products') }}" class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'our_products' }}">Products</a>
+            </div>
+            <div>
+                <a href="{{ url_for('discounted_artefacts') }}" class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+            </div>
+            <!-- Dynamic Categories -->
+            <!-- Dynamic Categories -->
+{% for category in categories %}
+<div class="category-item">
+    <div class="flex items-center justify-between">
+        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+           class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug else '' }}">
+            {{ category.name }}
+        </a>
+        {% if category.subcategories %}
+        <button class="toggle-subcategories text-gray-600 hover:text-yellow-600">
+            <i class="fas fa-chevron-down transition-transform duration-200"></i>
+        </button>
+        {% endif %}
+    </div>
+    {% if category.subcategories %}
+    <div class="subcategories hidden pl-4 space-y-2" style="display: none;">
+        {% for subcategory in category.subcategories %}
+        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+           class="block text-sm text-gray-600 hover:text-yellow-600 py-1 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}">
+            {{ subcategory.name }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+            <div>
+                <a href="{{ url_for('account') }}" class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'account' }}">My Account</a>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Hero Section -->
 <section class="relative h-screen overflow-hidden pt-16">
@@ -155,9 +204,9 @@
                         <p class="text-md md:text-lg italic text-amber-200 font-[Lora] mb-6">
                             Save big on handcrafted treasures today.
                         </p>
-                        <a href="/collections/discounts" class="inline-block px-8 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
+                        <!-- <a href="/collections/discounts" class="inline-block px-8 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
                             Grab Yours Now
-                        </a>
+                        </a> -->
                     </div>
                 </div>
                 <div class="w-full flex items-center justify-center gap-4 p-4 bg-white">
@@ -207,9 +256,9 @@
                         <p class="text-lg lg:text-xl italic text-amber-700 font-[Lora] mb-6">
                             Elegant Craftsmanship
                         </p>
-                        <a href="/collections/wooden-kitchen" class="inline-block px-6 py-3 bg-amber-700 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-800 transition-all duration-300">
+                        <!-- <a href="/collections/wooden-kitchen" class="inline-block px-6 py-3 bg-amber-700 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-800 transition-all duration-300">
                             Shop Now
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -233,9 +282,9 @@
                     <p class="text-lg md:text-xl italic text-amber-200 font-[Lora] mb-6">
                         Timeless Stone Sculptures
                     </p>
-                    <a href="/collections/stone-artifacts" class="inline-block px-8 py-3 bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-700 transition-all duration-300">
+                    <!-- <a href="/collections/stone-artifacts" class="inline-block px-8 py-3 bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-700 transition-all duration-300">
                         Explore Now
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </div>
@@ -265,9 +314,9 @@
                     <p class="text-lg lg:text-xl italic text-amber-100 font-[Lora] mb-6 max-w-3xl mx-auto">
                         Authentic Handwoven Crafts
                     </p>
-                    <a href="/collections/woven-heritage" class="inline-block px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
+                    <!-- <a href="/collections/woven-heritage" class="inline-block px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
                         Shop Now
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </div>
@@ -310,11 +359,11 @@
                     </div>
                 </div>
                 <!-- Button at Bottom -->
-                <div class="text-center mb-8" style="padding: 5px; margin:5px;">
+                <!-- <div class="text-center mb-8" style="padding: 5px; margin:5px;">
                     <a href="/collections/ancient-pottery" class="inline-block px-8 py-3 bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-700 transition-all duration-300">
                         Discover Now
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -949,5 +998,6 @@
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
      <script src="{{ url_for('static', filename='js/email.js') }}"></script>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

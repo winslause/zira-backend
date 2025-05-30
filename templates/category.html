@@ -502,7 +502,7 @@
                 <a href="{{ url_for('index') }}" class="nav-item text-gray-700" style="--index: 1;">Home</a>
                 <a href="{{ url_for('discounted_artefacts') }}" class="nav-item text-gray-700" style="--index: 2;">Special Discount</a>
                 <a href="{{ url_for('our_products') }}" class="nav-item text-gray-700" style="--index: 3;">Our Products</a>
-                <div class="relative group">
+                <!-- <div class="relative group">
                     <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}"
                        class="nav-item text-gray-700 category-filter {{ 'text-yellow-600 font-semibold' if not selected_category else '' }}"
                        style="--index: 4;" data-category="all">
@@ -517,7 +517,7 @@
                         {% endif %}
                         {% endfor %}
                     </div>
-                </div>
+                </div> -->
                 {% for category in categories %}
                 {% if category and category.slug %}
                 <div class="relative group">
@@ -1051,7 +1051,7 @@
                         showToast(result.message || 'Added to wishlist');
                     } else {
                         showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
-                        if (result.error === 'Unauthorized') window.location.href = '/login';
+                        if (result.error === 'Unauthorized') window.location.href = '/user_login';
                     }
                 } catch (error) {
                     console.error('Error adding to wishlist:', error);
@@ -1120,7 +1120,7 @@
                     showToast(result.message || 'Added to wishlist');
                 } else {
                     showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
-                    if (result.error === 'Unauthorized') window.location.href = '/login';
+                    if (result.error === 'Unauthorized') window.location.href = '/user_login';
                 }
             } catch (error) {
                 console.error('Error adding to wishlist:', error);

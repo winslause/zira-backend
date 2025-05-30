@@ -681,93 +681,210 @@
         flex-shrink: 0;
     }
 }
+
+/* Dropdown Menu */
+.dropdown-menu {
+    top: 100%;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-hover:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Dropdown Item */
+.dropdown-item {
+    font-size: 0.875rem;
+    color: #4b5563;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #d97706;
+}
+
+/* Mobile Sidebar Categories */
+.category-item {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem 0;
+}
+
+.toggle-subcategories {
+    padding: 0.5rem;
+}
+
+.toggle-subcategories .fa-chevron-down.active {
+    transform: rotate(180deg);
+}
+
+.subcategories {
+    display: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.subcategories.active {
+    display: block;
+}
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
     <!-- Navbar -->
-    <nav class="navbar bg-white shadow-md fixed w-full z-1000">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Mobile Navbar -->
-            <div class="md:hidden flex items-center justify-between w-full relative">
-                <button id="nav-toggler" class="text-2xl" aria-label="Toggle mobile menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-                <div class="flex items-center space-x-2 relative">
-                    <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer" aria-label="Toggle search"></i>
-                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900" aria-label="View cart"></a>
-                    <!-- Mobile Currency Button -->
-                    <div id="mobile-country-btn-container" class="relative z-1002">
-                        <button id="mobile-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
-                            <span class="floating-text">Currency</span>
-                            <span class="flag">🇺🇸</span> USA
-                        </button>
-                        <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1004">
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-                        </div>
+<nav class="navbar bg-white shadow-md fixed w-full z-1000">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <!-- Mobile Navbar -->
+        <div class="md:hidden flex items-center justify-between w-full relative">
+            <button id="nav-toggler" class="text-2xl" aria-label="Toggle mobile menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+            <div class="flex items-center space-x-2 relative">
+                <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer" aria-label="Toggle search"></i>
+                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900 {{ 'text-yellow-600' if request.endpoint == 'account' }}" aria-label="View cart"></a>
+                <!-- Mobile Currency Button -->
+                <div id="mobile-country-btn-container" class="relative z-1002">
+                    <button id="mobile-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
+                        <span class="floating-text">Currency</span>
+                        <span class="flag">
+                            {% if current_currency == 'USD' %}🇺🇸
+                            {% elif current_currency == 'EUR' %}🇩🇪
+                            {% elif current_currency == 'GBP' %}🇬🇧
+                            {% else %}🇰🇪
+                            {% endif %}
+                        </span> {{ current_currency }}
+                    </button>
+                    <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1004">
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
                     </div>
-                </div>
-                <!-- Mobile Search Bar -->
-                <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden">
-                    <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
                 </div>
             </div>
-
-            <!-- Desktop Navbar -->
-            <div class="hidden md:flex items-center justify-between w-full">
-                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-                <div class="flex space-x-6">
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700">Products</a>
-                    </div>
-                    <div class="relative nav-hover">
-                        <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
-                    </div>
-                </div>
-                <!-- Search and Icons -->
-                <div class="flex items-center space-x-4 relative">
-                    <div class="search-container">
-                        <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900" aria-label="View wishlist"></a>
-                    <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900" aria-label="View cart"></a>
-                    <!-- Desktop Currency Button -->
-                    <div id="country-btn-container" class="relative z-1002">
-                        <button id="country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
-                            <span class="floating-text">Currency</span>
-                            <span class="flag">🇺🇸</span> USA
-                        </button>
-                        <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1004">
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-                            <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-                        </div>
-                    </div>
-                </div>
+            <!-- Mobile Search Bar -->
+            <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden absolute top-full left-0 right-0 mt-2">
+                <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
             </div>
         </div>
-    </nav>
 
-    <!-- Mobile Sidebar -->
-    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-1001">
-        <div class="p-4">
-            <button id="close-sidebar" class="text-2xl mb-4"><i class="fas fa-times"></i></button>
-            <div class="space-y-2" style="padding-top: 20px;">
-                <a href="{{ url_for('index') }}" class="mobile-sidebar-item">Home</a>
-                <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item">Products</a>
-                <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item">Special Discount</a>
-                <a href="{{ url_for('account') }}" class="mobile-sidebar-item active">My Account</a>
+        <!-- Desktop Navbar -->
+        <div class="hidden md:flex items-center justify-between w-full">
+            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+            <!-- Navigation Links -->
+            <div class="flex space-x-6">
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('index') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'index' }}">Home</a>
+                </div>
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'our_products' }}">Products</a>
+                </div>
+                <div class="relative nav-hover">
+                    <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+                </div>
+                <!-- Dynamic Categories -->
+                {% for category in categories %}
+                <div class="relative nav-hover group">
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                       class="navbar-item text-gray-700 {{ 'active' if selected_category and selected_category.slug == category.slug else '' }} flex items-center">
+                        {{ category.name }}
+                        {% if category.subcategories %}
+                        <i class="fas fa-chevron-down text-sm ml-1 transition-transform duration-200 group-hover:rotate-180 hidden md:inline-block"></i>
+                        {% endif %}
+                    </a>
+                    {% if category.subcategories %}
+                    <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-1004 min-w-[200px]">
+                        {% for subcategory in category.subcategories %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                           class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}">
+                            {{ subcategory.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Search and Icons -->
+            <div class="flex items-center space-x-4 relative">
+                <div class="search-container flex items-center border rounded px-2">
+                    <input type="text" placeholder="Search artifacts & cultural items" class="search-input px-2 py-1 outline-none text-gray-700">
+                    <button class="text-gray-500 hover:text-yellow-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900 {{ 'text-yellow-600' if request.endpoint == 'account' }}" aria-label="View wishlist"></a>
+                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900 {{ 'text-yellow-600' if request.endpoint == 'account' }}" aria-label="View cart"></a>
+                <!-- Desktop Currency Button -->
+                <div id="country-btn-container" class="relative z-1002">
+                    <button id="country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
+                        <span class="floating-text">Currency</span>
+                        <span class="flag">
+                            {% if current_currency == 'USD' %}🇺🇸
+                            {% elif current_currency == 'EUR' %}🇩🇪
+                            {% elif current_currency == 'GBP' %}🇬🇧
+                            {% else %}🇰🇪
+                            {% endif %}
+                        </span> {{ current_currency }}
+                    </button>
+                    <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1004">
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</nav>
+
+<!-- Mobile Sidebar -->
+<div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-1001">
+    <div class="p-6">
+        <button id="close-sidebar" class="text-2xl mb-4" aria-label="Dismiss Sidebar"><i class="fas fa-times"></i></button>
+        <div class="space-y-2">
+            <a href="{{ url_for('index') }}" class="mobile-sidebar-item block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'index' }}">Home</a>
+            <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'our_products' }}">Products</a>
+            <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+            <!-- Dynamic Categories -->
+            {% for category in categories %}
+            <div class="category-item">
+                <div class="flex items-center justify-between">
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                       class="block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug else '' }}">
+                        {{ category.name }}
+                    </a>
+                    {% if category.subcategories %}
+                    <button class="toggle-subcategories text-gray-600 hover:text-yellow-600">
+                        <i class="fas fa-chevron-down transition-transform duration-200"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% if category.subcategories %}
+                <div class="subcategories hidden pl-4 space-y-2">
+                    {% for subcategory in category.subcategories %}
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                       class="block text-sm text-gray-600 hover:text-yellow-600 py-1 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}">
+                        {{ subcategory.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <a href="{{ url_for('account') }}" class="mobile-sidebar-item block text-sm font-medium text-gray-800 hover:text-yellow-600 py-2 {{ 'font-bold text-yellow-600' if request.endpoint == 'account' }}">My Account</a>
+        </div>
+    </div>
+</div>
 
     <!-- Hero Section -->
     <section class="relative h-72 bg-cover bg-center animate-zoomIn hero">
@@ -804,120 +921,132 @@
                 <!-- Wishlist, Cart, and Orders -->
                 <div class="space-y-8 animate-slideIn delay-[200ms]">
                     <!-- Wishlist -->
-                    <div class="custom-card p-6">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Wishlist</h3>
-                        <div id="wishlist-items" class="table-container">
-                            {% if wishlist_items %}
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in wishlist_items %}
-                                        {% if item.product %}
-                                            <tr class="wishlist-card" data-wishlist-id="{{ item.id }}">
-                                                <td>
-                                                    <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}">
-                                                </td>
-                                                <td>
-                                                    <h3 class="text-lg font-semibold text-gray-800">{{ item.product.name }}</h3>
-                                                </td>
-                                                <td>
-                                                    {% if item.product.discount and item.product.discount.percent > 0 %}
-                                                        <p class="text-gray-600 price text-base" data-price="{{ item.product.price }}" data-discounted-price="{{ (item.product.price * (1 - item.product.discount.percent / 100)) | round(2) }}" data-has-discount="true">{{ current_currency }} {{ (item.product.price * (1 - item.product.discount.percent / 100)) | round(2) }}</p>
-                                                        <p class="text-gray-500 line-through text-sm" data-original-price="{{ item.product.price }}">{{ current_currency }} {{ item.product.price }}</p>
-                                                    {% else %}
-                                                        <p class="text-gray-600 price text-base" data-price="{{ item.product.price }}" data-has-discount="false">{{ current_currency }} {{ item.product.price }}</p>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <div class="flex gap-3">
-                                                        <button class="text-red-500 hover:text-red-700" onclick="removeFromWishlist({{ item.id }})"><i class="fas fa-trash text-lg"></i></button>
-                                                        <button class="action-btn bg-yellow-600 text-white px-3 py-1 rounded-lg hover:bg-yellow-700" onclick="addToCartFromWishlist({{ item.id }}, {{ item.product.id }})"><i class="fas fa-cart-plus text-lg"></i></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% else %}
-                                            <tr class="wishlist-card">
-                                                <td colspan="4">
-                                                    <p class="text-gray-600">Product not found (ID: {{ item.product_id }})</p>
-                                                    <button class="text-red-500 hover:text-red-700" onclick="removeFromWishlist({{ item.id }})"><i class="fas fa-trash text-lg"></i></button>
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            {% else %}
-                                <div class="custom-card p-6">
-                                    <p class="text-gray-600 text-lg">Your wishlist is empty.</p>
+<div class="custom-card p-6">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Wishlist</h3>
+    <div id="wishlist-items" class="table-container">
+        {% if wishlist_items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in wishlist_items %}
+                    {% if item.name %}
+                        <tr class="wishlist-card" data-wishlist-id="{{ item.id }}">
+                            <td>
+                                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
+                            </td>
+                            <td>
+                                <h3 class="text-lg font-semibold text-gray-800">{{ item.name }}</h3>
+                                <p class="text-sm text-gray-600">{{ item.product_type | capitalize }}</p>
+                            </td>
+                            <td>
+                                {% if item.is_discounted %}
+                                    <p class="text-gray-600 price text-base" data-price="{{ item.price }}" data-discounted-price="{{ item.discounted_price | round(2) }}" data-has-discount="true">{{ current_currency }} {{ item.discounted_price | round(2) }}</p>
+                                    <p class="text-gray-500 line-through text-sm" data-original-price="{{ item.price }}">{{ current_currency }} {{ item.price }}</p>
+                                {% else %}
+                                    <p class="text-gray-600 price text-base" data-price="{{ item.price }}" data-has-discount="false">{{ current_currency }} {{ item.price }}</p>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="flex gap-3">
+                                    <button class="text-red-500 hover:text-red-700" onclick="removeFromWishlist({{ item.id }})"><i class="fas fa-trash text-lg"></i></button>
+                                    <button class="action-btn bg-yellow-600 text-white px-3 py-1 rounded-lg hover:bg-yellow-700" onclick="addToCartFromWishlist({{ item.id }}, {{ item.product_id }}, '{{ item.product_type }}')"><i class="fas fa-cart-plus text-lg"></i></button>
                                 </div>
-                            {% endif %}
-                        </div>
-                    </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr class="wishlist-card">
+                            <td colspan="4">
+                                <p class="text-gray-600">Product not found (ID: {{ item.product_id }})</p>
+                                <button class="text-red-500 hover:text-red-700" onclick="removeFromWishlist({{ item.id }})"><i class="fas fa-trash text-lg"></i></button>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="custom-card p-6">
+                <p class="text-gray-600 text-lg">Your wishlist is empty.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
 
-                    <!-- Cart -->
-                    <div class="custom-card p-6">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Cart</h3>
-                        <div id="cart-items" class="table-container">
-                            {% if cart_items %}
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Quantity</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in cart_items %}
-                                        <tr class="cart-card" data-product-id="{{ item.product_id }}">
-                                            <td>
-                                                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.product.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.product.name }}">
-                                            </td>
-                                            <td>
-                                                <h3 class="text-lg font-semibold text-gray-800">{{ item.product.name }}</h3>
-                                            </td>
-                                            <td>
-                                                {% if item.product.discount and item.product.discount.percent > 0 %}
-                                                    <p class="text-gray-600 price text-base" data-price="{{ item.product.price }}" data-discounted-price="{{ (item.product.price * (1 - item.product.discount.percent / 100)) | round(2) }}">{{ current_currency }} {{ (item.product.price * (1 - item.product.discount.percent / 100)) | round(2) }}</p>
-                                                    <p class="text-gray-500 line-through text-sm" data-original-price="{{ item.product.price }}">{{ current_currency }} {{ item.product.price }}</p>
-                                                {% else %}
-                                                    <p class="text-gray-600 price text-base" data-price="{{ item.product.price }}">{{ current_currency }} {{ item.product.price }}</p>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity - 1 }})"><i class="fas fa-minus"></i></button>
-                                                    <input type="number" class="w-16 p-1 border rounded text-center" value="{{ item.quantity }}" min="1" onchange="updateCartQuantity({{ item.product_id }}, this.value)">
-                                                    <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity + 1 }})"><i class="fas fa-plus"></i></button>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <button class="text-red-500 hover:text-red-700" onclick="removeFromCart({{ item.product_id }})"><i class="fas fa-trash text-lg"></i></button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            {% else %}
-                                <div class="custom-card p-6">
-                                    <p class="text-gray-600 text-lg">Your cart is empty.</p>
+                   <!-- Cart -->
+<div class="custom-card p-6">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Cart</h3>
+    <div id="cart-items" class="table-container">
+        {% if cart_items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    {% if item.name %}
+                        <tr class="cart-card" data-product-id="{{ item.product_id }}" data-product-type="{{ item.product_type }}">
+                            <td>
+                                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
+                            </td>
+                            <td>
+                                <h3 class="text-lg font-semibold text-gray-800">{{ item.name }}</h3>
+                                <p class="text-sm text-gray-600">{{ item.product_type | capitalize }}</p>
+                            </td>
+                            <td>
+                                {% if item.is_discounted %}
+                                    <p class="text-gray-600 price text-base" data-price="{{ item.price }}" data-discounted-price="{{ item.discounted_price | round(2) }}">{{ current_currency }} {{ item.discounted_price | round(2) }}</p>
+                                    <p class="text-gray-500 line-through text-sm" data-original-price="{{ item.price }}">{{ current_currency }} {{ item.price }}</p>
+                                {% else %}
+                                    <p class="text-gray-600 price text-base" data-price="{{ item.price }}">{{ current_currency }} {{ item.price }}</p>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity - 1 }}, '{{ item.product_type }}')"><i class="fas fa-minus"></i></button>
+                                    <input type="number" class="w-16 p-1 border rounded text-center" value="{{ item.quantity }}" min="1" onchange="updateCartQuantity({{ item.product_id }}, this.value, '{{ item.product_type }}')">
+                                    <button class="action-btn bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400" onclick="updateCartQuantity({{ item.product_id }}, {{ item.quantity + 1 }}, '{{ item.product_type }}')"><i class="fas fa-plus"></i></button>
                                 </div>
-                            {% endif %}
-                        </div>
-                        <div class="total-card mt-6 p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <p class="text-xl font-semibold text-gray-800">Total: <span id="cart-total">{{ current_currency }} 0.00</span></p>
-                            <button onclick="openModal('checkout-modal')" class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium">Proceed to Checkout</button>
-                        </div>
-                    </div>
+                            </td>
+                            <td>
+                                <button class="text-red-500 hover:text-red-700" onclick="removeFromCart({{ item.product_id }}, '{{ item.product_type }}')"><i class="fas fa-trash text-lg"></i></button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr class="cart-card">
+                            <td colspan="5">
+                                <p class="text-gray-600">Product not found (ID: {{ item.product_id }})</p>
+                                <button class="text-red-500 hover:text-red-700" onclick="removeFromCart({{ item.product_id }}, '{{ item.product_type }}')"><i class="fas fa-trash text-lg"></i></button>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="custom-card p-6">
+                <p class="text-gray-600 text-lg">Your cart is empty.</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="total-card mt-6 p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p class="text-xl font-semibold text-gray-800">Total: <span id="cart-total">{{ current_currency }} {{ (cart_items | sum(attribute='total_price')) | round(2) }}</span></p>
+        <button onclick="openModal('checkout-modal')" class="action-btn bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 text-lg font-medium">Proceed to Checkout</button>
+    </div>
+</div>
+
 
                     <!-- Orders -->
 <div class="custom-card p-6">
@@ -1060,19 +1189,20 @@
         </div>
     </div>
 
-   <div id="checkout-modal" class="modal">
+   <!-- Checkout Modal -->
+<div id="checkout-modal" class="modal">
     <div class="relative flex flex-col md:flex-row items-start justify-center max-w-5xl mx-auto p-4 gap-4">
         <!-- Modal Content -->
         <div class="modal-content relative bg-white rounded-lg p-6 w-full max-w-lg animate-slideIn delay-[200ms] z-10">
             <span class="modal-close" onclick="closeModal('checkout-modal')"><i class="fas fa-times"></i></span>
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Checkout</h2>
-            <form id="checkout-form" class="space-y-4" onsubmit="placeOrder(event)">
+            <form id="checkout-form" class="space-y-4">
                 <div>
                     <label class="block text-gray-700 mb-1">Full Name</label>
                     <input type="text" name="name" value="{{ user.name }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
                 </div>
                 <div>
-                    <label class="block text-gray-700 mb-1">Phone Number</label>
+                    "Phone Number</label>
                     <input type="tel" name="phone_number" value="{{ user.phone_number | default('') }}" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
                 </div>
                 <div>
@@ -1100,14 +1230,16 @@
                     <label class="block text-gray-700 mb-1">Payment Method</label>
                     <div class="radio-group">
                         <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="immediate" class="mr-2" disabled>
+                            <input type="radio" name="payment_method" value="immediate" class="mr-2" onchange="toggleMessageCode(); updatePaymentDetails();" disabled>
                             Pay Immediately
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="delivery" class="mr-2" checked>
+                            <input type="radio" name="payment_method" value="delivery" class="mr-2" checked onchange="toggleMessageCode(); updatePaymentDetails();">
                             Pay on Delivery
                         </label>
                     </div>
+                    <!-- Hidden input to enforce required payment method -->
+                    <input type="hidden" name="payment_method_required" value="delivery" required>
                 </div>
                 <div id="message-code-section" class="hidden">
                     <label class="block text-gray-700 mb-1">Message Code</label>
@@ -1115,13 +1247,14 @@
                 </div>
                 <div class="flex gap-4">
                     <button type="submit" class="action-btn bg-yellow-600 text-white px-4 py-2 rounded flex-1 hover:bg-yellow-700">Place Order</button>
-                    <button type="button" id="cancel-checkout-btn" class="action-btn bg-gray-500 text-white px-4 py-2 rounded flex-1 hover:bg-gray-600">Cancel</button>
+                    <button type="button" class="action-btn bg-gray-500 text-white px-4 py-2 rounded flex-1 hover:bg-gray-600" onclick="closeModal('checkout-modal')">Cancel</button>
                 </div>
             </form>
         </div>
         <!-- Floating Payment Details Card -->
         <div class="custom-card payment-details-card p-6 bg-white rounded-lg shadow-lg w-full max-w-md mt-4 animate-slideIn delay-[100ms]">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details (Currently not available. Only pay on Delivery at the moment)</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Details</h3>
+            <p class="text-gray-600 text-sm mb-4">Currently, only Pay on Delivery is available.</p>
             <div id="payment-details" class="space-y-4">
                 <div id="immediate-payment-details" class="hidden">
                     <div class="mb-4">
@@ -1132,9 +1265,9 @@
                     <div>
                         <h4 class="text-lg font-medium text-gray-700">Bank Transfer</h4>
                         <p class="text-gray-600 text-sm">Bank: Zira Bank</p>
-                        <p class="text-gray-600 text-sm">Account: </p>
-                        <p class="text-gray-600 text-sm">SWIFT: </p>
-                        <p class="text-gray-600 text-sm mt-1">Reference: </p>
+                        <p class="text-gray-600 text-sm">Account: [Account Number]</p>
+                        <p class="text-gray-600 text-sm">SWIFT: [SWIFT Code]</p>
+                        <p class="text-gray-600 text-sm mt-1">Reference: [Reference Code]</p>
                     </div>
                 </div>
                 <div id="delivery-payment-details">
@@ -1298,764 +1431,603 @@
 
 <script>
     // Currency Conversion Logic (KES as base currency)
-let exchangeRates = {
-    EUR: 0.0073, // Fallback rates
-    GBP: 0.0061,
-    KES: 1,
-    USD: 0.0077
-};
-let currentCurrency = '{{ current_currency | safe }}';
+    let exchangeRates = {
+        EUR: 0.0073,
+        GBP: 0.0061,
+        KES: 1,
+        USD: 0.0077
+    };
+    let currentCurrency = '{{ current_currency | safe }}';
 
-// API Configuration
-const API_URL = '/api/exchange_rates';
-const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+    // API Configuration
+    const API_URL = '/api/exchange_rates';
+    const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort();
 
-// Fetch Exchange Rates from Backend
-async function fetchExchangeRates() {
-    console.log('Fetching exchange rates from backend');
-    try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            console.error(`Backend error: ${response.status} ${response.statusText}`);
-            throw new Error('Backend request failed');
+    // Fetch Exchange Rates from Backend
+    async function fetchExchangeRates() {
+        console.log('Fetching exchange rates from backend');
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+                console.error(`Backend error: ${response.status} ${response.statusText}`);
+                throw new Error('Backend request failed');
+            }
+            const rates = await response.json();
+            if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+                console.error('Invalid backend response:', rates);
+                throw new Error('Invalid backend response');
+            }
+            exchangeRates = { ...rates };
+            console.log('Fetched exchange rates:', exchangeRates);
+            updatePrices();
+        } catch (error) {
+            console.error('Error fetching exchange rates:', error);
+            console.warn('Using fallback exchange rates');
+            updatePrices();
         }
-        const rates = await response.json();
-        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
-            console.error('Invalid backend response:', rates);
-            throw new Error('Invalid backend response');
-        }
-
-        // Update exchange rates
-        exchangeRates = { ...rates };
-        console.log('Fetched exchange rates:', exchangeRates);
-        updatePrices();
-    } catch (error) {
-        console.error('Error fetching exchange rates:', error);
-        console.warn('Using fallback exchange rates');
-        updatePrices();
-    }
-}
-
-// Helper Function to Format Dates Safely
-function formatDate(dateInput) {
-    console.log('Formatting date:', dateInput);
-    if (!dateInput) {
-        console.warn('Date input is null or undefined');
-        return 'Unknown';
     }
 
-    try {
-        const date = new Date(dateInput);
-        if (isNaN(date.getTime())) {
-            console.warn(`Invalid date: ${dateInput}`);
+    // Helper Function to Format Dates Safely
+    function formatDate(dateInput) {
+        console.log('Formatting date:', dateInput);
+        if (!dateInput) {
+            console.warn('Date input is null or undefined');
             return 'Unknown';
         }
-        // Format as YYYY-MM-DD
-        return date.toISOString().split('T')[0];
-    } catch (error) {
-        console.error(`Error formatting date ${dateInput}:`, error);
-        return 'Unknown';
-    }
-}
-
-// Toggle Country Dropdown
-document.getElementById('country-btn')?.addEventListener('click', () => {
-    console.log('Toggling country dropdown');
-    const dropdown = document.getElementById('country-dropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('hidden');
-    } else {
-        console.error('Country dropdown not found');
-    }
-});
-
-// Toggle Mobile Country Dropdown
-document.getElementById('mobile-country-btn')?.addEventListener('click', () => {
-    console.log('Toggling mobile country dropdown');
-    const dropdown = document.getElementById('mobile-country-dropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('hidden');
-    } else {
-        console.error('Mobile country dropdown not found');
-    }
-});
-
-// Update Currency for Mobile
-document.querySelectorAll('#mobile-country-dropdown .country-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        console.log('Mobile currency option clicked');
-        e.preventDefault();
-        const country = e.target.getAttribute('data-country');
-        const flag = e.target.getAttribute('data-flag');
-        currentCurrency = e.target.getAttribute('data-currency');
-        const countryBtn = document.getElementById('mobile-country-btn');
-        if (countryBtn) {
-            countryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${flag}</span> ${country}`;
+        try {
+            const date = new Date(dateInput);
+            if (isNaN(date.getTime())) {
+                console.warn(`Invalid date: ${dateInput}`);
+                return 'Unknown';
+            }
+            return date.toISOString().split('T')[0];
+        } catch (error) {
+            console.error(`Error formatting date ${dateInput}:`, error);
+            return 'Unknown';
         }
-        const dropdown = document.getElementById('mobile-country-dropdown');
-        if (dropdown) {
-            dropdown.classList.add('hidden');
-        }
-        updatePrices();
-    });
-});
+    }
 
-// Update Currency
-document.querySelectorAll('.country-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        console.log('Currency option clicked');
-        e.preventDefault();
-        const country = e.target.getAttribute('data-country');
-        const flag = e.target.getAttribute('data-flag');
-        currentCurrency = e.target.getAttribute('data-currency');
-        const countryBtn = document.getElementById('country-btn');
-        if (countryBtn) {
-            countryBtn.innerHTML = `<span class="flag">${flag}</span> ${country}`;
-        }
+    // Toggle Country Dropdown
+    document.getElementById('country-btn')?.addEventListener('click', () => {
+        console.log('Toggling country dropdown');
         const dropdown = document.getElementById('country-dropdown');
         if (dropdown) {
-            dropdown.classList.add('hidden');
-        }
-        updatePrices();
-    });
-});
-
-// Update Wishlist, Cart, and Order Prices
-function updatePrices() {
-    console.log('Updating prices for currency:', currentCurrency);
-    let cartTotal = 0;
-
-    // Validate currency
-    if (!exchangeRates[currentCurrency]) {
-        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
-        currentCurrency = 'KES';
-    }
-
-    // Update Wishlist Prices
-    document.querySelectorAll('#wishlist-items .price').forEach(priceElement => {
-        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-        const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-
-        if (isNaN(basePriceKES)) {
-            console.error('Invalid base price for wishlist item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-            priceElement.textContent = `${currentCurrency} N/A`;
-            return;
-        }
-
-        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-        console.log(`Wishlist item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-        if (originalPriceElement) {
-            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-            if (isNaN(originalPriceKES)) {
-                console.error('Invalid original price for wishlist item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                originalPriceElement.textContent = `${currentCurrency} N/A`;
-            } else {
-                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                console.log(`Wishlist item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-            }
-        }
-    });
-
-    // Update Cart Prices and Total
-    document.querySelectorAll('#cart-items .price').forEach(priceElement => {
-        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-        const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-        const quantityElement = priceElement.parentElement.querySelector('input[type="number"]');
-        const quantity = quantityElement ? parseInt(quantityElement.value) : 1;
-
-        if (isNaN(basePriceKES)) {
-            console.error('Invalid base price for cart item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-            priceElement.textContent = `${currentCurrency} N/A`;
-            return;
-        }
-
-        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-        cartTotal += basePriceKES * quantity;
-        console.log(`Cart item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-        if (originalPriceElement) {
-            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-            if (isNaN(originalPriceKES)) {
-                console.error('Invalid original price for cart item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                originalPriceElement.textContent = `${currentCurrency} N/A`;
-            } else {
-                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                console.log(`Cart item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-            }
-        }
-    });
-
-    // Update Order Prices
-    document.querySelectorAll('#order-items .price').forEach(priceElement => {
-        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-        const basePriceKES = parseFloat(
-            hasDiscount 
-                ? priceElement.getAttribute('data-discounted-price') 
-                : priceElement.getAttribute('data-price')
-        );
-
-        if (isNaN(basePriceKES)) {
-            console.error('Invalid base price for order item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-            priceElement.textContent = `${currentCurrency} N/A`;
-            return;
-        }
-
-        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-        console.log(`Order item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-        if (originalPriceElement) {
-            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-            if (isNaN(originalPriceKES)) {
-                console.error('Invalid original price for order item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                originalPriceElement.textContent = `${currentCurrency} N/A`;
-            } else {
-                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                console.log(`Order item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-            }
-        }
-    });
-
-    // Update Order Totals
-    document.querySelectorAll('#order-items .price[data-price]').forEach(totalElement => {
-        const baseTotalKES = parseFloat(totalElement.getAttribute('data-price'));
-        if (isNaN(baseTotalKES)) {
-            console.error('Invalid base total for order:', totalElement, 'data-price:', totalElement.getAttribute('data-price'));
-            totalElement.textContent = `${currentCurrency} N/A`;
+            dropdown.classList.toggle('hidden');
         } else {
-            const convertedTotal = (baseTotalKES * exchangeRates[currentCurrency]).toFixed(2);
-            totalElement.textContent = `${currentCurrency} ${convertedTotal}`;
-            console.log(`Order total - Base total (KES): ${baseTotalKES}, Converted total: ${currentCurrency} ${convertedTotal}`);
+            console.error('Country dropdown not found');
         }
     });
 
-    // Update Cart Total
-    const cartTotalElement = document.getElementById('cart-total');
-    if (cartTotalElement) {
-        cartTotalElement.textContent = `${currentCurrency} ${(cartTotal * exchangeRates[currentCurrency]).toFixed(2)}`;
-    }
-}
-
-// Initialize Exchange Rates on Page Load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, initializing exchange rates');
-    fetchExchangeRates();
-});
-
-// Modal Functions
-function openModal(modalId) {
-    console.log(`Attempting to open modal: ${modalId}`);
-    const modal = document.getElementById(modalId);
-    if (!modal) {
-        console.error(`Modal ${modalId} not found`);
-        showToast(`Modal ${modalId} not found`, 'error');
-        return;
-    }
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    if (modalId === 'checkout-modal') {
-        updatePaymentDetails(); // Ensure payment details are updated
-        toggleMessageCode(); // Hide message code section
-    }
-    console.log(`Modal ${modalId} opened successfully`);
-}
-
-function closeModal(modalId) {
-    console.log(`Attempting to close modal: ${modalId}`);
-    const modal = document.getElementById(modalId);
-    if (!modal) {
-        console.error(`Modal ${modalId} not found`);
-        return;
-    }
-    modal.classList.remove('open');
-    document.body.style.overflow = 'auto';
-    console.log(`Modal ${modalId} closed successfully`);
-}
-
-// Update Profile
-function updateProfile(event) {
-    event.preventDefault();
-    console.log('Updating profile');
-    const form = event.target;
-    const data = {
-        name: form.name.value,
-        email: form.email.value,
-        phone_number: form.phone_number.value
-    };
-    fetch('/api/users/{{ user.id }}', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to update profile');
-        }
-        showToast(body.message || 'User updated successfully', 'success');
-        closeModal('profile-modal');
-        setTimeout(() => {
-            console.log('Reloading page after profile update');
-            location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error updating profile:', error);
-        showToast('Failed to update profile: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
+    // Toggle Mobile Country Dropdown
+    document.getElementById('mobile-country-btn')?.addEventListener('click', () => {
+        console.log('Toggling mobile country dropdown');
+        const dropdown = document.getElementById('mobile-country-dropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('hidden');
+        } else {
+            console.error('Mobile country dropdown not found');
         }
     });
-}
 
-// Change Profile Picture
-document.getElementById('picture-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    console.log('Submitting profile picture');
-    const fileInput = e.target.querySelector('input[type="file"]');
-    if (fileInput.files[0]) {
-        const formData = new FormData();
-        formData.append('image', fileInput.files[0]);
-        fetch('/api/profile/picture', {
-            method: 'POST',
-            body: formData,
+    // Update Currency for Mobile
+    document.querySelectorAll('#mobile-country-dropdown .country-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            console.log('Mobile currency option clicked');
+            e.preventDefault();
+            const country = e.target.getAttribute('data-country');
+            const flag = e.target.getAttribute('data-flag');
+            currentCurrency = e.target.getAttribute('data-currency');
+            const countryBtn = document.getElementById('mobile-country-btn');
+            if (countryBtn) {
+                countryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${flag}</span> ${country}`;
+            }
+            const dropdown = document.getElementById('mobile-country-dropdown');
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+            }
+            updatePrices();
+        });
+    });
+
+    // Update Currency
+    document.querySelectorAll('.country-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            console.log('Currency option clicked');
+            e.preventDefault();
+            const country = e.target.getAttribute('data-country');
+            const flag = e.target.getAttribute('data-flag');
+            currentCurrency = e.target.getAttribute('data-currency');
+            const countryBtn = document.getElementById('country-btn');
+            if (countryBtn) {
+                countryBtn.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+            }
+            const dropdown = document.getElementById('country-dropdown');
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+            }
+            updatePrices();
+        });
+    });
+
+    // Update Wishlist, Cart, and Order Prices
+    function updatePrices() {
+        console.log('Updating prices for currency:', currentCurrency);
+        let cartTotal = 0;
+
+        // Validate currency
+        if (!exchangeRates[currentCurrency]) {
+            console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+            currentCurrency = 'KES';
+        }
+
+        // Update Wishlist Prices
+        document.querySelectorAll('#wishlist-items .wishlist-card .price').forEach(priceElement => {
+            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+            const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
+
+            if (isNaN(basePriceKES)) {
+                console.error('Invalid base price for wishlist item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+                priceElement.textContent = `${currentCurrency} N/A`;
+                return;
+            }
+
+            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+            console.log(`Wishlist item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
+
+            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+            if (originalPriceElement) {
+                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+                if (isNaN(originalPriceKES)) {
+                    console.error('Invalid original price for wishlist item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                    originalPriceElement.textContent = `${currentCurrency} N/A`;
+                } else {
+                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                    console.log(`Wishlist item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
+                }
+            }
+        });
+
+        // Update Cart Prices and Total
+        document.querySelectorAll('#cart-items .cart-card .price').forEach(priceElement => {
+            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+            const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
+            const quantityElement = priceElement.closest('.cart-card').querySelector('input[type="number"]');
+            const quantity = quantityElement ? parseInt(quantityElement.value) || 1 : 1;
+
+            if (isNaN(basePriceKES)) {
+                console.error('Invalid base price for cart item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+                priceElement.textContent = `${currentCurrency} N/A`;
+                return;
+            }
+
+            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+            cartTotal += basePriceKES * quantity;
+            console.log(`Cart item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Quantity: ${quantity}, Converted price: ${currentCurrency} ${convertedPrice}`);
+
+            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+            if (originalPriceElement) {
+                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+                if (isNaN(originalPriceKES)) {
+                    console.error('Invalid original price for cart item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                    originalPriceElement.textContent = `${currentCurrency} N/A`;
+                } else {
+                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                    console.log(`Cart item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
+                }
+            }
+        });
+
+        // Update Order Prices
+        document.querySelectorAll('#order-items .price').forEach(priceElement => {
+            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+            const basePriceKES = parseFloat(
+                hasDiscount 
+                    ? priceElement.getAttribute('data-discounted-price') 
+                    : priceElement.getAttribute('data-price')
+            );
+
+            if (isNaN(basePriceKES)) {
+                console.error('Invalid base price for order item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+                priceElement.textContent = `${currentCurrency} N/A`;
+                return;
+            }
+
+            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+            console.log(`Order item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
+
+            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+            if (originalPriceElement) {
+                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+                if (isNaN(originalPriceKES)) {
+                    console.error('Invalid original price for order item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                    originalPriceElement.textContent = `${currentCurrency} N/A`;
+                } else {
+                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                    console.log(`Order item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
+                }
+            }
+        });
+
+        // Update Order Totals
+        document.querySelectorAll('#order-items .total-price[data-total-price]').forEach(totalElement => {
+            const baseTotalKES = parseFloat(totalElement.getAttribute('data-total-price'));
+            if (isNaN(baseTotalKES)) {
+                console.error('Invalid base total for order:', totalElement, 'data-total-price:', totalElement.getAttribute('data-total-price'));
+                totalElement.textContent = `${currentCurrency} N/A`;
+            } else {
+                const convertedTotal = (baseTotalKES * exchangeRates[currentCurrency]).toFixed(2);
+                totalElement.textContent = `${currentCurrency} ${convertedTotal}`;
+                console.log(`Order total - Base total (KES): ${baseTotalKES}, Converted total: ${currentCurrency} ${convertedTotal}`);
+            }
+        });
+
+        // Update Cart Total
+        const cartTotalElement = document.getElementById('cart-total');
+        if (cartTotalElement) {
+            const convertedTotal = (cartTotal * exchangeRates[currentCurrency]).toFixed(2);
+            cartTotalElement.textContent = `${currentCurrency} ${convertedTotal}`;
+            console.log(`Cart total - Base total (KES): ${cartTotal}, Converted total: ${currentCurrency} ${convertedTotal}`);
+        } else {
+            console.warn('Cart total element not found');
+        }
+    }
+
+    // Initialize Exchange Rates on Page Load
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page loaded, initializing exchange rates');
+        fetchExchangeRates();
+    });
+
+    // Modal Functions
+    function openModal(modalId) {
+        console.log(`Attempting to open modal: ${modalId}`);
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error(`Modal ${modalId} not found`);
+            showToast(`Modal ${modalId} not found`, 'error');
+            return;
+        }
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (modalId === 'checkout-modal') {
+            updatePaymentDetails();
+            toggleMessageCode();
+        }
+        console.log(`Modal ${modalId} opened successfully`);
+    }
+
+    function closeModal(modalId) {
+        console.log(`Attempting to close modal: ${modalId}`);
+        const modal = document.getElementById(modalId);
+        if (!modal) {
+            console.error(`Modal ${modalId} not found`);
+            return;
+        }
+        modal.classList.remove('open');
+        document.body.style.overflow = 'auto';
+        console.log(`Modal ${modalId} closed successfully`);
+    }
+
+    // Update Profile
+    function updateProfile(event) {
+        event.preventDefault();
+        console.log('Updating profile');
+        const form = event.target;
+        const data = {
+            name: form.name.value,
+            email: form.email.value,
+            phone_number: form.phone_number.value
+        };
+        fetch('/api/users/{{ user.id }}', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
             credentials: 'include'
         })
         .then(response => response.json().then(data => ({ status: response.status, body: data })))
         .then(({ status, body }) => {
             if (status >= 400) {
-                throw new Error(body.error || 'Failed to update profile picture');
+                throw new Error(body.error || 'Failed to update profile');
             }
-            if (body.image_url) {
-                document.getElementById('profile-pic').src = body.image_url;
-                showToast('Profile picture updated!', 'success');
-            } else {
-                showToast('Failed to update profile picture', 'error');
-            }
-            closeModal('picture-modal');
-        })
-        .catch(error => {
-            console.error('Error uploading picture:', error);
-            showToast('Failed to upload picture: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '{{ url_for('user_login') }}';
-            }
-        });
-    }
-});
-
-// Add Address
-document.getElementById('address-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    console.log('Adding address');
-    fetch('/api/profile/address', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            street: e.target.street.value,
-            city: e.target.city.value,
-            country: e.target.country.value,
-            postal_code: e.target.postal_code.value,
-        }),
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to add address');
-        }
-        showToast(body.message || 'Address added successfully', 'success');
-        closeModal('address-modal');
-        setTimeout(() => {
-            console.log('Reloading page after adding address');
-            location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error adding address:', error);
-        showToast('Failed to add address: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
-        }
-    });
-});
-
-// Remove from Wishlist
-function removeFromWishlist(wishlistId) {
-    console.log(`Removing wishlist item: ${wishlistId}`);
-    fetch(`/api/wishlist/${wishlistId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to remove from wishlist');
-        }
-        showToast(body.message || 'Removed from wishlist', 'success');
-        setTimeout(() => {
-            console.log('Reloading page after removing from wishlist');
-            location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error removing from wishlist:', error);
-        showToast('Failed to remove from wishlist: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
-        }
-    });
-}
-
-// Add to Cart from Wishlist
-function addToCartFromWishlist(wishlistId, productId) {
-    console.log(`Adding to cart from wishlist: ${wishlistId}, product: ${productId}`);
-    const wishlistCard = document.querySelector(`#wishlist-items .wishlist-card button[onclick="addToCartFromWishlist(${wishlistId}, ${productId})"]`).closest('.wishlist-card');
-    const priceElement = wishlistCard.querySelector('.price');
-    const discountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-
-    fetch('/api/cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-            product_id: productId, 
-            quantity: 1,
-            price: discountedPriceKES
-        }),
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to add to cart');
-        }
-        return fetch(`/api/wishlist/${wishlistId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to remove from wishlist');
-        }
-        showToast('Product moved to cart', 'success');
-        setTimeout(() => {
-            console.log('Reloading page after moving to cart');
-            location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error moving to cart:', error);
-        showToast('Failed to move product to cart: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
-        }
-    });
-}
-
-// Update Cart Quantity
-async function updateCartQuantity(productId, quantity) {
-    console.log(`Updating cart quantity for product: ${productId}, quantity: ${quantity}`);
-    if (quantity < 1) {
-        showToast('Quantity must be at least 1', 'error');
-        return;
-    }
-    const cartCard = document.querySelector(`.cart-card[data-product-id="${productId}"]`);
-    const priceElement = cartCard.querySelector('.price');
-    const discountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-
-    try {
-        const response = await fetch('/api/cart', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                product_id: productId, 
-                quantity: parseInt(quantity),
-                price: discountedPriceKES
-            }),
-            credentials: 'include'
-        });
-        const data = await response.json();
-        if (response.ok) {
-            showToast(data.message || 'Quantity updated successfully', 'success');
+            showToast(body.message || 'User updated successfully', 'success');
+            closeModal('profile-modal');
             setTimeout(() => {
-                console.log('Reloading page after updating quantity');
+                console.log('Reloading page after profile update');
                 location.reload();
             }, 3000);
-        } else {
-            showToast(data.error || 'Failed to update quantity', 'error');
-            if (data.redirect) {
-                window.location.href = data.redirect;
+        })
+        .catch(error => {
+            console.error('Error updating profile:', error);
+            showToast('Failed to update profile: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
             }
-        }
-    } catch (error) {
-        console.error('Error updating quantity:', error);
-        showToast('Failed to update quantity: ' + error.message, 'error');
-    }
-}
-
-// Remove from Cart
-function removeFromCart(productId) {
-    console.log(`Removing from cart: ${productId}`);
-    fetch('/api/cart', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ product_id: productId }),
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to remove from cart');
-        }
-        showToast(body.message || 'Removed from cart', 'success');
-        setTimeout(() => {
-            console.log('Reloading page after removing from cart');
-            location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error removing from cart:', error);
-        showToast('Failed to remove from cart: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
-        }
-    });
-}
-
-// Cancel Order
-function cancelOrder(orderId) {
-    console.log(`Initiating cancel order for ID: ${orderId}`);
-    if (!confirm('Are you sure you want to cancel this order?')) {
-        console.log('Order cancellation aborted by user');
-        return;
+        });
     }
 
-    fetch(`/api/orders/${orderId}/cancel`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-    })
-    .then(response => {
-        console.log(`Cancel order response: ${response.status} ${response.statusText}`);
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.error || `HTTP error ${response.status}`);
+    // Change Profile Picture
+    document.getElementById('picture-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log('Submitting profile picture');
+        const fileInput = e.target.querySelector('input[type="file"]');
+        if (fileInput.files[0]) {
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            fetch('/api/profile/picture', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            })
+            .then(response => response.json().then(data => ({ status: response.status, body: data })))
+            .then(({ status, body }) => {
+                if (status >= 400) {
+                    throw new Error(body.error || 'Failed to update profile picture');
+                }
+                if (body.image_url) {
+                    document.getElementById('profile-pic').src = body.image_url;
+                    showToast('Profile picture updated!', 'success');
+                } else {
+                    showToast('Failed to update profile picture', 'error');
+                }
+                closeModal('picture-modal');
+            })
+            .catch(error => {
+                console.error('Error uploading picture:', error);
+                showToast('Failed to upload picture: ' + error.message, 'error');
+                if (error.message.includes('Unauthorized')) {
+                    window.location.href = '/login';
+                }
             });
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Cancel order response data:', data);
-        showToast(data.message || 'Order canceled successfully', 'success');
-        setTimeout(() => {
-            console.log('Reloading page after canceling order');
-            window.location.reload();
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error canceling order:', error);
-        showToast(`Failed to cancel order: ${error.message}`, 'error');
-        if (error.message.includes('Unauthorized') || error.message.includes('401')) {
-            console.log('Unauthorized, redirecting to login');
-            window.location.href = '{{ url_for('user_login') }}';
-        }
     });
-}
 
-// Show Toast Notification
-function showToast(message, type = 'success') {
-    console.log(`Showing toast: ${message}, type: ${type}`);
-    if (typeof Toastify === 'undefined') {
-        console.error('Toastify library not loaded');
-        alert(message); // Fallback to alert if Toastify is unavailable
-        return;
-    }
-    try {
-        Toastify({
-            text: message,
-            duration: 4000,
-            close: true,
-            gravity: "top",
-            position: "right",
-            backgroundColor: type === 'error' ? '#f87171' : '#22c55e', // Red for error, green for success
-            stopOnFocus: true,
-            style: {
-                zIndex: '3000' // Ensure above modals (z-2000) and navbar (z-1000)
-            }
-        }).showToast();
-        console.log(`Toast displayed: ${message}`);
-    } catch (error) {
-        console.error('Error displaying Toastify toast:', error);
-        alert(message); // Fallback to alert on error
-    }
-}
-
-async function populateOrders() {
-    console.log('Populating orders');
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+    // Add Address
+    document.getElementById('address-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log('Adding address');
+        fetch('/api/profile/address', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                street: e.target.street.value,
+                city: e.target.city.value,
+                country: e.target.country.value,
+                postal_code: e.target.postal_code.value,
+            }),
             credentials: 'include'
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) {
+                throw new Error(body.error || 'Failed to add address');
+            }
+            showToast(body.message || 'Address added successfully', 'success');
+            closeModal('address-modal');
+            setTimeout(() => {
+                console.log('Reloading page after adding address');
+                location.reload();
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error adding address:', error);
+            showToast('Failed to add address: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
+            }
         });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || 'Failed to fetch orders');
-        }
-        const orders = Array.isArray(data) ? data : [];
-        console.log('Fetched orders:', orders.map(o => ({ id: o.id, status: o.status, created_at: o.created_at, total: o.total, items: o.items })));
-        const orderItems = document.getElementById('order-items');
-        if (orderItems) {
-            orderItems.innerHTML = orders.length === 0
-                ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
-                : `
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${orders.map(order => {
-                                const totalConverted = (order.total * exchangeRates[currentCurrency]).toFixed(2);
-                                const statusLower = order.status ? order.status.toLowerCase().trim() : '';
-                                console.log(`Order ${order.id} created_at: ${order.created_at}, formatted: ${formatDate(order.created_at)}`);
-                                return `
-                                    <tr class="order-card">
-                                        <td>#${order.id || 'N/A'}</td>
-                                        <td>${formatDate(order.created_at)}</td>
-                                        <td>
-                                            <span class="price" data-price="${order.total || 0}">${currentCurrency} ${totalConverted}</span>
-                                        </td>
-                                        <td>${order.status || 'Unknown'}</td>
-                                        <td>
-                                            ${order.items && Array.isArray(order.items) ? order.items.map(item => `
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    ${item.image ? `
-                                                        <img loading="lazy" src="/static/uploads/${item.image}" alt="${item.product_name || 'Product'}" class="w-10 h-10 object-contain rounded">
-                                                    ` : `
-                                                        <img loading="lazy" src="https://via.placeholder.com/40x40" alt="No image" class="w-10 h-10 object-contain rounded">
-                                                    `}
-                                                    <div>
-                                                        <p class="text-sm font-medium text-gray-800">${item.product_name || 'Unknown'}</p>
-                                                        <p class="text-xs text-gray-600">Qty: ${item.quantity || 1}</p>
-                                                    </div>
-                                                </div>
-                                            `).join('') : '<p class="text-gray-600">No items</p>'}
-                                        </td>
-                                        <td>
-                                            ${statusLower === 'pending' ? `
-                                                <button class="action-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id || 0})">Cancel</button>
-                                            ` : `
-                                                <span>No action available</span>
-                                            `}
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            updatePrices();
-        } else {
-            console.error('Order items container (#order-items) not found');
-            showToast('Failed to load orders: Container not found', 'error');
-        }
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        const orderItems = document.getElementById('order-items');
-        if (orderItems) {
-            orderItems.innerHTML = '<div class="custom-card p-6"><p class="text-gray-600 text-lg">Failed to load orders. Please try again later.</p></div>';
-        }
-        if (error.message.includes('Unauthorized')) {
-            showToast('Session expired, please log in', 'error');
-            window.location.href = '{{ url_for('user_login') }}';
-        } else {
-            showToast('Failed to load orders: ' + error.message, 'error');
-        }
-    }
-}
+    });
 
-// Toggle Message Code Field
-function toggleMessageCode() {
-    console.log('Toggling message code visibility');
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-    if (paymentMethod) {
-        const messageCodeSection = document.getElementById('message-code-section');
-        if (messageCodeSection) {
-            messageCodeSection.style.display = paymentMethod.value === 'immediate' ? 'block' : 'none';
-            if (paymentMethod.value !== 'immediate') {
-                const messageCodeInput = document.querySelector('input[name="message_code"]');
-                if (messageCodeInput) {
-                    messageCodeInput.value = '';
+    // Remove from Wishlist
+    function removeFromWishlist(wishlistId) {
+        console.log(`Removing wishlist item: ${wishlistId}`);
+        fetch(`/api/wishlist/${wishlistId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) {
+                throw new Error(body.error || 'Failed to remove from wishlist');
+            }
+            showToast(body.message || 'Removed from wishlist', 'success');
+            setTimeout(() => {
+                console.log('Reloading page after removing from wishlist');
+                location.reload();
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error removing from wishlist:', error);
+            showToast('Failed to remove from wishlist: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    // Add to Cart from Wishlist
+    function addToCartFromWishlist(wishlistId, productId, productType) {
+        console.log(`Adding to cart from wishlist: ${wishlistId}, product: ${productId}, type: ${productType}`);
+        fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                product_id: productId, 
+                quantity: 1,
+                product_type: productType
+            }),
+            credentials: 'include'
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) {
+                throw new Error(body.error || 'Failed to add to cart');
+            }
+            return fetch(`/api/wishlist/${wishlistId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) {
+                throw new Error(body.error || 'Failed to remove from wishlist');
+            }
+            showToast('Product moved to cart', 'success');
+            setTimeout(() => {
+                console.log('Reloading page after moving to cart');
+                location.reload();
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error moving to cart:', error);
+            showToast('Failed to move product to cart: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    // Update Cart Quantity
+    async function updateCartQuantity(productId, quantity, productType) {
+        console.log(`Updating quantity for product ${productId}: ${quantity}, type: ${productType}`);
+        if (quantity < 1) {
+            showToast('Quantity must be at least 1', 'error');
+            return;
+        }
+        const cartCard = document.querySelector(`.cart-card[data-product-id="${productId}"][data-product-type="${productType}"]`);
+        const priceElement = cartCard.querySelector('.price');
+        const quantityInput = cartCard.querySelector('input[type="number"]');
+
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    product_id: productId, 
+                    quantity: parseInt(quantity), 
+                    product_type: productType
+                }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                showToast(data.message || 'Quantity updated successfully', 'success');
+                if (quantityInput) {
+                    quantityInput.value = parseInt(quantity);
+                }
+                updatePrices();
+                setTimeout(() => {
+                    console.log('Reloading page after updating quantity');
+                    location.reload();
+                }, 3000);
+            } else {
+                showToast(data.error || 'Failed to update quantity', 'error');
+                if (data.redirect) {
+                    window.location.href = data.redirect;
                 }
             }
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showToast(`Failed to update quantity: ${error.message}`, 'error');
         }
     }
-}
 
-// Update Payment Details
-function updatePaymentDetails() {
-    console.log('Updating payment details');
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-    const immediateDetails = document.getElementById('immediate-payment-details');
-    const deliveryDetails = document.getElementById('delivery-payment-details');
-
-    if (immediateDetails && deliveryDetails) {
-        // Since only Pay on Delivery is available, force show delivery details
-        immediateDetails.classList.add('hidden');
-        deliveryDetails.classList.remove('hidden');
-    } else {
-        console.error('Payment details elements not found');
-        showToast('Payment details not found', 'error');
+    // Remove from Cart
+    function removeFromCart(productId, productType) {
+        console.log(`Removing from cart: ${productId}, type: ${productType}`);
+        fetch('/api/cart', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ product_id: productId, product_type: productType }),
+            credentials: 'include'
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) {
+                throw new Error(body.error || 'Failed to remove from cart');
+            }
+            showToast(body.message || 'Removed from cart', 'success');
+            setTimeout(() => {
+                console.log('Reloading page after removing from cart');
+                location.reload();
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error removing from cart:', error);
+            showToast('Failed to remove from cart: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
+            }
+        });
     }
-}
 
+    // Place Order
 // Place Order
 function placeOrder(event) {
     event.preventDefault();
     console.log('Placing order');
     const form = event.target;
+
+    // Get the checked payment method
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+    if (!paymentMethod) {
+        console.error('No payment method selected');
+        showToast('Error: Please select a payment method', 'error');
+        return;
+    }
+
+    const paymentMethodValue = paymentMethod.value.trim();
+    if (!['delivery', 'immediate'].includes(paymentMethodValue)) {
+        console.error('Invalid payment method:', paymentMethodValue);
+        showToast('Error: Invalid payment method', 'error');
+        return;
+    }
+
+    // Validate message code for immediate payment (not needed since 'immediate' is disabled)
+    const messageCodeInput = form.querySelector('input[name="message_code"]');
+    if (paymentMethodValue === 'immediate' && (!messageCodeInput || !messageCodeInput.value.trim())) {
+        console.error('Message code required for immediate payment');
+        showToast('Error: Message code is required for immediate payment', 'error');
+        return;
+    }
+
+    // Collect form data (include name in payload)
+    const name = form.querySelector('input[name="name"]').value.trim();
     const data = {
-        name: form.name.value,
-        phone_number: form.phone_number.value,
+        name: name,
+        phone_number: form.querySelector('input[name="phone_number"]').value.trim(),
         address: {
-            street: form.street.value,
-            city: form.city.value,
-            country: form.country.value,
-            postal_code: form.postal_code.value,
+            street: form.querySelector('input[name="street"]').value.trim(),
+            city: form.querySelector('input[name="city"]').value.trim(),
+            country: form.querySelector('select[name="country"]').value.trim(),
+            postal_code: form.querySelector('input[name="postal_code"]').value.trim(),
         },
-        payment_method: paymentMethod ? paymentMethod.value : null,
-        message_code: paymentMethod && paymentMethod.value === 'immediate' ? form.message_code.value : null
+        payment_method: paymentMethodValue,
+        message_code: paymentMethodValue === 'immediate' && messageCodeInput ? messageCodeInput.value.trim() : null
     };
+
+    // Validate required fields
+    if (!data.name || !data.phone_number || !data.address.street || !data.address.city || !data.address.country || !data.address.postal_code) {
+        console.error('Missing required fields:', data);
+        showToast('Error: All fields are required', 'error');
+        return;
+    }
+
+    // Submit order to API
     fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -2064,12 +2036,12 @@ function placeOrder(event) {
         body: JSON.stringify(data),
         credentials: 'include'
     })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
+    .then(response => response.json().then(data => ({ status: response.status, json: data })))
+    .then(({ status, json }) => {
         if (status >= 400) {
-            throw new Error(body.error || 'Failed to place order');
+            throw new Error(json.error || 'Failed to place order');
         }
-        showToast(body.message || 'Order placed successfully', 'success');
+        showToast(json.message || 'Order placed successfully', 'success');
         closeModal('checkout-modal');
         setTimeout(() => {
             console.log('Reloading page after placing order');
@@ -2078,218 +2050,446 @@ function placeOrder(event) {
     })
     .catch(error => {
         console.error('Error placing order:', error);
-        showToast('Failed to place order: ' + error.message, 'error');
+        showToast(`Failed to place order: ${error.message}`, 'error');
         if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
+            window.location.href = '/login';
         }
     });
 }
-
-// Mobile Navbar Toggle
-document.getElementById('nav-toggler')?.addEventListener('click', () => {
-    console.log('Toggling mobile navbar');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const icon = document.querySelector('#nav-toggler i');
-    if (sidebar && icon) {
-        sidebar.classList.toggle('-translate-x-full');
-        icon.classList.toggle('fa-bars');
-        icon.classList.toggle('fa-times');
-        icon.classList.add('animate-rotateToggle');
-        setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-    }
-});
-
-// Close Mobile Sidebar
-document.getElementById('close-sidebar')?.addEventListener('click', () => {
-    console.log('Closing mobile sidebar');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const icon = document.querySelector('#nav-toggler i');
-    if (sidebar && icon) {
-        sidebar.classList.add('-translate-x-full');
-        icon.classList.add('fa-bars');
-        icon.classList.remove('fa-times');
-        icon.classList.add('animate-rotateToggle');
-        setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-    }
-});
-
-// Mobile Search Toggle
-document.getElementById('mobile-search-icon')?.addEventListener('click', () => {
-    console.log('Toggling mobile search');
-    const searchBar = document.getElementById('mobile-search-bar');
-    const icon = document.getElementById('mobile-search-icon');
-    if (searchBar && icon) {
-        searchBar.classList.toggle('active');
-        icon.classList.add('animate-bounce');
-        setTimeout(() => icon.classList.remove('animate-bounce'), 200);
-    }
-});
-
-// Close Modals on Outside Click
-document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            console.log(`Closing modal ${modal.id} on outside click`);
-            closeModal(modal.id);
+    // Cancel Order
+    function cancelOrder(orderId) {
+        console.log(`Initiating cancel order for ID: ${orderId}`);
+        if (!confirm('Are you sure you want to cancel this order?')) {
+            console.log('Order cancellation aborted by user');
+            return;
         }
-    });
-});
 
-// Toggle Password Visibility
-function togglePassword(inputId) {
-    console.log(`Toggling password visibility for ${inputId}`);
-    const input = document.getElementById(inputId);
-    const icon = input?.nextElementSibling;
-    if (!input || !icon) {
-        console.error(`Input or icon not found for ${inputId}`);
-        return;
-    }
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-    icon.classList.add('animate-pulse');
-    setTimeout(() => icon.classList.remove('animate-pulse'), 300);
-}
-
-// Change Password
-async function changePassword(event) {
-    event.preventDefault();
-    console.log('Change password function called');
-    const form = document.getElementById('password-form');
-    if (!form) {
-        console.error('Password form not found');
-        showToast('Form error, please try again', 'error');
-        return;
-    }
-    const oldPassword = form.querySelector('#old-password')?.value;
-    const newPassword = form.querySelector('#new-password')?.value;
-    const confirmPassword = form.querySelector('#confirm-password')?.value;
-
-    if (!oldPassword || !newPassword || !confirmPassword) {
-        console.log('Validation failed: Missing password fields');
-        showToast('All password fields are required', 'error');
-        return;
-    }
-    if (newPassword.length < 8) {
-        console.log('Validation failed: New password too short');
-        showToast('New password must be at least 8 characters long', 'error');
-        return;
-    }
-    if (newPassword !== confirmPassword) {
-        console.log('Validation failed: Passwords do not match');
-        showToast('New passwords do not match', 'error');
-        return;
-    }
-
-    try {
-        console.log('Sending request to /api/change_password');
-        const response = await fetch('/api/change_password', {
+        fetch(`/api/orders/${orderId}/cancel`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                old_password: oldPassword,
-                new_password: newPassword,
-                confirm_password: confirmPassword
-            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
             credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || `HTTP error ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            showToast(data.message || 'Order canceled successfully', 'success');
+            setTimeout(() => {
+                console.log('Reloading page after canceling order');
+                window.location.reload();
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error canceling order:', error);
+            showToast(`Failed to cancel order: ${error.message}`, 'error');
+            if (error.message.includes('Unauthorized') || error.message.includes('401')) {
+                window.location.href = '/login';
+            }
         });
-        console.log(`Response from /api/change_password: ${response.status}`);
-        const data = await response.json();
-        console.log('Response data:', data);
-        if (!response.ok) {
-            throw new Error(data.error || 'Failed to change password');
+    }
+
+    // Show Toast Notification
+    function showToast(message, type = 'success') {
+        console.log(`Showing toast: ${message}, type: ${type}`);
+        if (typeof Toastify === 'undefined') {
+            console.error('Toastify library not loaded');
+            alert(message);
+            return;
         }
-        showToast(data.message || 'Password changed successfully', 'success');
-        console.log('Password changed successfully');
-        closeModal('password-modal');
-        setTimeout(() => {
-            console.log('Reloading page after password change');
-            location.reload();
-        }, 3000);
-    } catch (error) {
-        console.error('Error changing password:', error);
-        showToast('Failed to change password: ' + error.message, 'error');
-        if (error.message.includes('Unauthorized')) {
-            window.location.href = '{{ url_for('user_login') }}';
+        try {
+            Toastify({
+                text: message,
+                duration: 4000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: type === 'error' ? '#f87171' : '#22c55e',
+                stopOnFocus: true,
+                style: {
+                    zIndex: '3000'
+                }
+            }).showToast();
+            console.log(`Toast displayed: ${message}`);
+        } catch (error) {
+            console.error('Error displaying Toastify toast:', error);
+            alert(message);
         }
     }
-}
 
-// Run on page load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, initializing account page');
-    try {
-        const passwordButton = document.getElementById('change-password-btn');
-        if (passwordButton) {
-            console.log('Change Password button found, adding click listener');
-            passwordButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Change Password button clicked, opening password-modal');
-                openModal('password-modal');
+    // Populate Orders
+    async function populateOrders() {
+        console.log('Populating orders');
+        try {
+            const response = await fetch('/api/orders', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
             });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch orders');
+            }
+            const orders = Array.isArray(data) ? data : [];
+            console.log('Fetched orders:', orders.map(o => ({ id: o.id, status: o.status, created_at: o.created_at, total: o.total, items: o.items })));
+            const orderItems = document.getElementById('order-items');
+            if (orderItems) {
+                orderItems.innerHTML = orders.length === 0
+                    ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
+                    : `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Items</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${orders.map(order => {
+                                    const totalConverted = (order.total * exchangeRates[currentCurrency]).toFixed(2);
+                                    const statusLower = order.status ? order.status.toLowerCase().trim() : '';
+                                    console.log(`Order ${order.id} created_at: ${order.created_at}, formatted: ${formatDate(order.created_at)}`);
+                                    return `
+                                        <tr class="order-card">
+                                            <td>#${order.id || 'N/A'}</td>
+                                            <td>${formatDate(order.created_at)}</td>
+                                            <td>
+                                                <span class="total-price" data-total-price="${order.total || 0}">${currentCurrency} ${totalConverted}</span>
+                                            </td>
+                                            <td>${order.status || 'Unknown'}</td>
+                                            <td>
+                                                ${order.items && Array.isArray(order.items) ? order.items.map(item => `
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        ${item.image ? `
+                                                            <img loading="lazy" src="/static/uploads/${item.image}" alt="${item.product_name || 'Product'}" class="w-10 h-10 object-contain rounded">
+                                                        ` : `
+                                                            <img loading="lazy" src="https://via.placeholder.com/40x40" alt="No image" class="w-10 h-10 object-contain rounded">
+                                                        `}
+                                                        <div>
+                                                            <p class="text-sm font-medium text-gray-800">${item.product_name || 'Unknown'}</p>
+                                                            <p class="text-xs text-gray-600">Qty: ${item.quantity || 1}</p>
+                                                        </div>
+                                                    </div>
+                                                `).join('') : '<p class="text-gray-600">No items</p>'}
+                                            </td>
+                                            <td>
+                                                ${statusLower === 'pending' ? `
+                                                    <button class="action-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id || 0})">Cancel</button>
+                                                ` : `
+                                                    <span>No action available</span>
+                                                `}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                updatePrices();
+            } else {
+                console.error('Order items container (#order-items) not found');
+                showToast('Failed to load orders: Container not found', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            const orderItems = document.getElementById('order-items');
+            if (orderItems) {
+                orderItems.innerHTML = '<div class="custom-card p-6"><p class="text-gray-600 text-lg">Failed to load orders. Please try again later.</p></div>';
+            }
+            if (error.message.includes('Unauthorized')) {
+                showToast('Session expired, please log in', 'error');
+                window.location.href = '/login';
+            } else {
+                showToast('Failed to load orders: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // Toggle Message Code Field
+    function toggleMessageCode() {
+        console.log('Toggling message code visibility');
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (paymentMethod) {
+            console.log('Payment method:', paymentMethod.value);
+            const messageCodeSection = document.getElementById('message-code-section');
+            if (messageCodeSection) {
+                messageCodeSection.style.display = paymentMethod.value === 'immediate' ? 'block' : 'none';
+                if (paymentMethod.value !== 'immediate') {
+                    const messageCodeInput = document.querySelector('input[name="message_code"]');
+                    if (messageCodeInput) {
+                        messageCodeInput.value = '';
+                    }
+                }
+            } else {
+                console.error('Message code section not found');
+            }
         } else {
-            console.error('Change Password button (#change-password-btn) not found');
-            showToast('Change Password button not found', 'error');
+            console.warn('No payment method selected in toggleMessageCode');
+        }
+    }
+
+    // Update Payment Details
+    function updatePaymentDetails() {
+        console.log('Updating payment details');
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        const immediateDetails = document.getElementById('immediate-payment-details');
+        const deliveryDetails = document.getElementById('delivery-payment-details');
+
+        if (immediateDetails && deliveryDetails) {
+            if (paymentMethod && paymentMethod.value === 'immediate') {
+                immediateDetails.classList.remove('hidden');
+                deliveryDetails.classList.add('hidden');
+            } else {
+                immediateDetails.classList.add('hidden');
+                deliveryDetails.classList.remove('hidden');
+            }
+        } else {
+            console.error('Payment details elements not found');
+            showToast('Payment details not found', 'error');
+        }
+    }
+
+    // Mobile Navbar Toggle
+    document.getElementById('nav-toggler')?.addEventListener('click', () => {
+        console.log('Toggling mobile navbar');
+        const sidebar = document.getElementById('mobile-sidebar');
+        const icon = document.querySelector('#nav-toggler i');
+        if (sidebar && icon) {
+            sidebar.classList.toggle('-translate-x-full');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+        }
+    });
+
+    // Close Mobile Sidebar
+    document.getElementById('close-mobile-sidebar')?.addEventListener('click', () => {
+        console.log('Closing mobile sidebar');
+        const sidebar = document.getElementById('mobile-sidebar');
+        const icon = document.querySelector('#nav-toggler i');
+        if (sidebar && icon) {
+            sidebar.classList.add('-translate-x-full');
+            icon.classList.add('fa-bars');
+            icon.classList.remove('fa-times');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+        }
+    });
+
+    // Mobile Search Toggle
+    document.getElementById('mobile-search-icon')?.addEventListener('click', () => {
+        console.log('Toggling mobile search');
+        const searchBar = document.getElementById('mobile-search-bar');
+        const icon = document.getElementById('mobile-search-icon');
+        if (searchBar && icon) {
+            searchBar.classList.toggle('active');
+            icon.classList.add('animate-bounce');
+            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+        }
+    });
+
+    // Close Modals on Outside Click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                console.log(`Closing modal ${modal.id} on outside click`);
+                closeModal(modal.id);
+            }
+        });
+    });
+
+    // Toggle Password Visibility
+    function togglePassword(inputId) {
+        console.log(`Toggling password visibility for ${inputId}`);
+        const input = document.getElementById(inputId);
+        const icon = input?.nextElementSibling;
+        if (!input || !icon) {
+            console.error(`Input or icon not found for ${inputId}`);
+            return;
+        }
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+        icon.classList.add('animate-pulse');
+        setTimeout(() => icon.classList.remove('animate-pulse'), 300);
+    }
+
+    // Change Password
+    async function changePassword(event) {
+        event.preventDefault();
+        console.log('Change password function called');
+        const form = document.getElementById('password-form');
+        if (!form) {
+            console.error('Password form not found');
+            showToast('Form error, please try again', 'error');
+            return;
+        }
+        const oldPassword = form.querySelector('#old-password')?.value;
+        const newPassword = form.querySelector('#new-password')?.value;
+        const confirmPassword = form.querySelector('#confirm-password')?.value;
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            console.log('Validation failed: Missing password fields');
+            showToast('All password fields are required', 'error');
+            return;
+        }
+        if (newPassword.length < 8) {
+            console.log('Validation failed: New password too short');
+            showToast('New password must be at least 8 characters long', 'error');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            console.log('Validation failed: Passwords do not match');
+            showToast('New passwords do not match', 'error');
+            return;
         }
 
-        function initializePasswordForm() {
-            const passwordForm = document.getElementById('password-form');
-            const submitButton = document.getElementById('change-password-submit');
-            if (passwordForm) {
-                console.log('Password form found, adding submit listener');
-                passwordForm.addEventListener('submit', (e) => {
-                    console.log('Password form submit event triggered');
-                    changePassword(e);
+        try {
+            const response = await fetch('/api/change_password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    old_password: oldPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to change password');
+            }
+            showToast(data.message || 'Password changed successfully', 'success');
+            closeModal('password-modal');
+            setTimeout(() => {
+                console.log('Reloading page after password change');
+                location.reload();
+            }, 3000);
+        } catch (error) {
+            console.error('Error changing password:', error);
+            showToast('Failed to change password: ' + error.message, 'error');
+            if (error.message.includes('Unauthorized')) {
+                window.location.href = '/login';
+            }
+        }
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page loaded, initializing account page');
+        try {
+            const passwordButton = document.getElementById('change-password-btn');
+            if (passwordButton) {
+                passwordButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openModal('password-modal');
                 });
             } else {
-                console.error('Password form (#password-form) not found');
-                showToast('Password form not found', 'error');
+                console.error('Change Password button (#change-password-btn) not found');
             }
-            if (submitButton) {
-                console.log('Change Password submit button found, adding click listener');
-                submitButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    console.log('Change Password submit button clicked');
-                    if (passwordForm) {
-                        changePassword({ preventDefault: () => {}, target: passwordForm });
-                    } else {
-                        console.error('Password form not found during submit');
-                        showToast('Form error, please try again', 'error');
+
+            function initializePasswordForm() {
+                const passwordForm = document.getElementById('password-form');
+                const submitButton = document.getElementById('change-password-submit');
+                if (passwordForm) {
+                    passwordForm.addEventListener('submit', changePassword);
+                }
+                if (submitButton) {
+                    submitButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (passwordForm) {
+                            changePassword({ preventDefault: () => {}, target: passwordForm });
+                        } else {
+                            showToast('Form error, please try again', 'error');
+                        }
+                    });
+                }
+            }
+
+            initializePasswordForm();
+
+            const passwordModal = document.getElementById('password-modal');
+            if (passwordModal) {
+                const observer = new MutationObserver(() => {
+                    if (paymentModal.classList.contains('open')) {
+                        initializePasswordForm();
                     }
                 });
-            } else {
-                console.error('Change Password submit button (#change-password-submit) not found');
-                showToast('Submit button not found', 'error');
+                observer.observe(passwordModal, { attributes: true, attributeFilter: ['class'] });
             }
+
+            // Initialize checkout form submission
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', (event) => {
+                    console.log('Checkout form submitted');
+                    placeOrder(event);
+                });
+            } else {
+                console.error('Checkout form (#checkout-form) not found');
+            }
+
+            updatePrices();
+            toggleMessageCode();
+            populateOrders();
+        } catch (error) {
+            console.error('Error during page initialization:', error);
+            showToast('Page initialization failed: ' + error.message, 'error');
         }
+    });
 
-        initializePasswordForm();
-
-        const passwordModal = document.getElementById('password-modal');
-        if (passwordModal) {
-            const observer = new MutationObserver(() => {
-                if (passwordModal.classList.contains('open')) {
-                    console.log('Password modal opened, re-initializing form listeners');
-                    initializePasswordForm();
-                }
+    // Initialize Desktop Category Dropdowns
+    document.querySelectorAll('.nav-hover').forEach(nav => {
+        const dropdown = nav.querySelector('.dropdown-menu');
+        if (dropdown) {
+            nav.addEventListener('mouseenter', () => {
+                console.log('Showing desktop dropdown for category');
+                dropdown.classList.remove('hidden');
+                dropdown.style.opacity = '1';
+                dropdown.style.visibility = 'visible';
+                dropdown.style.transform = 'translateY(0)';
             });
-            observer.observe(passwordModal, { attributes: true, attributeFilter: ['class'] });
+            nav.addEventListener('mouseleave', () => {
+                console.log('Hiding desktop dropdown for category');
+                dropdown.classList.add('hidden');
+                dropdown.style.opacity = '0';
+                dropdown.style.visibility = 'hidden';
+                dropdown.style.transform = 'translateY(-10px)';
+            });
         }
+    });
 
-        updatePrices();
-        toggleMessageCode();
-        populateOrders();
-    } catch (error) {
-        console.error('Error during page initialization:', error);
-        showToast('Page initialization failed: ' + error.message, 'error');
-    }
-});
+    // Initialize Mobile Sidebar Subcategory Toggles
+    document.querySelectorAll('.toggle-subcategories').forEach(button => {
+        button.addEventListener('click', () => {
+            console.log('Toggling mobile subcategory');
+            const icon = button.querySelector('.fa-chevron-down');
+            const subcategories = button.closest('.category-item').querySelector('.subcategories');
+            if (subcategories && icon) {
+                const isHidden = subcategories.style.display === 'none' || !subcategories.style.display;
+                subcategories.style.display = isHidden ? 'block' : 'none';
+                subcategories.classList.toggle('active', isHidden);
+                icon.classList.toggle('active', isHidden);
+            }
+        });
+    });
 </script>
 </body>
 </html>

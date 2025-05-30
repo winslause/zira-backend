@@ -11,6 +11,9 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css" rel="stylesheet">
     <!-- jQuery (for popup toggle) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -18,938 +21,1085 @@
     <!-- Custom Styles -->
 
 <style>
-    /* Custom Font */
-    body, .navbar {
-        font-family: 'Poppins', sans-serif;
-    }
+   /* Custom Font */
+body, .navbar {
+    font-family: 'Poppins', sans-serif;
+}
 
-    /* Hidden Class for Dropdown */
-    .hidden {
-        display: none !important;
-    }
+/* Hidden Class for Dropdown */
+.hidden {
+    display: none !important;
+}
 
-    /* Image Transition on Hover */
-    .product-card img {
-        transition: opacity 0.5s ease-in-out;
-    }
+/* Image Transition on Hover */
+.product-card img {
+    transition: opacity 0.5s ease-in-out;
+}
 
-    /* Wishlist Button and Tooltip */
-    .wishlist-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        color: #6b7280;
-        transition: color 0.3s ease;
-        z-index: 10;
-    }
-    .wishlist-btn:hover {
-        color: #d97706;
-    }
-    .wishlist-btn.active {
-        color: #d97706;
-    }
-    .wishlist-btn:hover .tooltip {
-        visibility: visible;
-        opacity: 1;
-    }
-    .tooltip {
-        visibility: hidden;
-        opacity: 0;
-        position: absolute;
-        top: 30px;
-        right: -10px;
-        background-color: #d97706;
-        color: white;
-        padding: 6px 10px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        white-space: nowrap;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-        z-index: 15;
-    }
-    .tooltip::after {
-        content: '';
-        position: absolute;
-        top: 100%;
-        right: 15px;
-        width: 0;
-        height: 0;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5px solid #d97706;
-    }
+/* Wishlist Button and Tooltip */
+.wishlist-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #6b7280;
+    transition: color 0.3s ease;
+    z-index: 10;
+}
+.wishlist-btn:hover {
+    color: #d97706;
+}
+.wishlist-btn.active {
+    color: #d97706;
+}
+.wishlist-btn:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 30px;
+    right: -10px;
+    background-color: #d97706;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 15;
+}
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 15px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #d97706;
+}
 
-    /* Animations */
-    .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
-    .animate-bounceIn { animation: bounceIn 1s ease-out forwards; }
-    .animate-zoomIn { animation: zoomIn 5s ease-out forwards; }
-    .animate-pageLoad { animation: pageLoad 1s ease-out forwards; }
-    .animate-navLoad { animation: navLoad 0.8s ease-out forwards; }
-    .animate-rotateToggle { animation: rotateToggle 0.3s ease-in-out forwards; }
-    .animate-bounce { animation: bounce 0.2s ease-in-out; }
-    .animate-pulse { animation: pulse 0.3s ease-in-out; }
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes bounceIn {
-        0% { opacity: 0; transform: scale(0.95); }
-        50% { opacity: 0.5; transform: scale(1.05); }
-        100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes zoomIn {
-        from { background-size: 100%; }
-        to { background-size: 110%; }
-    }
-    @keyframes pageLoad {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes navLoad {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes rotateToggle {
-        0% { transform: rotate(0deg) scale(1); }
-        50% { transform: rotate(90deg) scale(1.2); }
-        100% { transform: rotate(180deg) scale(1); }
-    }
-    @keyframes bounce {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.3); }
-        100% { transform: scale(1); }
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.8; }
-        100% { transform: scale(1); opacity: 1; }
-    }
+/* Animations */
+.animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
+.animate-bounceIn { animation: bounceIn 1s ease-out forwards; }
+.animate-zoomIn { animation: zoomIn 5s ease-out forwards; }
+.animate-pageLoad { animation: pageLoad 1s ease-out forwards; }
+.animate-navLoad { animation: navLoad 0.8s ease-out forwards; }
+.animate-rotateToggle { animation: rotateToggle 0.3s ease-in-out forwards; }
+.animate-bounce { animation: bounce 0.2s ease-in-out; }
+.animate-pulse { animation: pulse 0.3s ease-in-out; }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounceIn {
+    0% { opacity: 0; transform: scale(0.95); }
+    50% { opacity: 0.5; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes zoomIn {
+    from { background-size: 100%; }
+    to { background-size: 110%; }
+}
+@keyframes pageLoad {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes navLoad {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes rotateToggle {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(90deg) scale(1.2); }
+    100% { transform: rotate(180deg) scale(1); }
+}
+@keyframes bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
 
-    /* Delay Classes */
-    .delay-\[100ms\] { animation-delay: 100ms; }
-    .delay-\[200ms\] { animation-delay: 200ms; }
-    .delay-\[300ms\] { animation-delay: 300ms; }
-    .delay-\[400ms\] { animation-delay: 400ms; }
+/* Navbar Animations */
+.nav-item, .nav-icon {
+    animation: slideDown 0.5s ease-out forwards;
+    animation-delay: calc(0.1s * var(--index));
+}
+.nav-logo {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-    /* Navbar Styling */
-    .navbar {
-        background: #ffffff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        padding: 1rem 0;
-        position: fixed;
-        width: 100%;
-        z-index: 50;
-        animation: navLoad 0.8s ease-out;
-    }
-    .navbar-item {
-        position: relative;
-        font-size: 1.2rem;
-        font-weight: 500;
-        color: #4b5563;
-        padding: 0.75rem 1.5rem;
-        transition: all 0.3s ease;
-        border-radius: 8px;
-    }
-    .navbar-item:hover, .navbar-item.active {
-        color: #1f2937;
-        transform: scale(1.05);
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-    .navbar-item::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 3px;
-        background-color: #1f2937;
-        transition: width 0.3s ease;
-    }
-    .navbar-item:hover::after, .navbar-item.active::after {
-        width: 50%;
-    }
-    .nav-hover:hover {
-        transform: scale(1.05);
-    }
+/* Delay Classes */
+.delay-\[100ms\] { animation-delay: 100ms; }
+.delay-\[200ms\] { animation-delay: 200ms; }
+.delay-\[300ms\] { animation-delay: 300ms; }
+.delay-\[400ms\] { animation-delay: 400ms; }
 
-    /* Search Container */
-    .search-container {
-        position: relative;
-    }
-    .search-container input {
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-        outline: none;
-    }
-    .search-container .fa-search {
-        position: absolute;
-        right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6b7280;
-    }
-    #mobile-search-bar {
-        display: none;
-        position: absolute;
-        top: 3rem;
-        left: 0;
-        right: 0;
-        margin: 0 1rem;
-        z-index: 45;
-    }
-    #mobile-search-bar.active {
-        display: block;
-    }
+/* Navbar Styling */
+.navbar {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    animation: navLoad 0.8s ease-out;
+}
+.nav-item {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4b5563;
+    padding: 0.5rem 0.75rem;
+    transition: color 0.3s ease, transform 0.3s ease;
+    border-radius: 8px;
+}
+.nav-item:hover, .nav-item.active {
+    color: #d97706;
+    transform: scale(1.05);
+}
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: #d97706;
+    transition: width 0.3s ease;
+}
+.nav-item:hover::after, .nav-item.active::after {
+    width: 50%;
+}
+.nav-hover:hover {
+    transform: scale(1.05);
+}
 
-    /* Sidebar Filter Hover Effects */
-    .filter-item:hover, .sidebar select:hover {
-        transform: scale(1.05);
-        color: #d97706;
-        transition: transform 0.3s ease, color 0.3s ease;
-    }
+/* Dropdown Menu */
+.dropdown-menu {
+    min-width: 200px;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    background: #ffffff;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.dropdown-item {
+    font-size: 0.875rem;
+    color: #4b5563;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #d97706;
+}
 
-    /* Responsive Grid for Product Cards */
-    .product-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-    .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .product-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-    .product-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
-    .product-grid.list-view {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    .product-grid.list-view .product-card {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 1rem;
-    }
-    .product-grid.list-view .product-card .relative {
-        width: 150px;
-        height: 150px;
-    }
-    .product-grid.list-view .product-card .p-4 {
-        flex: 1;
-        text-align: left;
-    }
+/* Search Container */
+.search-container {
+    position: relative;
+}
+.search-container input {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+    outline: none;
+}
+.search-container .fa-search {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+}
+#mobile-search-bar {
+    display: none;
+    position: absolute;
+    top: 4.5rem;
+    left: 0;
+    right: 0;
+    margin: 0 1rem;
+    z-index: 999;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+}
+#mobile-search-bar.active {
+    display: block;
+}
 
-    /* Display Option Icons */
-    .display-option {
-        padding: 0.5rem;
-        cursor: pointer;
-        color: #4b5563;
-        transition: color 0.3s ease;
-    }
-    .display-option:hover, .display-option.active {
-        color: #d97706;
-    }
+/* Mobile Sidebar */
+#mobile-sidebar {
+    transition: transform 0.3s ease, visibility 0.3s ease;
+    visibility: hidden;
+    z-index: 1000;
+}
+#mobile-sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+}
+.mobile-sidebar-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #4b5563;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+.mobile-sidebar-item:hover, .mobile-sidebar-item.active {
+    color: #d97706;
+    background-color: #f3f4f6;
+}
+.sidebar-dropdown-toggle i {
+    transition: transform 0.3s ease;
+}
+.sidebar-dropdown-toggle.active i {
+    transform: rotate(180deg);
+}
+.sidebar-dropdown {
+   display: block !important; /* Ensure block display */
+    opacity: 0;
+    max-height: 0;
+    overflow-y: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    background-color: #f3f4f6; /* Light background for visibility */
+    padding-left: 1rem;
+}
+.sidebar-dropdown.active {
+    opacity: 1;
+    max-height: 500px; /* Increased for safety */
+    padding: 0.5rem 0; /* Add padding when active */
 
-    /* Floating Filter Toggler Button (Mobile) */
-    .filter-toggler {
-        display: none;
-        position: fixed;
-        top: 100px;
-        left: 16px;
-        background-color: #d97706;
-        color: white;
-        padding: 8px;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        z-index: 40;
-        transition: background-color 0.3s ease;
-    }
-    .filter-toggler:hover {
-        background-color: #b45309;
-    }
+}
+.sidebar-dropdown a {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+    border-left: 2px solid transparent; /* Debug border */
+}
+.sidebar-dropdown a:hover {
+    color: #d97706;
+    border-left-color: #d97706; /* Debug hover effect */
+}
 
-    /* Filter Close Button (Mobile) */
-    #filter-close-btn {
-        display: none;
-        background-color: #d97706;
-        color: white;
-        padding: 8px;
-        border-radius: 50%;
-        transition: background-color 0.3s ease;
-    }
-    #filter-close-btn:hover {
-        background-color: #b45309;
-    }
+/* Country Button in Navbar */
+#mobile-country-btn-container,
+#desktop-country-btn-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 60;
+    overflow: visible;
+}
+#mobile-country-btn,
+#desktop-country-btn {
+    background-color: #ffffff;
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+#mobile-country-btn:hover,
+#desktop-country-btn:hover {
+    background-color: #f3f4f6;
+}
+#mobile-country-btn .flag,
+#desktop-country-btn .flag {
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+}
+#mobile-country-dropdown,
+#desktop-country-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 8rem;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    z-index: 80;
+    display: none;
+}
+#mobile-country-dropdown:not(.hidden),
+#desktop-country-dropdown:not(.hidden) {
+    display: block;
+}
+.country-option {
+    font-size: 0.875rem;
+    color: #4b5563;
+    padding: 0.25rem 0.5rem;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+.country-option:hover {
+    color: #d97706;
+}
+.floating-text {
+    font-size: 0.75rem;
+    color: #4b5563;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    text-align: center;
+}
 
-    /* Country Button in Navbar */
-    #mobile-country-btn-container,
-    #desktop-country-btn-container {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        z-index: 60;
-        overflow: visible;
-    }
-    #mobile-country-btn,
-    #desktop-country-btn {
-        background-color:#d97706;
-        color: #374151;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.2s;
-        display: flex;
-        align-items: center;
-        font-size: 0.875rem;
-        cursor: pointer;
-    }
-    #mobile-country-btn:hover,
-    #desktop-country-btn:hover {
-        background-color: #f3f4f6;
-    }
-    #mobile-country-btn .flag,
-    #desktop-country-btn .flag {
-        font-size: 0.875rem;
-        margin-right: 0.5rem;
-    }
-    #mobile-country-dropdown,
-    #desktop-country-dropdown {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 0.5rem;
-        width: 8rem;
-        background-color: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 0.375rem;
-        padding: 1rem;
-        z-index: 80;
-        display: none;
-    }
-    #mobile-country-dropdown:not(.hidden),
-    #desktop-country-dropdown:not(.hidden) {
-        display: block;
-    }
-    .country-option {
-        font-size: 0.875rem;
-        color: #4b5563;
-        padding: 0.25rem 0.5rem;
-        transition: color 0.3s ease;
-        cursor: pointer;
-    }
-    .country-option:hover {
-        color: #d97706;
-    }
-    .floating-text {
-        font-size: 0.75rem;
-        color: #4b5563;
-        margin-bottom: 0.25rem;
-        white-space: nowrap;
-        text-align: center;
-    }
+/* Sidebar Filter Hover Effects */
+.filter-item:hover, .sidebar select:hover {
+    transform: scale(1.05);
+    color: #d97706;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
 
-    /* Action Button Hover Effect */
-    .action-btn {
-        transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    .action-btn:hover {
-        transform: scale(1.05);
-    }
+/* Responsive Grid for Product Cards */
+.product-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.product-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.product-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.product-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+.product-grid.list-view .product-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+.product-grid.list-view .product-card .relative {
+    width: 150px;
+    height: 150px;
+}
+.product-grid.list-view .product-card .p-4 {
+    flex: 1;
+    text-align: left;
+}
 
-    /* Search Bar Styling */
-    .search-input:focus {
-        border-color: #d97706;
-        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
-    }
+/* Display Option Icons */
+.display-option {
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #4b5563;
+    transition: color 0.3s ease;
+}
+.display-option:hover, .display-option.active {
+    color: #d97706;
+}
 
-    /* No Results Message */
-    .no-results {
-        display: none;
-        text-align: center;
-        color: #4b5563;
-        font-size: 1rem;
-        grid-column: 1 / -1;
-    }
+/* Floating Filter Toggler Button (Mobile) */
+.filter-toggler {
+    display: none;
+    position: fixed;
+    top: 100px;
+    left: 16px;
+    background-color: #d97706;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 40;
+    transition: background-color 0.3s ease;
+}
+.filter-toggler:hover {
+    background-color: #b45309;
+}
 
-    /* Mobile Sidebar Styling */
-    .mobile-sidebar-item {
-        display: block;
-        padding: 0.75rem 1rem;
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #4b5563;
-        transition: color 0.3s ease, background-color 0.3s ease;
-    }
-    .mobile-sidebar-item:hover, .mobile-sidebar-item.active {
-        color: #d97706;
-        background-color: #f3f4f6;
-    }
+/* Filter Close Button (Mobile) */
+#filter-close-btn {
+    display: none;
+    background-color: #d97706;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+#filter-close-btn:hover {
+    background-color: #b45309;
+}
 
-    /* Quantity Modal */
-    #quantity-modal {
-        transition: opacity 0.3s ease;
-    }
-    #quantity-modal.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-    #quantity-modal:not(.hidden) {
-        opacity: 1;
-    }
-    #quantity-input {
-        appearance: textfield;
-    }
-    #quantity-input::-webkit-outer-spin-button,
-    #quantity-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+/* Action Button Hover Effect */
+.action-btn {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.action-btn:hover {
+    transform: scale(1.05);
+}
 
-    /* Floating Button Styles */
-    :root {
-        --whatsapp-green: #25D366;
-        --pink: #EC4899;
-        --yellow-600: #d97706;
-        --yellow-700: #b45309;
-        --red: #EF4444;
-        --error-red: #dc2626;
-    }
+/* Search Bar Styling */
+.search-input:focus {
+    border-color: #d97706;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+}
 
-    /* Custom Animations */
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-15px); }
-        60% { transform: translateY(-7px); }
-    }
+/* No Results Message */
+.no-results {
+    display: none;
+    text-align: center;
+    color: #4b5563;
+    font-size: 1rem;
+    grid-column: 1 / -1;
+}
 
-    /* Floating Button Container */
-    .floating-btn-container {
-        position: fixed;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        pointer-events: auto;
-    }
+/* Quantity Modal */
+#quantity-modal {
+    transition: opacity 0.3s ease;
+}
+#quantity-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+#quantity-modal:not(.hidden) {
+    opacity: 1;
+}
+#quantity-input {
+    appearance: textfield;
+}
+#quantity-input::-webkit-outer-spin-button,
+#quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
-    /* WhatsApp Button */
-    .whatsapp-btn-container {
-        bottom: 16px;
-        right: 16px;
-    }
-    .whatsapp-btn-container .floating-btn {
-        width: 48px;
-        height: 48px;
-        background-color: var(--whatsapp-green);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s ease;
-        animation: bounce 2s infinite;
-        cursor: pointer;
-    }
-    .whatsapp-btn-container .floating-btn i {
-        color: white;
-        font-size: 24px;
-    }
-    .whatsapp-btn-container .floating-btn:hover {
-        transform: scale(1.1);
-    }
-    .whatsapp-btn-container .floating-text {
-        margin-right: 8px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-    .whatsapp-btn-container .badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background-color: var(--red);
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 10px;
-    }
+/* Floating Button Styles */
+:root {
+    --whatsapp-green: #25D366;
+    --pink: #EC4899;
+    --yellow-600: #d97706;
+    --yellow-700: #b45309;
+    --red: #EF4444;
+    --error-red: #dc2626;
+}
 
-    /* Discount Button (About Zira Collection) */
-    .discount-btn-container {
-        bottom: 16px;
-        left: 16px;
-        position: fixed;
-        z-index: 1000;
-        pointer-events: auto;
-    }
-    .discount-btn-container .floating-btn {
-        background-color: var(--pink);
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        padding: 16px;
-        height: 48px;
-        transition: all 0.3s ease;
-        animation: bounce 2s infinite;
-        cursor: pointer;
-    }
-    .discount-btn-container .floating-btn:hover {
-        transform: scale(1.1);
-    }
-    .discount-btn-container .floating-btn img {
-        width: 24px;
-        height: 24px;
-        margin-right: 8px;
-    }
+/* Floating Button Container */
+.floating-btn-container {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+}
 
-    /* Discount Popup */
-    #discount-page {
-        z-index: 60;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        transition: transform 0.5s ease-in-out;
-    }
-    #discount-page .p-6 {
-        min-height: 100%;
-        box-sizing: border-box;
-    }
-    #close-discount {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        z-index: 65;
-    }
+/* WhatsApp Button */
+.whatsapp-btn-container {
+    bottom: 16px;
+    right: 16px;
+}
+.whatsapp-btn-container .floating-btn {
+    width: 48px;
+    height: 48px;
+    background-color: var(--whatsapp-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    animation: bounce 2s infinite;
+    cursor: pointer;
+}
+.whatsapp-btn-container .floating-btn i {
+    color: white;
+    font-size: 24px;
+}
+.whatsapp-btn-container .floating-btn:hover {
+    transform: scale(1.1);
+}
+.whatsapp-btn-container .floating-text {
+    margin-right: 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.whatsapp-btn-container .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: var(--red);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+}
 
-    /* Email Form Styling */
-    #contact-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-    #contact-form label {
-        font-weight: 500;
-        color: #374151;
-    }
-    #contact-form input,
-    #contact-form textarea {
-        background: #ffffff;
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        padding: 0.75rem;
-        font-size: 0.875rem;
-        color: #1f2937;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    #contact-form input:focus,
-    #contact-form textarea:focus {
-        border-color: var(--yellow-600);
-        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
-    }
-    #contact-form textarea {
-        resize: vertical;
-        min-height: 120px;
-    }
-    #contact-form button {
-        background: var(--yellow-600);
-        color: #ffffff;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.375rem;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    #contact-form button:hover {
-        background: var(--yellow-700);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    #contact-form button:focus {
-        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
-    }
-    #contact-form .text-right {
-        text-align: center;
-    }
+/* Discount Button (About Zira Collection) */
+.discount-btn-container {
+    bottom: 0; /* Flush with bottom edge */
+    left: 0; /* Flush with left edge */
+    position: fixed;
+    z-index: 1000;
+    pointer-events: auto;
+}
+.discount-btn-container .floating-btn {
+    background-color: var(--pink);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px; /* Reduced font size */
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    padding: 8px; /* Reduced padding */
+    height: 36px; /* Smaller height */
+    transition: all 0.3s ease;
+    animation: bounce 2s infinite;
+    cursor: pointer;
+}
+.discount-btn-container .floating-btn:hover {
+    transform: scale(1.1);
+}
+.discount-btn-container .floating-btn img {
+    width: 18px; /* Smaller logo */
+    height: 18px;
+    margin-right: 6px;
+}
 
-    /* Flash Messages */
-    #flash-message1 {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 16px;
-        border-radius: 8px;
-        color: white;
-        font-size: 16px;
-        z-index: 9999;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        min-width: 200px;
-        text-align: center;
-    }
-    #flash-message1.success {
-        background-color: var(--yellow-600);
-    }
-    #flash-message1.error {
-        background-color: var(--error-red);
-    }
-    #flash-message1.show {
-        opacity: 1;
-    }
 
-    /* Product Details Modal */
-    #product-details-modal {
-        transition: opacity 0.3s ease;
-    }
-    #product-details-modal.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-    #product-details-modal:not(.hidden) {
-        opacity: 1;
-    }
-    #product-details-modal .bg-white {
-        animation: fadeInUp 0.3s ease-out;
-    }
-    #product-details-modal img {
-        width: 100%;
-        height: auto;
-        max-height: 400px;
-        object-fit: contain;
-        transition: none;
-    }
-    #product-details-modal img:hover {
-        transform: scale(1.05);
-    }
-    #product-details-modal button {
-        transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    #product-details-modal button:hover {
-        transform: scale(1.05);
-    }
+/* Discount Popup */
+#discount-page {
+    z-index: 60;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: transform 0.5s ease-in-out;
+}
+#discount-page .p-6 {
+    min-height: 100%;
+    box-sizing: border-box;
+}
+#close-discount {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 65;
+}
 
-    /* Responsive Adjustments */
-    @media (max-width: 767px) {
-        #desktop-navbar {
-            display: none !important;
-        }
-        .product-grid.cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
-            grid-template-columns: 1fr;
-        }
-        .product-grid.list-view .product-card {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .product-grid.list-view .product-card .relative {
-            width: 100%;
-            height: 200px;
-        }
-        .product-grid.list-view .product-card .p-4 {
-            text-align: center;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 280px;
-            height: 100%;
-            background-color: #f3f4f6;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 60;
-            overflow-y: auto;
-        }
-        .sidebar.open {
-            transform: translateX(0);
-        }
-        #mobile-sidebar {
-        display: block; /* Ensure it's not hidden */
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-         z-index: 80; /* Increase z-index */
-    }
-    #mobile-sidebar.open {
-        transform: translateX(0);
-    }
+/* Email Form Styling */
+#contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+#contact-form label {
+    font-weight: 500;
+    color: #374151;
+}
+#contact-form input,
+#contact-form textarea {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: #1f2937;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#contact-form input:focus,
+#contact-form textarea:focus {
+    border-color: var(--yellow-600);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+}
+#contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+#contact-form button {
+    background: var(--yellow-600);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+#contact-form button:hover {
+    background: var(--yellow-700);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+#contact-form button:focus {
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
+}
+#contact-form .text-right {
+    text-align: center;
+}
 
-        .filter-toggler {
-            display: block;
-        }
-        #filter-close-btn {
-            display: block;
-        }
-        .tooltip {
-            right: 0;
-            top: -50px;
-        }
-        .tooltip::after {
-            right: 10px;
-        }
-        .navbar {
-            padding: 0.5rem 0;
-        }
-        .navbar-logo {
-            height: 48px;
-        }
-        .whatsapp-btn-container .floating-btn {
-            width: 36px;
-            height: 36px;
-        }
-        .whatsapp-btn-container .floating-btn i {
-            font-size: 18px;
-        }
-        .whatsapp-btn-container .floating-text {
-            font-size: 10px;
-            padding: 3px 6px;
-        }
-        .whatsapp-btn-container .badge {
-            font-size: 8px;
-            padding: 1px 4px;
-            top: -2px;
-            right: -2px;
-        }
-        .discount-btn-container .floating-btn {
-            height: 36px;
-            font-size: 10px;
-            padding: 12px;
-        }
-        .discount-btn-container .floating-btn img {
-            width: 18px;
-            height: 18px;
-            margin-right: 6px;
-        }
-        #discount-page {
-            width: 100%;
-        }
-        #discount-page .p-6 {
-            padding: 1rem;
-        }
-        #discount-page .h-16 {
-            height: 2.5rem;
-        }
-        #discount-page h2 {
-            font-size: 1.5rem;
-        }
-        #discount-page p {
-            font-size: 0.875rem;
-        }
-        #discount-page .text-sm {
-            font-size: 0.75rem;
-        }
-        #contact-form {
-            gap: 1rem;
-        }
-        #contact-form input,
-        #contact-form textarea {
-            font-size: 0.875rem;
-            padding: 0.5rem;
-        }
-        #contact-form button {
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
-        }
-        #contact-form label {
-            font-size: 0.75rem;
-        }
-        #mobile-country-btn-container {
-            display: flex;
-        }
-        #mobile-country-btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        #mobile-country-btn .flag {
-            font-size: 0.75rem;
-        }
-        #mobile-country-dropdown {
-            width: 100px;
-            padding: 0.5rem;
-        }
-        .country-option {
-            font-size: 0.75rem;
-        }
-        .floating-text {
-            font-size: 0.625rem;
-            margin-bottom: 0.125rem;
-        }
-    }
-    @media (min-width: 768px) {
-        #desktop-navbar {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-        .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .sidebar {
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-        .navbar-item {
-            padding: 0.5rem 0.75rem;
-            font-size: 1rem;
-        }
-        .navbar-logo {
-            height: 56px;
-        }
-        #discount-page {
-            width: 50%;
-        }
-        #desktop-country-btn-container {
-            display: flex;
-        }
-        #desktop-country-btn {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-        }
-        #desktop-country-dropdown {
-            width: 120px;
-            padding: 0.75rem;
-        }
-        .country-option {
-            font-size: 0.875rem;
-        }
-        .floating-text {
-            font-size: 0.75rem;
-        }
-        #mobile-sidebar {
-            display: none;
-        }
-    }
-    @media (min-width: 1024px) {
-        .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-        .navbar-logo {
-            height: 64px;
-        }
-        #desktop-country-btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
-        #desktop-country-dropdown {
-            width: 140px;
-            padding: 1rem;
-        }
-        .country-option {
-            font-size: 0.875rem;
-        }
-        .floating-text {
-            font-size: 0.75rem;
-        }
-    }
+/* Flash Messages */
+#flash-message1 {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 16px;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    min-width: 200px;
+    text-align: center;
+}
+#flash-message1.success {
+    background-color: var(--yellow-600);
+}
+#flash-message1.error {
+    background-color: var(--error-red);
+}
+#flash-message1.show {
+    opacity: 1;
+}
 
-    #close-product-modal {
+/* Product Details Modal */
+#product-details-modal {
+    transition: opacity 0.3s ease;
+}
+#product-details-modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+#product-details-modal:not(.hidden) {
+    opacity: 1;
+}
+#product-details-modal .bg-white {
+    animation: fadeInUp 0.3s ease-out;
+}
+#product-details-modal img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    transition: none;
+}
+#product-details-modal img:hover {
+    transform: scale(1.05);
+}
+#product-details-modal button {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+#product-details-modal button:hover {
+    transform: scale(1.05);
+}
+
+/* Close Modal Button */
+#close-product-modal {
     position: absolute !important;
     top: 1rem !important;
     right: 1rem !important;
-    z-index: 100 !important; /* Ensures it's above all modal content */
+    z-index: 100 !important;
     cursor: pointer !important;
     background: none !important;
     border: none !important;
     padding: 0.5rem !important;
-    color: #4b5563 !important; /* Tailwind text-gray-600 */
+    color: #4b5563 !important;
     transition: color 0.3s ease !important;
     outline: none !important;
     pointer-events: auto !important;
 }
-
 #close-product-modal:hover {
-    color: #dc2626 !important; /* Tailwind text-red-600 */
+    color: #dc2626 !important;
 }
-
 #close-product-modal:focus {
-    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3) !important; /* Tailwind focus:ring-yellow-600 */
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3) !important;
 }
-
 #close-product-modal i {
-    font-size: 1.25rem !important; /* Tailwind text-xl */
-    line-height: 1 !important; /* Ensure proper alignment */
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
 }
 
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+    #desktop-navbar {
+        display: none !important;
+    }
+    .product-grid.cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
+        grid-template-columns: 1fr;
+    }
+    .product-grid.list-view .product-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .product-grid.list-view .product-card .relative {
+        width: 100%;
+        height: 200px;
+    }
+    .product-grid.list-view .product-card .p-4 {
+        text-align: center;
+    }
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100%;
+        background-color: #f3f4f6;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 60;
+        overflow-y: auto;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    #mobile-sidebar {
+        display: block;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+    #mobile-sidebar.open {
+        transform: translateX(0);
+    }
+    .filter-toggler {
+        display: block;
+    }
+    #filter-close-btn {
+        display: block;
+    }
+    .tooltip {
+        right: 0;
+        top: -50px;
+    }
+    .tooltip::after {
+        right: 10px;
+    }
+    .navbar {
+        padding: 0.5rem 0;
+    }
+    .navbar-logo {
+        height: 48px;
+    }
+    .whatsapp-btn-container .floating-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .whatsapp-btn-container .floating-btn i {
+        font-size: 18px;
+    }
+    .whatsapp-btn-container .floating-text {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    .whatsapp-btn-container .badge {
+        font-size: 8px;
+        padding: 1px 4px;
+        top: -2px;
+        right: -2px;
+    }
+    .discount-btn-container .floating-btn {
+        height: 32px; /* Even smaller for mobile */
+        font-size: 8px;
+        padding: 6px;
+    }
+    .discount-btn-container .floating-btn img {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+    }
+    #discount-page {
+        width: 100%;
+    }
+    #discount-page .p-6 {
+        padding: 1rem;
+    }
+    #discount-page .h-16 {
+        height: 2.5rem;
+    }
+    #discount-page h2 {
+        font-size: 1.5rem;
+    }
+    #discount-page p {
+        font-size: 0.875rem;
+    }
+    #discount-page .text-sm {
+        font-size: 0.75rem;
+    }
+    #contact-form {
+        gap: 1rem;
+    }
+    #contact-form input,
+    #contact-form textarea {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+    #contact-form button {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    #contact-form label {
+        font-size: 0.75rem;
+    }
+    #mobile-country-btn-container {
+        display: flex;
+    }
+    #mobile-country-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    #mobile-country-btn .flag {
+        font-size: 0.75rem;
+    }
+    #mobile-country-dropdown {
+        width: 100px;
+        padding: 0.5rem;
+    }
+    .country-option {
+        font-size: 0.75rem;
+    }
+    .floating-text {
+        font-size: 0.625rem;
+        margin-bottom: 0.125rem;
+    }
+}
+@media (min-width: 768px) {
+    #desktop-navbar {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    .product-grid.cols-3, .product-grid.cols-4, .product-grid.cols-5 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .sidebar {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    .nav-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+    }
+    .navbar-logo {
+        height: 56px;
+    }
+    #discount-page {
+        width: 50%;
+    }
+    #desktop-country-btn-container {
+        display: flex;
+    }
+    #desktop-country-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    #desktop-country-dropdown {
+        width: 120px;
+        padding: 0.75rem;
+    }
+    footer .grid-cols-5 {
+        display: grid !important;
+    }
+
+    .country-option {
+        font-size: 0.875rem;
+    }
+    .floating-text {
+        font-size: 0.75rem;
+    }
+    #mobile-sidebar {
+        display: none !important;
+    }
+}
+@media (min-width: 1024px) {
+    .product-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .navbar-logo {
+        height: 64px;
+    }
+    #desktop-country-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    #desktop-country-dropdown {
+        width: 140px;
+        padding: 1rem;
+    }
+    .country-option {
+        font-size: 0.875rem;
+    }
+    .floating-text {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    min-width: 200px;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    background: #ffffff;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+
+.group:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Ensure dropdown is above other elements */
+.navbar {
+    z-index: 10;
+}
+@media (max-width: 767px) {
+    .sidebar-dropdown {
+        display: block !important;
+    }
+    .sidebar-dropdown.active {
+        max-height: 600px; /* Allow more space on mobile */
+    }
+    .sidebar-dropdown a {
+        font-size: 0.85rem; /* Slightly smaller for mobile */
+    }
+}
 </style>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Navbar -->
     <!-- Navbar -->
-<nav class="navbar bg-white shadow-md fixed w-full z-50">
-    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Mobile Navbar -->
-        <div class="md:hidden flex items-center justify-between w-full relative">
-            <button id="nav-toggler" class="text-2xl"><i class="fas fa-bars"></i></button>
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-            <div class="flex items-center space-x-4">
-                <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-gray-900 cursor-pointer"></i>
-                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                <div id="mobile-country-btn-container" class="relative flex flex-col items-center">
-                    <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
-                    <button id="mobile-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition flex items-center text-sm">
-                        <span class="flag">🇺🇸</span> USA
-                    </button>
-                    <div id="mobile-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 top-full mt-2 right-0 z-80">
-                        <div class="country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸">USA (USD)</div>
-                        <div class="country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪">Germany (EUR)</div>
-                        <div class="country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧">UK (GBP)</div>
-                        <div class="country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪">Kenya (KES)</div>
-                    </div>
-                </div>
-            </div>
-            <div id="mobile-search-bar" class="bg-white shadow-md rounded px-3 py-1 hidden">
-                <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
-            </div>
+<!-- Navbar -->
+<nav class="navbar bg-white fixed w-full z-1000 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <!-- Mobile Menu Toggle -->
+        <button id="mobile-menu-toggle" class="text-gray-700 text-2xl md:hidden order-1">
+            <i class="fas fa-bars"></i>
+        </button>
+        <!-- Logo -->
+        <div class="flex items-center nav-logo order-2">
+            <a href="{{ url_for('index') }}">
+                <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+            </a>
         </div>
         <!-- Desktop Navbar -->
-        <div id="desktop-navbar" class="hidden md:flex items-center justify-between w-full">
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-            <div class="flex space-x-6">
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
-                </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 active">Products</a>
-                </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700">Special Discount</a>
-                </div>
+        <div class="hidden md:flex flex-1 justify-center items-center space-x-4 order-3" id="desktop-navbar">
+            <a href="{{ url_for('index') }}" class="nav-item text-gray-700 hover:text-yellow-600 transition {{ 'font-bold text-yellow-600' if request.endpoint == 'index' }}" style="--index: 1;">Home</a>
+            <a href="{{ url_for('our_products') }}" class="nav-item text-gray-700 hover:text-yellow-600 transition {{ 'font-bold text-yellow-600' if request.endpoint == 'our_products' }}" style="--index: 2;">Products</a>
+            <a href="{{ url_for('discounted_artefacts') }}" class="nav-item text-gray-700 hover:text-yellow-600 transition {{ 'font-bold text-yellow-600' if request.endpoint == 'discount_uris' }}" style="--index: 3;">Special Discount</a>
+            <!-- Dynamic Categories -->
+            {% for category in categories %}
+<div class="relative group" style="--index: {{ loop.index + 3 }};">
+    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+       class="nav-item text-gray-700 hover:text-yellow-600 transition flex items-center {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug }}">
+        {{ category.name }}
+        {% if category.subcategories %}
+        <i class="fas fa-chevron-down ml-1 text-sm"></i>
+        {% endif %}
+    </a>
+    {% if category.subcategories %}
+    <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-20 min-w-[200px]">
+        {% for subcategory in category.subcategories %}
+        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+           class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
+            {{ subcategory.name }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+        </div>
+        <!-- Right Icons and Currency -->
+        <div class="flex items-center space-x-4 order-4">
+            <!-- Search Icon (Mobile) -->
+            <i id="mobile-search-icon" class="fas fa-search text-gray-700 hover:text-yellow-600 cursor-pointer md:hidden"></i>
+            <!-- Desktop Search -->
+            <div class="search-container hidden md:block">
+                <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
+                <i class="fas fa-search"></i>
             </div>
-            <div class="flex items-center space-x-4">
-                <div class="search-container">
-                    <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
-                    <i class="fas fa-search"></i>
-                </div>
-                <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900"></a>
-                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900"></a>
-                <div id="desktop-country-btn-container" class="relative flex flex-col items-center">
-                    <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
-                    <button id="desktop-country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition flex items-center text-sm">
-                        <span class="flag">🇺🇸</span> USA
-                    </button>
-                    <div id="desktop-country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 top-full mt-2 right-0 z-80">
-                        <div class="country-option" data-country="USA" data-currency="USD" data-flag="🇺🇸">USA (USD)</div>
-                        <div class="country-option" data-country="Germany" data-currency="EUR" data-flag="🇩🇪">Germany (EUR)</div>
-                        <div class="country-option" data-country="UK" data-currency="GBP" data-flag="🇬🇧">UK (GBP)</div>
-                        <div class="country-option" data-country="Kenya" data-currency="KES" data-flag="🇰🇪">Kenya (KES)</div>
-                    </div>
-                </div>
+            <!-- Wishlist and Cart -->
+            <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 5;"><i class="fas fa-heart"></i></a>
+            <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 6;"><i class="fas fa-shopping-cart"></i></a>
+            <!-- Currency Selector -->
+            <div class="currency-container relative flex flex-col items-center" >
+                <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
+                <select style="background-color:#b45309 ;" id="currency-select" class="currency-select bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition text-sm">
+                    <option value="USD" data-flag="🇺🇸" {{ 'selected' if current_currency == 'USD' }}>USD</option>
+                    <option value="EUR" data-flag="🇪🇺" {{ 'selected' if current_currency == 'EUR' }}>EUR</option>
+                    <option value="GBP" data-flag="🇬🇧" {{ 'selected' if current_currency == 'GBP' }}>GBP</option>
+                    <option value="KES" data-flag="🇰🇪" {{ 'selected' if current_currency == 'KES' }}>KES</option>
+                </select>
             </div>
         </div>
     </div>
+    <!-- Mobile Search Bar -->
+    <div id="mobile-search-bar" class="bg-white shadow-md rounded mx-4 my-2 px-3 py-1 hidden">
+        <input type="text" placeholder="Search artifacts & cultural items" class="w-full outline-none text-gray-700 search-input">
+    </div>
 </nav>
+
 <!-- Mobile Sidebar -->
-<div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 transform translate-x-[-100%] transition-transform duration-300 z-60">
-    <button id="close-sidebar" class="absolute top-4 right-4 text-2xl text-gray-700"><i class="fas fa-times"></i></button>
-    <div class="flex flex-col p-4 space-y-4">
-        <a href="{{ url_for('index') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600" style="margin-top: 100px;">Home</a>
-        <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 active">Products</a>
-        <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600">Special Discount</a>
+<div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 transform translate-x-[-100%] transition-transform duration-300 z-1000 md:hidden">
+    <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white z-50">
+        <i class="fas fa-times text-lg"></i>
+    </button>
+    <div class="flex flex-col p-4 space-y-4" style="margin-top: 40px;">
+        <a href="{{ url_for('index') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if request.endpoint == 'index' }}">Home</a>
+        <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if request.endpoint == 'our_products' }}">Products</a>
+        <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if request.endpoint == 'discount_uris' }}">Special Discount</a>
         <a href="{{ url_for('account') }}" class="mobile-sidebar-item text-gray-700 hover:text-yellow-600">Account</a>
+        <!-- Dynamic Categories -->
+        {% for category in categories %}
+<div class="relative">
+    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+       class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug }}">
+        {{ category.name }}
+    </a>
+    {% if category.subcategories %}
+    <button class="sidebar-dropdown-toggle absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-700">
+        <i class="fas fa-chevron-down text-sm"></i>
+    </button>
+    <div class="sidebar-dropdown hidden pl-4 space-y-2">
+        <!-- Debug: Log subcategories -->
+        {% if not category.subcategories %}
+        <p class="text-red-600">No subcategories found for {{ category.name }}</p>
+        {% else %}
+        {% for subcategory in category.subcategories %}
+        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+           class="block text-gray-600 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
+            {{ subcategory.name }}
+        </a>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
     </div>
 </div>
 
@@ -1078,15 +1228,17 @@
                         </button>
                     </div>
                     <!-- Category Filter -->
-                    <div class="mb-6">
-                        <label class="text-gray-700 font-medium mb-2 block">Category</label>
-                        <div class="space-y-2">
-                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="all">All Categories</a>
-                            {% for category in categories %}
-                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="{{ category.name }}">{{ category.name }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
+<div class="mb-6">
+    <label class="text-gray-700 font-medium mb-2 block">Category</label>
+    <div class="space-y-2">
+        <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="all">All Categories</a>
+        {% for category in categories %}
+            {% if category.name|lower != 'gifts' %}
+                <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="{{ category.name }}">{{ category.name }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
                     <!-- Price Range Filter -->
                     <div>
                         <label class="text-gray-700 font-medium mb-2 block">Price Range</label>
@@ -1192,131 +1344,131 @@
 </div>
     <!-- Footer -->
     <footer class="bg-black text-white py-12 px-6">
-        <div class="max-w-7xl mx-auto">
-            <!-- Desktop Layout -->
-            <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
-                <!-- Shop -->
-                <div>
-                    <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
-                        <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
-                    </ul>
-                </div>
-                <!-- Sell -->
-                <div>
-                    <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
-                        <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
-                    </ul>
-                </div>
-                <!-- Policies -->
-                <div>
-                    <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
-                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
-                    </ul>
-                </div>
-                <!-- Company -->
-                <div>
-                    <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
-                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                        <li class="mt-4 text-white font-medium">+254701539003</li>
-                        <li>vickiebmochama@gmail.com</li>
-                        <li class="flex gap-4 mt-2 text-xl">
-                            <a href="#"><i class="fab fa-pinterest"></i></a>
-                            <a href="#"><i class="fab fa-facebook"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                            <a href="#"><i class="fab fa-youtube"></i></a>
-                            <a href="#"><i class="fab fa-whatsapp"></i></a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- Subscribe -->
-                <div>
-                    <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
-                    <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
-                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
-                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                    </form>
-                    <div class="mt-2 flex items-start gap-2">
-                        <input type="checkbox" class="mt-1">
-                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
-                    </div>
-                </div>
+    <div class="max-w-7xl mx-auto">
+        <!-- Desktop Layout -->
+        <div class="hidden md:grid grid-cols-5 gap-8 text-sm">
+            <!-- Shop -->
+            <div>
+                <h3 class="text-yellow-600 font-semibold mb-3">Shop</h3>
+                <ul class="space-y-2">
+                    <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
+                    <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
+                </ul>
             </div>
-            <!-- Mobile Dropdowns -->
-            <div class="md:hidden space-y-4">
-                <!-- Shop -->
-                <details class="bg-gray-900 rounded-md p-4">
-                    <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
-                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                        <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
-                        <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
-                    </ul>
-                </details>
-                <!-- Sell -->
-                <details class="bg-gray-900 rounded-md p-4">
-                    <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
-                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                        <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
-                        <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
-                    </ul>
-                </details>
-                <!-- Policies -->
-                <details class="bg-gray-900 rounded-md p-4">
-                    <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
-                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                        <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
-                        <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
-                    </ul>
-                </details>
-                <!-- Company -->
-                <details class="bg-gray-900 rounded-md p-4">
-                    <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
-                    <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
-                        <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
-                        <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
-                    </ul>
-                    <div class="mt-3 text-sm">
-                        <p>+254701539003</p>
-                        <p>vickiebmochama@gmail.com</p>
-                        <div class="flex gap-3 mt-2 text-xl">
-                            <a href="#"><i class="fab fa-pinterest"></i></a>
-                            <a href="#"><i class="fab fa-facebook"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                            <a href="#"><i class="fab fa-youtube"></i></a>
-                            <a href="#"><i class="fab fa-whatsapp"></i></a>
-                        </div>
-                    </div>
-                </details>
-                <!-- Subscribe -->
-                <details class="bg-gray-900 rounded-md p-4">
-                    <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
-                    <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
-                    <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
-                        <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
-                        <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
-                    </form>
-                    <div class="mt-2 flex items-start gap-2">
-                        <input type="checkbox" class="mt-1">
-                        <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
-                    </div>
-                </details>
+            <!-- Sell -->
+            <div>
+                <h3 class="text-yellow-600 font-semibold mb-3">Sell</h3>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
+                    <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
+                </ul>
+            </div>
+            <!-- Policies -->
+            <div>
+                <h3 class="text-yellow-600 font-semibold mb-3">Policies</h3>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
+                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
+                </ul>
+            </div>
+            <!-- Company -->
+            <div>
+                <h3 class="text-yellow-600 font-semibold mb-3">Company</h3>
+                <ul class="space-y-2">
+                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
+                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                    <li class="mt-4 text-white font-medium">+254701539003</li>
+                    <li>vickiebmochama@gmail.com</li>
+                    <li class="flex gap-4 mt-2 text-xl">
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Subscribe -->
+            <div>
+                <h3 class="text-yellow-600 font-semibold mb-3">Let’s Get in Touch</h3>
+                <p class="text-sm mb-3">Sign up to subscribe and receive 5% off your artifact order</p>
+                <form class="flex items-center border rounded-md overflow-hidden bg-white text-black">
+                    <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                    <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                </form>
+                <div class="mt-2 flex items-start gap-2">
+                    <input type="checkbox" class="mt-1">
+                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                </div>
             </div>
         </div>
-    </footer>
+        <!-- Mobile Layout -->
+        <div class="block md:hidden space-y-4">
+            <!-- Shop -->
+            <details class="bg-gray-900 rounded-md p-4">
+                <summary class="text-yellow-500 font-semibold cursor-pointer">Shop</summary>
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                    <li><a href="{{ url_for('our_products') }}" class="text-white hover:text-yellow-400">Artifact Collections</a></li>
+                    <li><a href="{{ url_for('account') }}" class="text-white hover:text-yellow-400">Track My Order</a></li>
+                </ul>
+            </details>
+            <!-- Sell -->
+            <details class="bg-gray-900 rounded-md p-4">
+                <summary class="text-yellow-500 font-semibold cursor-pointer">Sell</summary>
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                    <li><a href="#" class="text-white hover:text-yellow-400">Sell on Zira Artifacts</a></li>
+                    <li><a href="#" class="text-white hover:text-yellow-400">Artisan Seller FAQ</a></li>
+                </ul>
+            </details>
+            <!-- Policies -->
+            <details class="bg-gray-900 rounded-md p-4">
+                <summary class="text-yellow-500 font-semibold cursor-pointer">Policies</summary>
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                    <li><a href="#" class="text-white hover:text-yellow-400">Return & Refund Policy</a></li>
+                    <li><a href="#" class="text-white hover:text-yellow-400">Privacy & Sharing</a></li>
+                </ul>
+            </details>
+            <!-- Company -->
+            <details class="bg-gray-900 rounded-md p-4">
+                <summary class="text-yellow-500 font-semibold cursor-pointer">Company</summary>
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">About Us</a></li>
+                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-yellow-400">Contact Us</a></li>
+                    <li><a href="{{ url_for('login') }}" class="text-white hover:text-yellow-400">Admin</a></li>
+                </ul>
+                <div class="mt-3 text-sm">
+                    <p>+254701539003</p>
+                    <p>vickiebmochama@gmail.com</p>
+                    <div class="flex gap-3 mt-2 text-xl">
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </details>
+            <!-- Subscribe -->
+            <details class="bg-gray-900 rounded-md p-4">
+                <summary class="text-yellow-500 font-semibold cursor-pointer">Let’s Get in Touch</summary>
+                <p class="text-sm mt-2">Sign up to subscribe and receive 5% off your artifact order</p>
+                <form class="flex items-center border rounded-md overflow-hidden bg-white text-black mt-2">
+                    <input type="email" placeholder="Enter your email" class="px-3 py-2 w-full focus:outline-none">
+                    <button type="submit" class="px-3 py-2 text-white bg-yellow-600 hover:bg-yellow-700 transition"><i class="fas fa-arrow-right"></i></button>
+                </form>
+                <div class="mt-2 flex items-start gap-2">
+                    <input type="checkbox" class="mt-1">
+                    <p class="text-xs">I agree with the <a href="#" class="underline">Terms & Conditions</a></p>
+                </div>
+            </details>
+        </div>
+    </div>
+</footer>
 
     <!-- JavaScript -->
  <script>
- // Currency Conversion Logic (KES as base currency)
+  // Currency Conversion Logic (KES as base currency)
 let exchangeRates = {
     EUR: 0.0073, // Fallback rates
     GBP: 0.0061,
@@ -1355,6 +1507,19 @@ async function fetchExchangeRates() {
     }
 }
 
+// Toast Notification
+function showToast(message, backgroundColor = '#4ade80') {
+    Toastify({
+        text: message,
+        duration: 3000,
+        close: true,
+        gravity: 'top',
+        position: 'right',
+        backgroundColor: backgroundColor,
+        stopOnFocus: true
+    }).showToast();
+}
+
 // Toggle Currency Dropdown (Mobile and Desktop)
 function toggleCurrencyDropdown(buttonId, dropdownId) {
     return function (e) {
@@ -1370,65 +1535,91 @@ function toggleCurrencyDropdown(buttonId, dropdownId) {
     };
 }
 
-// Attach event listeners to both currency buttons
-const mobileCurrencyButton = document.getElementById('mobile-country-btn');
-const desktopCurrencyButton = document.getElementById('desktop-country-btn');
+// Toggle Mobile Sidebar
+window.toggleSidebar = function(event) {
+    event.preventDefault();
+    const sidebar = document.getElementById('mobile-sidebar');
+    const toggle = document.getElementById('mobile-menu-toggle');
+    if (sidebar && toggle) {
+        const isOpen = sidebar.classList.toggle('open');
+        toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
+        toggle.querySelector('i').classList.toggle('fa-times', isOpen);
+        toggle.querySelector('i').classList.add('animate-rotateToggle');
+        setTimeout(() => toggle.querySelector('i').classList.remove('animate-rotateToggle'), 300);
+        console.log('Sidebar toggled:', isOpen, 'Screen width:', window.innerWidth);
+    } else {
+        console.error('Sidebar or toggle element not found');
+    }
+};
 
-if (mobileCurrencyButton) {
-    mobileCurrencyButton.addEventListener('click', toggleCurrencyDropdown('mobile-country-btn', 'mobile-country-dropdown'));
-} else {
-    console.error('Mobile currency button not found');
+// Toggle Mobile Dropdowns (for categories in sidebar)
+window.toggleMobileDropdown = function(button) {
+    const dropdown = button.nextElementSibling;
+    const icon = button.querySelector('i');
+    if (dropdown && icon) {
+        const isActive = dropdown.classList.toggle('active');
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-expanded', isActive);
+        dropdown.style.maxHeight = isActive ? `${dropdown.scrollHeight}px` : '0';
+        dropdown.style.opacity = isActive ? '1' : '0';
+        console.log(`Mobile dropdown toggled for ${button.previousElementSibling.textContent.trim()}:`, isActive, 'Screen width:', window.innerWidth);
+    } else {
+        console.error('Dropdown or icon not found for button:', button);
+    }
+};
+
+// Initialize Mobile Dropdown Event Listeners
+function initializeMobileDropdowns() {
+    document.querySelectorAll('.sidebar-dropdown-toggle').forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        button.removeEventListener('click', button._toggleHandler);
+        button._toggleHandler = () => window.toggleMobileDropdown(button);
+        button.addEventListener('click', button._toggleHandler);
+        // Ensure ARIA attribute is set
+        button.setAttribute('aria-expanded', button.classList.contains('active') ? 'true' : 'false');
+        console.log('Attached listener to dropdown toggle:', button.previousElementSibling.textContent.trim());
+    });
 }
 
-if (desktopCurrencyButton) {
-    desktopCurrencyButton.addEventListener('click', toggleCurrencyDropdown('desktop-country-btn', 'desktop-country-dropdown'));
-} else {
-    console.error('Desktop currency button not found');
-}
+// Initialize Category Dropdowns (Desktop Navbar)
+function initializeCategoryDropdowns() {
+    const categoryGroups = document.querySelectorAll('#desktop-navbar .group');
+    console.log(`Found ${categoryGroups.length} category groups`);
 
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-    const dropdowns = [
-        { id: 'mobile-country-dropdown', buttonId: 'mobile-country-btn' },
-        { id: 'desktop-country-dropdown', buttonId: 'desktop-country-btn' }
-    ];
-    dropdowns.forEach(({ id, buttonId }) => {
-        const dropdown = document.getElementById(id);
-        const button = document.getElementById(buttonId);
-        if (dropdown && button && !dropdown.contains(e.target) && !button.contains(e.target)) {
-            if (!dropdown.classList.contains('hidden')) {
-                dropdown.classList.add('hidden');
-                console.log(`${id} closed (outside click)`, 'Screen width:', window.innerWidth);
-            }
+    categoryGroups.forEach((group, index) => {
+        const categoryLink = group.querySelector('.nav-item');
+        const dropdownMenu = group.querySelector('.dropdown-menu');
+        const categoryName = categoryLink ? categoryLink.textContent.trim() : `Category ${index + 1}`;
+
+        if (!dropdownMenu) {
+            console.warn(`No dropdown menu found for category: ${categoryName}`);
+            return;
         }
-    });
-});
 
-// Update Currency
-document.querySelectorAll('.country-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        e.preventDefault();
-        const country = e.target.getAttribute('data-country');
-        const flag = e.target.getAttribute('data-flag');
-        currentCurrency = e.target.getAttribute('data-currency');
-        // Update both buttons
-        const buttons = [document.getElementById('mobile-country-btn'), document.getElementById('desktop-country-btn')];
-        buttons.forEach(button => {
-            if (button) {
-                button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+        // Verify subcategories
+        const subcategoryItems = dropdownMenu.querySelectorAll('.dropdown-item');
+        if (subcategoryItems.length === 0) {
+            console.warn(`No subcategories found for category: ${categoryName}`);
+        } else {
+            console.log(`Initialized dropdown for ${categoryName} with ${subcategoryItems.length} subcategories`);
+        }
+
+        // Add hover event listeners for debugging (CSS handles actual hover)
+        group.addEventListener('mouseenter', () => {
+            if (!dropdownMenu.classList.contains('hidden')) {
+                console.log(`Dropdown already visible for ${categoryName}`);
+                return;
             }
+            dropdownMenu.classList.remove('hidden');
+            console.log(`Showing dropdown for ${categoryName}`);
         });
-        // Close both dropdowns
-        ['mobile-country-dropdown', 'desktop-country-dropdown'].forEach(id => {
-            const dropdown = document.getElementById(id);
-            if (dropdown) {
-                dropdown.classList.add('hidden');
-            }
+
+        group.addEventListener('mouseleave', () => {
+            dropdownMenu.classList.add('hidden');
+            console.log(`Hiding dropdown for ${categoryName}`);
         });
-        updatePrices();
-        console.log('Currency updated to:', currentCurrency);
     });
-});
+}
 
 // Update Prices
 function updatePrices() {
@@ -1463,16 +1654,24 @@ function updatePrices() {
 
     // Update Price Filter Options (convert KES ranges to selected currency)
     const priceFilter = document.querySelector('.price-filter');
-    const selectedValue = priceFilter.value;
-    const rangeLow = 13000; // Approx 100 USD in KES
-    const rangeHigh = 26000; // Approx 200 USD in KES
-    priceFilter.innerHTML = `
-        <option value="all">All Prices</option>
-        <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
-        <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
-        <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
-    `;
-    priceFilter.value = selectedValue;
+    if (priceFilter) {
+        const selectedValue = priceFilter.value;
+        const rangeLow = 13000; // Approx 100 USD in KES
+        const rangeHigh = 26000; // Approx 200 USD in KES
+        priceFilter.innerHTML = `
+            <option value="all">All Prices</option>
+            <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
+            <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
+            <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
+        `;
+        priceFilter.value = selectedValue;
+    }
+
+    // Update modal price if open
+    const modalPrice = document.getElementById('modal-price');
+    if (modalPrice && modalPrice.dataset.price) {
+        modalPrice.textContent = `${currentCurrency} ${(parseFloat(modalPrice.dataset.price) * exchangeRates[currentCurrency]).toFixed(2)}`;
+    }
 }
 
 // Filter Logic
@@ -1526,64 +1725,34 @@ const applyFilters = () => {
     }
 };
 
-// Live Search
-document.querySelectorAll('.search-input').forEach(input => {
-    input.addEventListener('input', (e) => {
-        searchQuery = e.target.value.trim().toLowerCase();
-        applyFilters();
-    });
-});
+// Open Product Details Modal
+function openProductModal(id, name, category, price, description, image) {
+    const modal = document.getElementById('product-details-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalName = document.getElementById('modal-name');
+    const modalCategory = document.getElementById('modal-category');
+    const modalPrice = document.getElementById('modal-price');
+    const modalDescription = document.getElementById('modal-description');
+    const addToCartButton = document.getElementById('modal-add-to-cart');
 
-// Category Filter
-document.querySelectorAll('.filter-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        selectedCategory = e.target.getAttribute('data-filter');
-        document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
-        e.target.classList.add('font-bold', 'text-yellow-600');
-        applyFilters();
-    });
-});
+    // Set modal content
+    modalImage.src = image;
+    modalImage.alt = name;
+    modalName.textContent = name;
+    modalCategory.textContent = `Category: ${category}`;
+    modalPrice.textContent = `${currentCurrency} ${(price * exchangeRates[currentCurrency]).toFixed(2)}`;
+    modalPrice.dataset.price = price; // Store base price for currency updates
+    modalDescription.textContent = description || 'No description available.';
 
-// Price Range Filter
-document.querySelector('.price-filter').addEventListener('change', (e) => {
-    selectedPriceRange = e.target.value;
-    applyFilters();
-});
+    // Show modal
+    modal.classList.remove('hidden');
 
-// Initialize Exchange Rates on Page Load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, initializing exchange rates');
-    fetchExchangeRates();
-});
-
-// Display Options
-document.querySelectorAll('.display-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
-        e.target.classList.add('active');
-
-        const grid = document.querySelector('.product-grid');
-        grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
-
-        if (e.target.classList.contains('list-view')) {
-            grid.classList.add('list-view');
-        } else {
-            const cols = e.target.getAttribute('data-cols');
-            grid.classList.add(`cols-${cols}`);
-        }
-    });
-});
-
-// Wishlist Button Toggle
-document.querySelectorAll('.wishlist-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        btn.classList.toggle('active');
-        const icon = btn.querySelector('i');
-        icon.classList.toggle('fas');
-        icon.classList.toggle('far');
-    });
-});
+    // Add to Cart button handler
+    addToCartButton.onclick = () => {
+        modal.classList.add('hidden');
+        addToCart(id);
+    };
+}
 
 // Add to Wishlist
 function addToWishlist(productId) {
@@ -1606,15 +1775,7 @@ function addToWishlist(productId) {
     })
     .then(response => {
         if (response.status === 401) {
-            Toastify({
-                text: "Please login to add any item to your wishlist.",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f87171",
-                stopOnFocus: true
-            }).showToast();
+            showToast("Please login to add any item to your wishlist.", "#f87171");
             setTimeout(() => {
                 window.location.href = '/user_login';
             }, 3000);
@@ -1627,15 +1788,7 @@ function addToWishlist(productId) {
     })
     .then(data => {
         if (data) {
-            Toastify({
-                text: data.message,
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#4ade80",
-                stopOnFocus: true
-            }).showToast();
+            showToast(data.message, "#4ade80");
             wishlistBtn.classList.toggle('active');
             icon.classList.toggle('fas');
             icon.classList.toggle('far');
@@ -1645,15 +1798,7 @@ function addToWishlist(productId) {
     .catch(error => {
         if (error.message !== 'Failed to update wishlist: Unauthorized') {
             console.error('Error managing wishlist:', error);
-            Toastify({
-                text: 'Failed to update wishlist: ' + error.message,
-                duration: 4000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f87171",
-                stopOnFocus: true
-            }).showToast();
+            showToast('Failed to update wishlist: ' + error.message, "#f87171");
         }
     });
 }
@@ -1671,15 +1816,7 @@ function addToCart(productId) {
     const confirmHandler = () => {
         const quantity = parseInt(quantityInput.value);
         if (isNaN(quantity) || quantity < 1) {
-            Toastify({
-                text: "Please enter a valid quantity (1 or more).",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f87171",
-                stopOnFocus: true
-            }).showToast();
+            showToast("Please enter a valid quantity (1 or more).", "#f87171");
             return;
         }
 
@@ -1693,15 +1830,7 @@ function addToCart(productId) {
         })
         .then(response => {
             if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
-                Toastify({
-                    text: response.status === 401 ? "Please login to add any item to your cart." : "Session expired. Please log in.",
-                    duration: response.status === 401 ? 3000 : 4000,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#f87171",
-                    stopOnFocus: true
-                }).showToast();
+                showToast(response.status === 401 ? "Please login to add any item to your cart." : "Session expired. Please log in.", "#f87171");
                 modal.classList.add('hidden');
                 setTimeout(() => {
                     window.location.href = '/user_login';
@@ -1715,30 +1844,14 @@ function addToCart(productId) {
         })
         .then(data => {
             if (data) {
-                Toastify({
-                    text: data.message,
-                    duration: 3000,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#4ade80",
-                    stopOnFocus: true
-                }).showToast();
+                showToast(data.message, "#4ade80");
                 modal.classList.add('hidden');
             }
         })
         .catch(error => {
             if (error.message !== 'Failed to add to cart: Unauthorized') {
                 console.error('Error adding to cart:', error);
-                Toastify({
-                    text: 'Failed to add to cart: ' + error.message,
-                    duration: 4000,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#f87171",
-                    stopOnFocus: true
-                }).showToast();
+                showToast('Failed to add to cart: ' + error.message, "#f87171");
             }
         })
         .finally(() => {
@@ -1757,82 +1870,251 @@ function addToCart(productId) {
     cancelButton.addEventListener('click', cancelHandler);
 }
 
-// Mobile Navbar Toggle
-document.getElementById('nav-toggler').addEventListener('click', () => {
-    const sidebar = document.getElementById('mobile-sidebar');
-    const icon = document.querySelector('#nav-toggler i');
-    sidebar.classList.toggle('open'); // Toggle the 'open' class
-    icon.classList.toggle('fa-bars');
-    icon.classList.toggle('fa-times');
-    icon.classList.add('animate-rotateToggle');
-    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-});
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing exchange rates and dropdowns');
 
-// Close Mobile Sidebar
-document.getElementById('close-sidebar').addEventListener('click', () => {
-    const sidebar = document.getElementById('mobile-sidebar');
-    const icon = document.querySelector('#nav-toggler i');
-    sidebar.classList.remove('open'); // Remove 'open' class
-    icon.classList.add('fa-bars');
-    icon.classList.remove('fa-times');
-    icon.classList.add('animate-rotateToggle');
-    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-});
+    // Initialize Exchange Rates
+    fetchExchangeRates();
 
-// Mobile Search Toggle
-document.getElementById('mobile-search-icon').addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent event bubbling
-    const searchBar = document.getElementById('mobile-search-bar');
-    if (searchBar) {
-        searchBar.classList.toggle('active');
-        searchBar.classList.toggle('hidden'); // Explicitly toggle hidden class
-        const icon = document.getElementById('mobile-search-icon');
-        icon.classList.add('animate-bounce');
-        setTimeout(() => icon.classList.remove('animate-bounce'), 200);
-        console.log('Mobile search bar toggled:', searchBar.classList.contains('active')); // Debugging
+    // Initialize Dropdowns
+    initializeMobileDropdowns();
+    initializeCategoryDropdowns();
+
+    // Currency Dropdowns
+    const mobileCurrencyButton = document.getElementById('mobile-country-btn');
+    const desktopCurrencyButton = document.getElementById('desktop-country-btn');
+    if (mobileCurrencyButton) {
+        mobileCurrencyButton.addEventListener('click', toggleCurrencyDropdown('mobile-country-btn', 'mobile-country-dropdown'));
     } else {
-        console.error('Mobile search bar element not found');
+        console.error('Mobile currency button not found');
     }
-});
+    if (desktopCurrencyButton) {
+        desktopCurrencyButton.addEventListener('click', toggleCurrencyDropdown('desktop-country-btn', 'desktop-country-dropdown'));
+    } else {
+        console.error('Desktop currency button not found');
+    }
 
-// Filter Toggler Button (Mobile)
-document.getElementById('filter-toggler').addEventListener('click', () => {
-    const sidebar = document.querySelector('.sidebar');
-    const button = document.getElementById('filter-toggler');
-    sidebar.classList.toggle('open');
-    button.classList.add('animate-pulse');
-    setTimeout(() => button.classList.remove('animate-pulse'), 300);
-});
+    // Close Currency Dropdowns on Outside Click
+    document.addEventListener('click', (e) => {
+        const dropdowns = [
+            { id: 'mobile-country-dropdown', buttonId: 'mobile-country-btn' },
+            { id: 'desktop-country-dropdown', buttonId: 'desktop-country-btn' }
+        ];
+        dropdowns.forEach(({ id, buttonId }) => {
+            const dropdown = document.getElementById(id);
+            const button = document.getElementById(buttonId);
+            if (dropdown && button && !dropdown.contains(e.target) && !button.contains(e.target)) {
+                if (!dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                    console.log(`${id} closed (outside click)`, 'Screen width:', window.innerWidth);
+                }
+            }
+        });
+    });
 
-// Filter Close Button (Mobile)
-document.getElementById('filter-close-btn').addEventListener('click', () => {
-    const sidebar = document.querySelector('.sidebar');
-    const icon = document.querySelector('#filter-close-btn i');
-    sidebar.classList.remove('open');
-    icon.classList.add('animate-rotateToggle');
-    setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-    applyFilters();
-});
+    // Currency Selection
+    document.querySelectorAll('.country-option').forEach(option => {
+        option.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const country = e.target.getAttribute('data-country');
+            const flag = e.target.getAttribute('data-flag');
+            currentCurrency = e.target.getAttribute('data-currency');
+            // Update both buttons
+            const buttons = [document.getElementById('mobile-country-btn'), document.getElementById('desktop-country-btn')];
+            buttons.forEach(button => {
+                if (button) {
+                    button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+                }
+            });
+            // Close both dropdowns
+            ['mobile-country-dropdown', 'desktop-country-dropdown'].forEach(id => {
+                const dropdown = document.getElementById(id);
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            // Persist currency to backend
+            try {
+                const response = await fetch('/api/set_currency', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currency: currentCurrency }),
+                    credentials: 'include'
+                });
+                if (!response.ok) throw new Error('Failed to set currency');
+                await fetchExchangeRates();
+                showToast(`Currency changed to ${currentCurrency}`, '#4ade80');
+            } catch (error) {
+                console.error('Error setting currency:', error);
+                showToast('Failed to change currency', '#f87171');
+                updatePrices(); // Update locally if backend fails
+            }
+        });
+    });
 
-// Close Filter Sidebar When Clicking Outside (Mobile)
-document.addEventListener('click', (e) => {
-    const sidebar = document.querySelector('.sidebar');
-    const toggler = document.getElementById('filter-toggler');
-    const closeBtn = document.getElementById('filter-close-btn');
-    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
-        sidebar.classList.remove('open');
+    // Mobile Sidebar and Dropdowns
+    document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
+    document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
+
+    // Mobile Search Toggle
+    document.getElementById('mobile-search-icon').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const searchBar = document.getElementById('mobile-search-bar');
+        if (searchBar) {
+            searchBar.classList.toggle('active');
+            searchBar.classList.toggle('hidden');
+            const icon = document.getElementById('mobile-search-icon');
+            icon.classList.add('animate-bounce');
+            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+            console.log('Mobile search bar toggled:', searchBar.classList.contains('active'));
+        } else {
+            console.error('Mobile search bar element not found');
+        }
+    });
+
+    // Live Search
+    document.querySelectorAll('.search-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim().toLowerCase();
+            applyFilters();
+        });
+    });
+
+    // Category Filter
+    document.querySelectorAll('.filter-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectedCategory = e.target.getAttribute('data-filter');
+            document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
+            e.target.classList.add('font-bold', 'text-yellow-600');
+            applyFilters();
+        });
+    });
+
+    // Price Range Filter
+    document.querySelector('.price-filter').addEventListener('change', (e) => {
+        selectedPriceRange = e.target.value;
         applyFilters();
-    }
-});
+    });
 
-// Floating Button Positioning and Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Adjust positions of floating buttons
+    // Display Options
+    document.querySelectorAll('.display-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const grid = document.querySelector('.product-grid');
+            grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
+
+            if (e.target.classList.contains('list-view')) {
+                grid.classList.add('list-view');
+            } else {
+                const cols = e.target.getAttribute('data-cols');
+                grid.classList.add(`cols-${cols}`);
+            }
+        });
+    });
+
+    // Wishlist Button Toggle
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+        });
+    });
+
+    // Filter Toggler Button (Mobile)
+    document.getElementById('filter-toggler').addEventListener('click', () => {
+        const sidebar = document.querySelector('.sidebar');
+        const button = document.getElementById('filter-toggler');
+        sidebar.classList.toggle('open');
+        button.classList.add('animate-pulse');
+        setTimeout(() => button.classList.remove('animate-pulse'), 300);
+    });
+
+    // Filter Close Button (Mobile)
+    document.getElementById('filter-close-btn').addEventListener('click', () => {
+        const sidebar = document.querySelector('.sidebar');
+        const icon = document.querySelector('#filter-close-btn i');
+        sidebar.classList.remove('open');
+        icon.classList.add('animate-rotateToggle');
+        setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+        applyFilters();
+    });
+
+    // Close Filter Sidebar When Clicking Outside (Mobile)
+    document.addEventListener('click', (e) => {
+        const sidebar = document.querySelector('.sidebar');
+        const toggler = document.getElementById('filter-toggler');
+        const closeBtn = document.getElementById('filter-close-btn');
+        if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
+            sidebar.classList.remove('open');
+            applyFilters();
+        }
+    });
+
+    // Event Delegation for Product Clicks
+    document.getElementById('product-grid').addEventListener('click', (e) => {
+        const target = e.target.closest('.product-image, .product-name');
+        if (!target) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const productCard = target.closest('.product-card');
+        if (!productCard) return;
+
+        const id = productCard.getAttribute('data-product-id');
+        const name = productCard.getAttribute('data-name');
+        const category = productCard.getAttribute('data-category');
+        const price = parseFloat(productCard.querySelector('.price').getAttribute('data-price'));
+        const description = productCard.getAttribute('data-description');
+        const image = productCard.querySelector('img').src;
+
+        openProductModal(id, name, category, price, description, image);
+    });
+
+    // Close Product Details Modal
+    const closeButton = document.getElementById('close-product-modal');
+    if (closeButton) {
+        const newCloseButton = closeButton.cloneNode(true);
+        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+        newCloseButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const modal = document.getElementById('product-details-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                console.log('Close button clicked: Modal closed');
+            } else {
+                console.error('Modal element not found');
+            }
+        });
+    }
+
+    // Close Modal on Outside Click
+    document.getElementById('product-details-modal').addEventListener('click', (e) => {
+        const modal = document.getElementById('product-details-modal');
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            console.log('Outside modal clicked: Modal closed');
+        }
+    });
+
+    // Keyboard Accessibility for Modal Close
+    document.getElementById('close-product-modal').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            document.getElementById('product-details-modal').classList.add('hidden');
+        }
+    });
+
+    // Floating Button Positioning
     function adjustFloatingButtonPositions() {
         const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
-        let aboutOffset = 16; // Default bottom for About Zira button
-
-        // Calculate offsets for buttons excluding WhatsApp (right-aligned)
+        let aboutOffset = 16;
         floatingButtons.forEach(button => {
             if (button !== document.querySelector('.discount-btn-container') &&
                 button !== document.querySelector('.whatsapp-btn-container')) {
@@ -1841,8 +2123,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 aboutOffset = Math.max(aboutOffset, buttonBottom + buttonHeight + 16);
             }
         });
-
-        // Set About Zira button position
         const aboutButton = document.querySelector('.discount-btn-container');
         if (aboutButton) {
             aboutButton.style.bottom = `${aboutOffset}px`;
@@ -1877,8 +2157,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.open(whatsappUrl, '_blank');
             console.log('WhatsApp button clicked');
         });
-    } else {
-        console.error('WhatsApp button not found');
     }
 
     // Contact Form Submission
@@ -1929,8 +2207,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 showFlashMessage(`Error: ${error.message}`, false);
             }
         });
-    } else {
-        console.error('Contact form not found');
     }
 
     // Keyboard Accessibility for Floating Buttons
@@ -1957,110 +2233,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
 
-// Open Product Details Modal
-function openProductModal(id, name, category, price, description, image) {
-    const modal = document.getElementById('product-details-modal');
-    const modalImage = document.getElementById('modal-image');
-    const modalName = document.getElementById('modal-name');
-    const modalCategory = document.getElementById('modal-category');
-    const modalPrice = document.getElementById('modal-price');
-    const modalDescription = document.getElementById('modal-description');
-    const addToCartButton = document.getElementById('modal-add-to-cart');
-
-    // Set modal content
-    modalImage.src = image;
-    modalImage.alt = name;
-    modalName.textContent = name;
-    modalCategory.textContent = `Category: ${category}`;
-    modalPrice.textContent = `${currentCurrency} ${(price * exchangeRates[currentCurrency]).toFixed(2)}`;
-    modalDescription.textContent = description || 'No description available.';
-
-    // Show modal
-    modal.classList.remove('hidden');
-
-    // Add to Cart button handler
-    addToCartButton.onclick = () => {
-        modal.classList.add('hidden');
-        addToCart(id);
-    };
-}
-
-// Event Delegation for Product Clicks
-document.getElementById('product-grid').addEventListener('click', (e) => {
-    const target = e.target.closest('.product-image, .product-name');
-    if (!target) return;
-
-    // Prevent default behavior and stop propagation
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Find the parent product card
-    const productCard = target.closest('.product-card');
-    if (!productCard) return;
-
-    // Extract product data from the product card
-    const id = productCard.getAttribute('data-product-id');
-    const name = productCard.getAttribute('data-name');
-    const category = productCard.getAttribute('data-category');
-    const price = parseFloat(productCard.querySelector('.price').getAttribute('data-price'));
-    const description = productCard.getAttribute('data-description');
-    const image = productCard.querySelector('img').src;
-
-    // Open the modal with the extracted data
-    openProductModal(id, name, category, price, description, image);
-});
-
-// Close Product Details Modal
-document.getElementById('close-product-modal').addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent click from bubbling to the modal container
-    const modal = document.getElementById('product-details-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        console.log('Close button clicked: Modal closed');
-    } else {
-        console.error('Modal element not found');
-    }
-}, { once: false }); // Ensure the listener is only added once
-
-// Remove existing listeners to prevent duplicates
-const closeButton = document.getElementById('close-product-modal');
-if (closeButton) {
-    // Clone the node to remove all existing listeners
-    const newCloseButton = closeButton.cloneNode(true);
-    closeButton.parentNode.replaceChild(newCloseButton, closeButton);
-
-    // Add new listener
-    newCloseButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const modal = document.getElementById('product-details-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-            console.log('Close button clicked: Modal closed');
-        } else {
-            console.error('Modal element not found');
-        }
+    // Observe for dynamically added categories (Mobile Sidebar)
+    const sidebarObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+                const newButtons = document.querySelectorAll('.sidebar-dropdown-toggle');
+                if (newButtons.length > 0) {
+                    console.log('New sidebar dropdown toggles detected, re-initializing');
+                    initializeMobileDropdowns();
+                }
+            }
+        });
     });
-} else {
-    console.error('Close button element not found');
-}
+    sidebarObserver.observe(document.getElementById('mobile-sidebar'), { childList: true, subtree: true });
 
-// Close Modal on Outside Click
-document.getElementById('product-details-modal').addEventListener('click', (e) => {
-    const modal = document.getElementById('product-details-modal');
-    if (e.target === modal) {
-        modal.classList.add('hidden');
-        console.log('Outside modal clicked: Modal closed');
-    }
-});
-
-// Keyboard Accessibility for Modal Close
-document.getElementById('close-product-modal').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        document.getElementById('product-details-modal').classList.add('hidden');
-    }
+    // Observe for dynamically added categories (Desktop Navbar)
+    const navbarObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+                const newGroups = document.querySelectorAll('#desktop-navbar .group');
+                if (newGroups.length > 0) {
+                    console.log('New category groups detected, re-initializing dropdowns');
+                    initializeCategoryDropdowns();
+                }
+            }
+        });
+    });
+    navbarObserver.observe(document.getElementById('desktop-navbar'), { childList: true, subtree: true });
 });
 
 // Initialize Prices and Filters

@@ -22,6 +22,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 from collections import namedtuple
+from sqlalchemy import and_
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 # Load environment variables
 load_dotenv()
@@ -162,7 +165,6 @@ def get_next_mid_month():
         next_month = today.replace(day=15)
     return next_month
 
-# Models
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -177,6 +179,40 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reset_token = db.Column(db.String(255))
     reset_token_expiry = db.Column(db.DateTime)
+
+class Category(db.Model):
+    __tablename__ = 'category'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    image = db.Column(db.String(255), nullable=True)
+    products = db.relationship('Product', back_populates='category')
+    subcategories = db.relationship('Subcategory', back_populates='category')
+    gifts = db.relationship('Gift', back_populates='category')
+
+class Subcategory(db.Model):
+    __tablename__ = 'subcategory'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    slug = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category = db.relationship('Category', back_populates='subcategories')
+    products = db.relationship('Product', back_populates='subcategory')
+    gifts = db.relationship('Gift', back_populates='subcategory')
+
+class Discount(db.Model):
+    __tablename__ = 'discount'
+    id = db.Column(db.Integer, primary_key=True)
+    percent = db.Column(db.Integer, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    product = db.relationship('Product', back_populates='discount', uselist=False)
+
+    def is_active(self):
+        now = datetime.utcnow().date()
+        return self.start_date <= now <= self.end_date
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -204,6 +240,86 @@ class Product(db.Model):
     def is_discounted(self):
         return self.discount is not None and self.discount.is_active()
 
+class Gift(db.Model):
+    __tablename__ = 'gift'
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100), nullable=False)
+    image = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    subcategory_id = db.Column(db.Integer, db.ForeignKey('subcategory.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)
+    discount = db.relationship('Discount', backref='gifts', uselist=False)
+    category = db.relationship('Category', back_populates='gifts')
+    subcategory = db.relationship('Subcategory', back_populates='gifts')
+
+    @property
+    def discounted_price(self):
+        if self.discount and self.discount.is_active():
+            discount_percent = self.discount.percent
+            return self.price * (1 - discount_percent / 100)
+        return None
+
+    @property
+    def is_discounted(self):
+        return self.discount is not None and self.discount.is_active()
+
+class Wishlist(db.Model):
+    __tablename__ = 'wishlist'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)  # No ForeignKey
+    product_type = db.Column(db.String(20), nullable=False, default='product')
+    product = db.relationship(
+        'Product',
+        backref='wishlist_items',
+        lazy=True,
+        foreign_keys=[product_id],
+        primaryjoin=and_(product_id == Product.id, product_type == 'product'),
+        viewonly=True,
+        overlaps="gift,wishlist_items"
+    )
+    gift = db.relationship(
+        'Gift',
+        backref='wishlist_items',
+        lazy=True,
+        foreign_keys=[product_id],
+        primaryjoin=and_(product_id == Gift.id, product_type == 'gift'),
+        viewonly=True,
+        overlaps="product,wishlist_items"
+    )
+
+class Cart(db.Model):
+    __tablename__ = 'cart'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)  # No ForeignKey
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    product_type = db.Column(db.String(20), nullable=False, default='product')
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    product = db.relationship(
+        'Product',
+        backref='cart_items',
+        lazy=True,
+        foreign_keys=[product_id],
+        primaryjoin=and_(product_id == Product.id, product_type == 'product'),
+        viewonly=True,
+        overlaps="cart_items,gift"
+    )
+    gift = db.relationship(
+        'Gift',
+        backref='cart_items',
+        lazy=True,
+        foreign_keys=[product_id],
+        primaryjoin=and_(product_id == Gift.id, product_type == 'gift'),
+        viewonly=True,
+        overlaps="cart_items,product"
+    )
+
 class Order(db.Model):
     __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
@@ -224,42 +340,10 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
+    price = db.Column(db.Float, nullable=False)
+    total = db.Column(db.Float, nullable=False)
     product = db.relationship('Product', backref='order_items', lazy=True)
-
-class Category(db.Model):
-    __tablename__ = 'category'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    slug = db.Column(db.String(100), unique=True, nullable=False)  # Changed to nullable=False
-    description = db.Column(db.Text, nullable=True)
-    image = db.Column(db.String(255), nullable=True)
-    products = db.relationship('Product', back_populates='category')
-    subcategories = db.relationship('Subcategory', back_populates='category')
-    gifts = db.relationship('Gift', back_populates='category')
     
-class Subcategory(db.Model):
-    __tablename__ = 'subcategory'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    slug = db.Column(db.String(100), nullable=True)
-    description = db.Column(db.Text, nullable=True)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    category = db.relationship('Category', back_populates='subcategories')
-    products = db.relationship('Product', back_populates='subcategory')
-    gifts = db.relationship('Gift', back_populates='subcategory')
-
-class Discount(db.Model):
-    __tablename__ = 'discount'
-    id = db.Column(db.Integer, primary_key=True)
-    percent = db.Column(db.Integer, nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
-    product = db.relationship('Product', back_populates='discount', uselist=False)
-
-    def is_active(self):
-        now = datetime.utcnow().date()
-        return self.start_date <= now <= self.end_date
-
 class Artisan(db.Model):
     __tablename__ = 'artisan'
     id = db.Column(db.Integer, primary_key=True)
@@ -284,22 +368,6 @@ class Review(db.Model):
     comment = db.Column(db.Text)
     status = db.Column(db.String(20), default='Pending')
 
-class Wishlist(db.Model):
-    __tablename__ = 'wishlist'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    product = db.relationship('Product', backref='wishlist_items', lazy=True)
-
-class Cart(db.Model):
-    __tablename__ = 'cart'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False, default=1)
-    added_at = db.Column(db.DateTime, default=datetime.utcnow)
-    product = db.relationship('Product', backref='cart_items', lazy=True)
-
 class ExchangeRate(db.Model):
     __tablename__ = 'exchange_rate'
     id = db.Column(db.Integer, primary_key=True)
@@ -311,41 +379,15 @@ class ExchangeRate(db.Model):
     depletion_timestamp = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-class Gift(db.Model):
-    __tablename__ = 'gift'
-    id = db.Column(db.Integer, primary_key=True)
-    product_name = db.Column(db.String(100), nullable=False)
-    image = db.Column(db.String(255), nullable=True)
-    description = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    subcategory_id = db.Column(db.Integer, db.ForeignKey('subcategory.id'), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    category = db.relationship('Category', back_populates='gifts')
-    subcategory = db.relationship('Subcategory', back_populates='gifts')
-    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)
-    discount = db.relationship('Discount', backref='gifts', uselist=False)
-
-    @property
-    def discounted_price(self):
-        if self.discount and self.discount.is_active():
-            discount_percent = self.discount.percent
-            return self.price * (1 - discount_percent / 100)
-        return None
-
-    @property
-    def is_discounted(self):
-        return self.discount is not None and self.discount.is_active()
-
-
     
     
 @app.route('/')
 def index():
-    # Get currency from session, default to KES (or USD if preferred)
-    current_currency = session.get('currency', 'KES')  # Changed default to KES for consistency with your site’s Kenyan focus
+    # Get currency from session, default to KES
+    current_currency = session.get('currency', 'KES')
+
+    # Fetch categories
+    categories = Category.query.all()
 
     stories = Story.query.all()
     latest_products = Product.query.order_by(Product.created_at.desc()).limit(4).all()
@@ -367,10 +409,11 @@ def index():
         discount_products=discount_products,
         popular_products=popular_products,
         today=datetime.utcnow().date(),
-        current_currency=current_currency,  # Pass the session currency
-        stories=stories
+        current_currency=current_currency,
+        stories=stories,
+        categories=categories  # Add categories to the template context
     )
-
+    
 @app.route('/set_currency', methods=['POST'])
 def set_currency():
     currency = request.json.get('currency')
@@ -1375,22 +1418,43 @@ def get_orders():
         orders_data = []
         for order in orders:
             # Fetch user details
-            user = db.session.get(User, order.user_id)  # Use session.get
+            user = db.session.get(User, order.user_id)
             customer_name = order.customer_name or (user.name if user else 'Unknown')
             customer_number = order.customer_number or (user.phone_number if user and user.phone_number else 'N/A')
             location = user.address if user and hasattr(user, 'address') and isinstance(user.address, dict) else {}
 
-            # Fetch order items with joined Product data
-            order_items = db.session.query(OrderItem).filter_by(order_id=order.id).join(Product, isouter=True).all()
+            # Fetch order items
+            order_items = db.session.query(OrderItem).filter_by(order_id=order.id).all()
             items_data = []
             for item in order_items:
-                product = item.product
-                items_data.append({
-                    'product_id': item.product_id,
-                    'product_name': product.title if product else 'Deleted Product',  # Use title
-                    'quantity': item.quantity,
-                    'image': product.image if product and product.image else 'default.jpg'
-                })
+                # Try Product first
+                product = Product.query.get(item.product_id)
+                if product:
+                    item_data = {
+                        'product_id': item.product_id,
+                        'product_name': product.title,
+                        'quantity': item.quantity,
+                        'image': product.image if product.image else 'default.jpg'
+                    }
+                else:
+                    # Try Gift if Product not found
+                    gift = Gift.query.get(item.product_id)
+                    if gift:
+                        item_data = {
+                            'product_id': item.product_id,
+                            'product_name': gift.product_name,
+                            'quantity': item.quantity,
+                            'image': gift.image if gift.image else 'default.jpg'
+                        }
+                    else:
+                        # Fallback for deleted items
+                        item_data = {
+                            'product_id': item.product_id,
+                            'product_name': 'Deleted Item',
+                            'quantity': item.quantity,
+                            'image': 'default.jpg'
+                        }
+                items_data.append(item_data)
 
             orders_data.append({
                 'id': order.id,
@@ -1419,7 +1483,6 @@ def get_orders():
     except Exception as e:
         app.logger.error(f"Unexpected error fetching orders: {str(e)}")
         return jsonify({'error': 'Failed to fetch orders'}), 500
-
 
 @app.route('/api/orders/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_order(id):
@@ -2509,74 +2572,127 @@ def cancel_order(id):
         return jsonify({'error': 'Internal server error'}), 500
     
 @app.route('/api/orders', methods=['POST'])
-def create_order():
-    if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    user = User.query.filter_by(email=session['user']).first()
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    user_id = user.id
-    data = request.get_json()
-    
-    required_fields = ['name', 'phone_number', 'address', 'payment_method']
-    missing_fields = [field for field in required_fields if field not in data or not data[field]]
-    if missing_fields:
-        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
-    if data['payment_method'] not in ['immediate', 'delivery']:
-        return jsonify({'error': 'Invalid payment method'}), 400
-    if data['payment_method'] == 'immediate' and not data.get('message_code'):
-        return jsonify({'error': 'Message code required for immediate payment'}), 400
-    
-    # Fetch cart items with products and discounts
-    cart_items = Cart.query.filter_by(user_id=user_id).options(
-        joinedload(Cart.product).joinedload(Product.discount)
-    ).all()
-    if not cart_items:
-        return jsonify({'error': 'Cart is empty'}), 400
-    
-    total = 0
-    for item in cart_items:
-        product = item.product
-        if not product:
-            return jsonify({'error': f'Product ID {item.product_id} not found'}), 404
-        # Calculate discounted price in KES
-        if product.discount and product.discount.percent > 0:
-            price = product.price * (1 - product.discount.percent / 100)
-        else:
-            price = product.price
-        total += price * item.quantity
-        logging.debug(f"Cart item: product_id={item.product_id}, original_price={product.price}, discounted_price={price}, quantity={item.quantity}")
-    
-    order = Order(
-        user_id=user_id,
-        total=total,
-        status='Pending',
-        payment_method=data['payment_method'],
-        message_code=data.get('message_code')
-    )
-    db.session.add(order)
-    db.session.flush()
-    
-    for item in cart_items:
-        product = item.product
-        order_item = OrderItem(
-            order_id=order.id,
-            product_id=item.product_id,
-            quantity=item.quantity
+def place_order():
+    """
+    Create a new order from the user's cart.
+    Expects JSON payload with name, phone_number, address, payment_method, and optional message_code.
+    Handles both Product and Gift items in the cart.
+    """
+    try:
+        # Check if user is authenticated
+        if 'user' not in session:
+            logging.debug('Unauthorized: No user in session')
+            return jsonify({'error': 'Unauthorized', 'redirect': '/login'}), 401
+
+        # Get user from session
+        user_email = session['user']
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            logging.debug(f'User not found: {user_email}')
+            return jsonify({'error': 'User not found'}), 404
+
+        # Get JSON payload
+        data = request.get_json()
+        if not data:
+            logging.debug('No data provided in request')
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Validate required fields
+        required_fields = ['name', 'phone_number', 'address', 'payment_method']
+        if not all(field in data for field in required_fields):
+            logging.debug(f'Missing required fields: {data}')
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Validate address fields
+        address = data.get('address', {})
+        if not all(key in address for key in ['street', 'city', 'country', 'postal_code']):
+            logging.debug(f'Invalid address data: {address}')
+            return jsonify({'error': 'Invalid address data'}), 400
+
+        # Validate payment method
+        payment_method = data.get('payment_method')
+        if payment_method not in ['delivery', 'immediate']:
+            logging.debug(f'Invalid payment_method: {payment_method}')
+            return jsonify({'error': 'Invalid payment method'}), 400
+
+        # Validate message_code for immediate payment
+        if payment_method == 'immediate' and not data.get('message_code'):
+            logging.debug('Missing message_code for immediate payment')
+            return jsonify({'error': 'Message code required for immediate payment'}), 400
+
+        # Get cart items
+        cart_items = Cart.query.filter_by(user_id=user.id).all()
+        if not cart_items:
+            logging.debug(f'No items in cart for user: {user_email}')
+            return jsonify({'error': 'Cart is empty'}), 400
+
+        # Validate items and calculate total
+        order_items = []
+        total = 0
+        for item in cart_items:
+            price = None
+            if hasattr(item, 'product_type') and item.product_type == 'gift':
+                product = Gift.query.get(item.product_id)
+                if not product:
+                    logging.warning(f'Gift not found: ID={item.product_id}')
+                    return jsonify({'error': f'Gift ID {item.product_id} not found'}), 404
+                price = float(product.discounted_price or product.price)
+            else:
+                product = Product.query.get(item.product_id)
+                if not product:
+                    logging.warning(f'Product not found: ID={item.product_id}')
+                    return jsonify({'error': f'Product ID {item.product_id} not found'}), 404
+                price = float(product.discounted_price or product.price)
+
+            total += price * item.quantity
+            order_items.append({
+                'product_id': item.product_id,  # Store Gift ID as product_id in OrderItem
+                'quantity': item.quantity,
+                'price': price
+            })
+
+        # Create order
+        order = Order(
+            user_id=user.id,
+            total=float(total),
+            status='Pending',
+            customer_status='Active',
+            customer_name=data['name'],
+            customer_number=data['phone_number'],
+            payment_method=payment_method,
+            message_code=data.get('message_code') if payment_method == 'immediate' else None
         )
-        db.session.add(order_item)
-    
-    # Clear cart
-    Cart.query.filter_by(user_id=user_id).delete()
-    
-    # Update user details
-    user.address = data['address']
-    user.name = data['name']
-    user.phone_number = data['phone_number']
-    
-    db.session.commit()
-    logging.debug(f"Order created: order_id={order.id}, user_id={user_id}, total={total}, payment_method={data['payment_method']}")
-    return jsonify({'message': 'Order placed successfully', 'order_id': order.id}), 201
+        db.session.add(order)
+        db.session.flush()  # Ensure order.id is available
+
+        # Add order items
+        for item in order_items:
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item['product_id'],
+                quantity=item['quantity'],
+                price=item['price'],
+                total=item['price'] * item['quantity']
+            )
+            db.session.add(order_item)
+
+        # Clear cart
+        Cart.query.filter_by(user_id=user.id).delete()
+
+        # Commit transaction
+        db.session.commit()
+        logging.debug(f'Order created: ID={order.id}, User={user_email}')
+        return jsonify({'message': 'Order placed successfully', 'order_id': order.id}), 201
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logging.error(f"Database error in POST /api/orders: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Database error', 'details': str(e)}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error in POST /api/orders: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
 
 @app.route('/user_login', methods=['GET', 'POST'])
 def user_login():
@@ -2722,23 +2838,112 @@ def account():
         user_email = user_email['email']
         session['user'] = user_email  # Update session to store email string
     
-    user = User.query.filter_by(email=user_email).first()
-    if not user:
-        session.pop('user', None)
-        return redirect(url_for('user_login'))
-    
-    wishlist_items = Wishlist.query.filter_by(user_id=user.id).join(Product).all()
-    cart_items = Cart.query.filter_by(user_id=user.id).join(Product).all()
-    orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).all()
-    
-    return render_template('account.html',
-                          user=user,
-                          wishlist_items=wishlist_items,
-                          cart_items=cart_items,
-                          orders=orders,
-                          address=user.address or {},
-                          current_currency='USD')
-    
+    try:
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            session.pop('user', None)
+            return redirect(url_for('user_login'))
+        
+        # Fetch wishlist items
+        wishlist_items = Wishlist.query.filter_by(user_id=user.id).all()
+        wishlist_data = []
+        for item in wishlist_items:
+            item_data = {
+                'id': item.id,
+                'product_id': item.product_id,
+                'product_type': item.product_type
+            }
+            if item.product_type == 'product':
+                product = db.session.get(Product, item.product_id)
+                if product:
+                    item_data.update({
+                        'name': product.title,
+                        'price': float(product.price),
+                        'image': product.image,
+                        'discounted_price': product.discounted_price,
+                        'is_discounted': product.is_discounted
+                    })
+                else:
+                    logging.warning(f"Product not found: ID={item.product_id}")
+                    continue
+            elif item.product_type == 'gift':
+                gift = db.session.get(Gift, item.product_id)
+                if gift:
+                    item_data.update({
+                        'name': gift.product_name,
+                        'price': float(gift.price),
+                        'image': gift.image,
+                        'discounted_price': gift.discounted_price,
+                        'is_discounted': gift.is_discounted
+                    })
+                else:
+                    logging.warning(f"Gift not found: ID={item.product_id}")
+                    continue
+            wishlist_data.append(item_data)
+
+        # Fetch cart items
+        cart_items = Cart.query.filter_by(user_id=user.id).all()
+        cart_data = []
+        for item in cart_items:
+            item_data = {
+                'id': item.id,
+                'product_id': item.product_id,
+                'quantity': item.quantity,
+                'product_type': item.product_type
+            }
+            if item.product_type == 'product':
+                product = db.session.get(Product, item.product_id)
+                if product:
+                    item_data.update({
+                        'name': product.title,
+                        'price': float(product.price),
+                        'image': product.image,
+                        'discounted_price': product.discounted_price,
+                        'is_discounted': product.is_discounted,
+                        'total_price': round(float(product.discounted_price or product.price) * item.quantity, 2)
+                    })
+                else:
+                    logging.warning(f"Product not found: ID={item.product_id}")
+                    continue
+            elif item.product_type == 'gift':
+                gift = db.session.get(Gift, item.product_id)
+                if gift:
+                    item_data.update({
+                        'name': gift.product_name,
+                        'price': float(gift.price),
+                        'image': gift.image,
+                        'discounted_price': gift.discounted_price,
+                        'is_discounted': gift.is_discounted,
+                        'total_price': round(float(gift.discounted_price or gift.price) * item.quantity, 2)
+                    })
+                else:
+                    logging.warning(f"Gift not found: ID={item.product_id}")
+                    continue
+            cart_data.append(item_data)
+
+        # Fetch orders
+        orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).all()
+
+        # Fetch categories
+        categories = Category.query.all()
+
+        return render_template(
+            'account.html',
+            user=user,
+            wishlist_items=wishlist_data,
+            cart_items=cart_data,
+            orders=orders,
+            address=user.address or {},
+            current_currency='USD',
+            categories=categories
+        )
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database error in /account: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Database error', 'details': str(e)}), 500
+    except Exception as e:
+        logging.error(f"Unexpected error in /account: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/our_products')
 def our_products():
@@ -2929,7 +3134,6 @@ def handle_wishlist():
     user_id = user.id
 
     if request.method == 'GET':
-        # Retrieve wishlist items
         try:
             wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
             response = []
@@ -2940,7 +3144,7 @@ def handle_wishlist():
                     'product_type': item.product_type
                 }
                 if item.product_type == 'product':
-                    product = Product.query.get(item.product_id)
+                    product = item.product
                     if product:
                         item_data.update({
                             'name': product.title,
@@ -2948,9 +3152,10 @@ def handle_wishlist():
                             'image': product.image
                         })
                     else:
-                        continue  # Skip invalid product
+                        logging.warning(f"Product not found: ID={item.product_id}")
+                        continue
                 elif item.product_type == 'gift':
-                    gift = Gift.query.get(item.product_id)
+                    gift = item.gift
                     if gift:
                         item_data.update({
                             'name': gift.product_name,
@@ -2958,18 +3163,18 @@ def handle_wishlist():
                             'image': gift.image
                         })
                     else:
-                        continue  # Skip invalid gift
+                        logging.warning(f"Gift not found: ID={item.product_id}")
+                        continue
                 response.append(item_data)
             return jsonify(response)
         except SQLAlchemyError as e:
-            logging.error(f"Database error in GET /api/wishlist: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in GET /api/wishlist: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
-            logging.error(f"Unexpected error in GET /api/wishlist: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in GET /api/wishlist: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     elif request.method == 'POST':
-        # Add item to wishlist
         try:
             data = request.get_json()
             product_id = data.get('product_id')
@@ -2978,21 +3183,23 @@ def handle_wishlist():
             # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(product_id, int):
+                return jsonify({'error': 'Product ID must be an integer'}), 400
             if product_type not in ['product', 'gift']:
                 return jsonify({'error': 'Invalid product type'}), 400
 
             # Get item based on type
             if product_type == 'product':
-                item = Product.query.get(product_id)
+                item = db.session.get(Product, product_id)
                 if not item:
                     return jsonify({'error': 'Product not found'}), 404
             else:  # gift
-                item = Gift.query.get(product_id)
+                item = db.session.get(Gift, product_id)
                 if not item:
                     return jsonify({'error': 'Gift not found'}), 404
                 # Check availability
                 today = datetime.utcnow().date()
-                if item.start_date > today or item.end_date < today:
+                if not item.start_date or not item.end_date or item.start_date > today or item.end_date < today:
                     return jsonify({'error': 'Gift is not available at this time'}), 400
 
             # Check if item is already in wishlist
@@ -3014,15 +3221,13 @@ def handle_wishlist():
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in POST /api/wishlist: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in POST /api/wishlist: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in POST /api/wishlist: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in POST /api/wishlist: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
         
-        
-
 @app.route('/api/wishlist/<int:id>', methods=['DELETE'])
 def delete_wishlist_item(id):
     if 'user' not in session:
@@ -3036,6 +3241,7 @@ def delete_wishlist_item(id):
     db.session.delete(wishlist_item)
     db.session.commit()
     return jsonify({'message': 'Product removed from wishlist'})
+
 
 @app.route('/api/cart', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def handle_cart():
@@ -3051,7 +3257,6 @@ def handle_cart():
     user_id = user.id
 
     if request.method == 'GET':
-        # Retrieve cart items
         try:
             cart_items = Cart.query.filter_by(user_id=user_id).all()
             response = []
@@ -3063,38 +3268,43 @@ def handle_cart():
                     'product_type': item.product_type
                 }
                 if item.product_type == 'product':
-                    product = Product.query.get(item.product_id)
+                    product = db.session.get(Product, item.product_id)
                     if product:
                         item_data.update({
                             'name': product.title,
-                            'price': product.price,
+                            'price': float(product.price),
+                            'discounted_price': float(product.discounted_price) if product.is_discounted else None,
+                            'is_discounted': product.is_discounted,
                             'image': product.image,
-                            'total_price': round(product.price * item.quantity, 2)
+                            'total_price': float(round((product.discounted_price or product.price) * item.quantity, 2))
                         })
                     else:
-                        continue  # Skip invalid product
+                        logging.warning(f"Product not found: ID={item.product_id}")
+                        continue
                 elif item.product_type == 'gift':
-                    gift = Gift.query.get(item.product_id)
+                    gift = db.session.get(Gift, item.product_id)
                     if gift:
                         item_data.update({
                             'name': gift.product_name,
-                            'price': gift.price,
+                            'price': float(gift.price),
+                            'discounted_price': float(gift.discounted_price) if gift.is_discounted else None,
+                            'is_discounted': gift.is_discounted,
                             'image': gift.image,
-                            'total_price': round(gift.price * item.quantity, 2)
+                            'total_price': float(round((gift.discounted_price or gift.price) * item.quantity, 2))
                         })
                     else:
-                        continue  # Skip invalid gift
+                        logging.warning(f"Gift not found: ID={item.product_id}")
+                        continue
                 response.append(item_data)
             return jsonify(response)
         except SQLAlchemyError as e:
-            logging.error(f"Database error in GET /api/cart: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in GET /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
-            logging.error(f"Unexpected error in GET /api/cart: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in GET /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     elif request.method == 'POST':
-        # Add or update item in cart
         try:
             data = request.get_json()
             product_id = data.get('product_id')
@@ -3104,6 +3314,8 @@ def handle_cart():
             # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(product_id, int):
+                return jsonify({'error': 'Product ID must be an integer'}), 400
             if not isinstance(quantity, int) or quantity < 1:
                 return jsonify({'error': 'Quantity must be a positive integer'}), 400
             if product_type not in ['product', 'gift']:
@@ -3111,19 +3323,19 @@ def handle_cart():
 
             # Get item based on type
             if product_type == 'product':
-                item = Product.query.get(product_id)
+                item = db.session.get(Product, product_id)
                 if not item:
-                    return jsonify({'error': 'Product not found'}), 404
+                    return jsonify({'error': f'Product ID {product_id} not found'}), 404
                 # Check stock if applicable
                 if hasattr(item, 'stock') and item.stock < quantity:
-                    return jsonify({'error': f'Only {item.stock} items available in stock'}), 400
+                    return jsonify({'error': f'Only {item.stock} items available'}), 400
             else:  # gift
-                item = Gift.query.get(product_id)
+                item = db.session.get(Gift, product_id)
                 if not item:
-                    return jsonify({'error': 'Gift not found'}), 404
-                # Check availability based on gift dates
+                    return jsonify({'error': f'Gift ID {product_id} not found'}), 404
+                # Check availability
                 today = datetime.utcnow().date()
-                if item.start_date > today or item.end_date < today:
+                if not item.start_date or not item.end_date or item.start_date > today or item.end_date < today:
                     return jsonify({'error': 'Gift is not available at this time'}), 400
 
             cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id, product_type=product_type).first()
@@ -3150,15 +3362,14 @@ def handle_cart():
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in POST /api/cart: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in POST /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in POST /api/cart: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in POST /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     elif request.method == 'PUT':
-        # Update quantity of an existing cart item
         try:
             data = request.get_json()
             product_id = data.get('product_id')
@@ -3168,6 +3379,8 @@ def handle_cart():
             # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(product_id, int):
+                return jsonify({'error': 'Product ID must be an integer'}), 400
             if not isinstance(quantity, int) or quantity < 1:
                 return jsonify({'error': 'Quantity must be a positive integer'}), 400
             if product_type not in ['product', 'gift']:
@@ -3179,19 +3392,19 @@ def handle_cart():
 
             # Get item based on type
             if product_type == 'product':
-                item = Product.query.get(product_id)
+                item = db.session.get(Product, product_id)
                 if not item:
-                    return jsonify({'error': 'Product not found'}), 404
+                    return jsonify({'error': f'Product ID {product_id} not found'}), 404
                 # Check stock if applicable
                 if hasattr(item, 'stock') and item.stock < quantity:
-                    return jsonify({'error': f'Only {item.stock} items available in stock'}), 400
+                    return jsonify({'error': f'Only {item.stock} items available'}), 400
             else:  # gift
-                item = Gift.query.get(product_id)
+                item = db.session.get(Gift, product_id)
                 if not item:
-                    return jsonify({'error': 'Gift not found'}), 404
+                    return jsonify({'error': f'Gift ID {product_id} not found'}), 404
                 # Check availability
                 today = datetime.utcnow().date()
-                if item.start_date > today or item.end_date < today:
+                if not item.start_date or not item.end_date or item.start_date > today or item.end_date < today:
                     return jsonify({'error': 'Gift is not available at this time'}), 400
 
             cart_item.quantity = quantity
@@ -3205,22 +3418,24 @@ def handle_cart():
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in PUT /api/cart: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in PUT /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in PUT /api/cart: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in PUT /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     elif request.method == 'DELETE':
-        # Remove item from cart
         try:
             data = request.get_json()
             product_id = data.get('product_id')
             product_type = data.get('product_type', 'product')
 
+            # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if not isinstance(product_id, int):
+                return jsonify({'error': 'Product ID must be an integer'}), 400
             if product_type not in ['product', 'gift']:
                 return jsonify({'error': 'Invalid product type'}), 400
 
@@ -3238,12 +3453,12 @@ def handle_cart():
 
         except SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in DELETE /api/cart: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            logging.error(f"Database error in DELETE /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Database error', 'details': str(e)}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error in DELETE /api/cart: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            logging.error(f"Unexpected error in DELETE /api/cart: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/cart/<int:id>', methods=['DELETE'])
 def delete_cart_item(id):

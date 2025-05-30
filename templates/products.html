@@ -164,9 +164,10 @@ body, .navbar {
     border-radius: 8px;
 }
 .navbar-item:hover, .navbar-item.active {
-    color: #1f2937; /* Tailwind gray-900 */
+    color: #d97706; /* Tailwind yellow-600 */
     transform: scale(1.05);
     background-color: rgba(0, 0, 0, 0.05);
+
 }
 .navbar-item::after {
     content: '';
@@ -176,8 +177,9 @@ body, .navbar {
     transform: translateX(-50%);
     width: 0;
     height: 3px;
-    background-color: #1f2937;
+    background-color: #d97706; /* Tailwind yellow-600 */
     transition: width 0.3s ease;
+
 }
 .navbar-item:hover::after, .navbar-item.active::after {
     width: 50%;
@@ -195,6 +197,13 @@ body, .navbar {
     border-radius: 0.375rem;
     padding: 0.5rem 2.5rem 0.5rem 0.75rem;
     outline: none;
+}
+/* Dropdown Icon Animation */
+.navbar-item .fa-chevron-down {
+    transition: transform 0.2s ease;
+}
+.group:hover .navbar-item .fa-chevron-down {
+    transform: rotate(180deg);
 }
 .search-container .fa-search {
     position: absolute;
@@ -864,6 +873,79 @@ body, .navbar {
         height: 64px;
     }
 }
+/* Mobile Sidebar Dropdown */
+.sidebar-dropdown {
+    display: block !important;
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    overflow-y: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease, visibility 0.4s ease;
+    background-color: #f3f4f6;
+    padding-left: 1rem;
+}
+.sidebar-dropdown.active {
+    visibility: visible;
+    opacity: 1;
+    max-height: 500px;
+    padding: 0.5rem 0;
+}
+.sidebar-dropdown a {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+    border-left: 2px solid transparent;
+}
+.sidebar-dropdown a:hover {
+    color: #d97706;
+    border-left-color: #d97706;
+}
+
+/* Desktop Navbar Dropdown */
+.dropdown-menu {
+    min-width: 200px;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    background: #ffffff;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+.group:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.dropdown-item {
+    font-size: 0.875rem;
+    color: #4b5563;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #d97706;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+    .sidebar-dropdown {
+        display: block !important;
+    }
+    .sidebar-dropdown.active {
+        max-height: 600px;
+    }
+    .sidebar-dropdown a {
+        font-size: 0.85rem;
+    }
+}
 </style>
    
 </head>
@@ -903,59 +985,105 @@ body, .navbar {
         </div>
 
         <!-- Desktop Navbar -->
-        <div class="hidden md:flex items-center justify-between w-full">
-            <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
-            <div class="flex space-x-6">
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('index') }}" class="navbar-item text-gray-700">Home</a>
-                </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700">Products</a>
-                </div>
-                <div class="relative nav-hover">
-                    <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700 active">Special Discount</a>
-                </div>
+        <!-- Desktop Navbar -->
+<div class="hidden md:flex items-center justify-between w-full">
+    <img loading="lazy" src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Artifacts Logo" class="h-12 navbar-logo">
+    <div class="flex space-x-6">
+        <div class="relative nav-hover">
+            <a href="{{ url_for('index') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'index' }}">Home</a>
+        </div>
+        <div class="relative nav-hover">
+            <a href="{{ url_for('our_products') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'our_products' }}">Products</a>
+        </div>
+        <div class="relative nav-hover">
+            <a href="{{ url_for('discounted_artefacts') }}" class="navbar-item text-gray-700 {{ 'active' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+        </div>
+        <!-- Dynamic Categories -->
+        {% for category in categories %}
+        <div class="relative nav-hover group">
+            <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+               class="navbar-item text-gray-700 {{ 'active' if selected_category and selected_category.slug == category.slug }} flex items-center">
+                {{ category.name }}
+                {% if category.subcategories %}
+                <i class="fas fa-chevron-down text-sm ml-1 transition-transform duration-200 group-hover:rotate-180 hidden md:inline-block"></i>
+                {% endif %}
+            </a>
+            {% if category.subcategories %}
+            <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-20 min-w-[200px]">
+                {% for subcategory in category.subcategories %}
+                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                   class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
+                    {{ subcategory.name }}
+                </a>
+                {% endfor %}
             </div>
-            <!-- Search and Icons -->
-            <div class="flex items-center space-x-4 relative">
-                <div class="search-container">
-                    <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
-                    <i class="fas fa-search"></i>
-                </div>
-                <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900" aria-label="View wishlist"></a>
-                <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900" aria-label="View cart"></a>
-                <!-- Desktop Currency Button -->
-                <div id="country-btn-container" class="relative z-10">
-                    <button id="country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
-                        <span class="floating-text" style="font-size: 13px;">Currency</span>
-                        <span class="flag">🇺🇸</span> USA
-                    </button>
-                    <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1000">
-                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
-                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
-                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
-                        <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
-                    </div>
-                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Search and Icons -->
+    <div class="flex items-center space-x-4 relative">
+        <div class="search-container">
+            <input type="text" placeholder="Search artifacts & cultural items" class="border rounded px-3 py-1 search-input">
+            <i class="fas fa-search"></i>
+        </div>
+        <a href="{{ url_for('account') }}" class="fas fa-heart text-gray-700 hover:text-gray-900" aria-label="View wishlist"></a>
+        <a href="{{ url_for('account') }}" class="fas fa-shopping-cart text-gray-700 hover:text-gray-900" aria-label="View cart"></a>
+        <!-- Desktop Currency Button -->
+        <div id="country-btn-container" class="relative z-10">
+            <button id="country-btn" class="bg-white text-gray-700 px-3 py-1 rounded-full shadow-lg hover:bg-gray-100 transition flex items-center text-sm" aria-label="Select currency">
+                <span class="floating-text" style="font-size: 13px;">Currency</span>
+                <span class="flag">🇺🇸</span> USA
+            </button>
+            <div id="country-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-2 w-32 mt-2 right-0 z-1000">
+                <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="USA" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USA</a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Germany" data-currency="EUR" data-flag="🇩🇪"><span class="text-sm mr-2">🇩🇪</span>Germany</a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="UK" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>UK</a>
+                <a href="#" class="block py-1 hover:text-gray-900 country-option text-sm" data-country="Kenya" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>Kenya</a>
             </div>
         </div>
+    </div>
+</div>
     </div>
 </nav>
 
 <!-- Mobile Sidebar -->
-    <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-60">
-        <div class="p-4 relative">
-            <button id="close-sidebar" class="text-2xl" aria-label="Close mobile sidebar">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="space-y-2">
-                <a href="{{ url_for('index') }}" class="mobile-sidebar-item" style="margin-top:100px">Home</a>
-                <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item">Products</a>
-                <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item active">Special Discount</a>
-                <a href="{{ url_for('account') }}" class="mobile-sidebar-item">My Account</a>
+   <!-- Mobile Sidebar -->
+<div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-60">
+    <div class="p-4 relative">
+        <button id="close-sidebar" class="text-2xl" aria-label="Close mobile sidebar">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="space-y-2" style="margin-top: 40px;">
+            <a href="{{ url_for('index') }}" class="mobile-sidebar-item {{ 'font-bold text-yellow-600' if request.endpoint == 'index' }}">Home</a>
+            <a href="{{ url_for('our_products') }}" class="mobile-sidebar-item {{ 'font-bold text-yellow-600' if request.endpoint == 'our_products' }}">Products</a>
+            <a href="{{ url_for('discounted_artefacts') }}" class="mobile-sidebar-item {{ 'font-bold text-yellow-600' if request.endpoint == 'discounted_artefacts' }}">Special Discount</a>
+            <a href="{{ url_for('account') }}" class="mobile-sidebar-item">My Account</a>
+            <!-- Dynamic Categories -->
+            {% for category in categories %}
+            <div class="relative">
+                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                   class="mobile-sidebar-item text-gray-700 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug }}">
+                    {{ category.name }}
+                </a>
+                {% if category.subcategories %}
+                <button class="sidebar-dropdown-toggle absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-700">
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+                <div class="sidebar-dropdown hidden pl-4 space-y-2">
+                    {% for subcategory in category.subcategories %}
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                       class="block text-gray-600 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
+                        {{ subcategory.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
+            {% endfor %}
         </div>
     </div>
+</div>
 
     <!-- Hero Section -->
     <section class="relative h-96">
@@ -1083,14 +1211,16 @@ body, .navbar {
                     </div>
                     <!-- Category Filter -->
                     <div class="mb-6">
-                        <label class="text-gray-700 font-medium mb-2 block">Category</label>
-                        <div class="space-y-2">
-                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="all">All Categories</a>
-                            {% for category in categories %}
-                            <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="{{ category.name }}">{{ category.name }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
+    <label class="text-gray-700 font-medium mb-2 block">Category</label>
+    <div class="space-y-2">
+        <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="all">All Categories</a>
+        {% for category in categories %}
+            {% if category.name != "Gifts" %}
+                <a href="#" class="block py-1 text-gray-700 filter-item" data-filter="{{ category.name }}">{{ category.name }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
                     <!-- Price Range Filter -->
                     <div>
                         <label class="text-gray-700 font-medium mb-2 block">Price Range</label>
@@ -2001,6 +2131,84 @@ document.addEventListener('DOMContentLoaded', function() {
 // Initialize Prices and Filters
 updatePrices();
 applyFilters();
+
+// Mobile Dropdown Toggle
+window.toggleMobileDropdown = function(button) {
+    const dropdown = button.nextElementSibling;
+    const icon = button.querySelector('i');
+    if (!dropdown || !icon) {
+        console.error('Dropdown or icon not found for button:', button);
+        return;
+    }
+    const isActive = dropdown.classList.toggle('active');
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-expanded', isActive);
+    dropdown.style.maxHeight = isActive ? `${dropdown.scrollHeight}px` : '0';
+    dropdown.style.opacity = isActive ? '1' : '0';
+    icon.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+    console.log(`Mobile dropdown toggled for ${button.previousElementSibling.textContent.trim()}:`, {
+        isActive,
+        dropdownChildren: dropdown.children.length,
+        scrollHeight: dropdown.scrollHeight,
+        screenWidth: window.innerWidth
+    });
+};
+
+// Initialize Mobile Dropdowns
+function initializeMobileDropdowns() {
+    const buttons = document.querySelectorAll('.sidebar-dropdown-toggle');
+    console.log(`Found ${buttons.length} sidebar dropdown toggles`);
+    buttons.forEach((button, index) => {
+        button.removeEventListener('click', button._toggleHandler);
+        button._toggleHandler = (e) => {
+            e.preventDefault();
+            window.toggleMobileDropdown(button);
+        };
+        button.addEventListener('click', button._toggleHandler);
+        button.setAttribute('aria-expanded', button.classList.contains('active') ? 'true' : 'false');
+        const dropdown = button.nextElementSibling;
+        if (dropdown && dropdown.children.length === 0) {
+            console.warn(`Empty dropdown for category at index ${index}`, button.previousElementSibling.textContent.trim());
+        }
+    });
+}
+
+// Desktop Dropdown Initialization
+function initializeCategoryDropdowns() {
+    const categoryGroups = document.querySelectorAll('.group');
+    categoryGroups.forEach((group, index) => {
+        const categoryLink = group.querySelector('.navbar-item');
+        const dropdownMenu = group.querySelector('.dropdown-menu');
+        const categoryName = categoryLink ? categoryLink.textContent.trim() : `Category ${index + 1}`;
+        if (!dropdownMenu) return;
+        group.addEventListener('mouseenter', () => {
+            dropdownMenu.classList.remove('hidden');
+            console.log(`Showing dropdown for ${categoryName}`);
+        });
+        group.addEventListener('mouseleave', () => {
+            dropdownMenu.classList.add('hidden');
+            console.log(`Hiding dropdown for ${categoryName}`);
+        });
+    });
+}
+
+// Mutation Observer for Mobile Sidebar
+const sidebarObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+            console.log('Mutation detected in mobile sidebar:', mutation.addedNodes.length, 'nodes added');
+            initializeMobileDropdowns();
+        }
+    });
+});
+sidebarObserver.observe(document.getElementById('mobile-sidebar'), { childList: true, subtree: true });
+
+// Initialize on Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing dropdowns');
+    initializeMobileDropdowns();
+    initializeCategoryDropdowns();
+});
     </script> 
     <script src="{{ url_for('static', filename='js/email.js') }}"></script> 
     </body>
