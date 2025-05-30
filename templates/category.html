@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }}</title>
+    <title>{{ page_title | default('Zira Collection') }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <!-- Toastify CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
-        /* Custom Fonts */
-        body {
+        /* Prevent horizontal scrolling */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
             font-family: 'Poppins', sans-serif;
         }
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
-        }
-        .inter-font {
-            font-family: 'Inter', sans-serif;
-        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        .inter-font { font-family: 'Inter', sans-serif; }
 
         /* Smooth Scroll */
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
-        /* Hero Section Photo Video Background */
-        .hero-container {
+        /* Hero Section */
+        .hero-section {
             position: relative;
             height: 100vh;
             overflow: hidden;
-            display: block !important;
+            width: 100%;
         }
         .hero-bg {
             position: absolute;
@@ -46,534 +44,430 @@
             background-position: center;
             opacity: 0;
             animation: showroomTour 52s infinite ease-in-out;
-            transform-origin: center;
         }
-        .hero-bg:nth-child(1) { 
+        .hero-bg:nth-child(1) {
             background-image: url('https://s1.bwallpapers.com/wallpapers/2014/06/18/digital-art-desktop-wallpapers_052436925.jpg');
-            animation-delay: 0s; 
+            animation-delay: 0s;
         }
-        .hero-bg:nth-child(2) { 
-            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230610/pngtree-ancient-artifacts-display-in-an-exhibit-image_2923820.jpg');
-            animation-delay: 13s; 
+        .hero-bg:nth-child(2) {
+            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230610/pngtree-ancient-artifacts.jpg');
+            animation-delay: 13s;
         }
-        .hero-bg:nth-child(3) { 
-            background-image: url('https://curiousmatrix.com/wp-content/uploads/2024/01/Ancient-artifacts-696x397.jpg.webp');
-            animation-delay: 26s; 
+        .hero-bg:nth-child(3) {
+            background-image: url('https://curiousmatrix.com/wp-content/uploads/2024/01/Ancient-artifacts-696x397.jpg');
+            animation-delay: 26s;
         }
-        .hero-bg:nth-child(4) { 
+        .hero-bg:nth-child(4) {
             background-image: url('https://cdn.pixabay.com/photo/2017/08/02/13/09/confetti-2571539_640.jpg');
             animation-delay: 39s;
         }
-
         @keyframes showroomTour {
-            0% {
-                opacity: 0;
-                transform: scale(1.2) rotate(1deg) translateX(-5%) translateY(-5%);
-                background-position: 40% 40%;
-            }
-            5% {
-                opacity: 1;
-                transform: scale(1.15) rotate(0deg) translateX(0%) translateY(0%);
-                background-position: 50% 50%;
-            }
-            20% {
-                opacity: 1;
-                transform: scale(1.1) rotate(-1deg) translateX(3%) translateY(3%);
-                background-position: 60% 60%;
-            }
-            25% {
-                opacity: 1;
-                transform: scale(1.15) rotate(0deg) translateX(-2%) translateY(-2%);
-                background-position: 45% 45%;
-            }
-            30% {
-                opacity: 0;
-                transform: scale(1.2) rotate(1deg) translateX(5%) translateY(5%);
-                background-position: 55% 55%;
-            }
-            100% {
-                opacity: 0;
-            }
+            0% { opacity: 0; transform: scale(1.2); }
+            5% { opacity: 1; transform: scale(1.1); }
+            25% { opacity: 1; transform: scale(1.1); }
+            30% { opacity: 0; transform: scale(1.2); }
+            100% { opacity: 0; }
         }
 
-        /* General Page Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } to { transform: scale(1); } }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px rgba(217, 119, 6, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(217, 119, 6, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(217, 119, 6, 0.5); }
         }
-
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         /* Navbar Animations */
-        .nav-item, .nav-icon {
-            animation: slideDown 0.5s ease-out forwards;
-            animation-delay: calc(0.1s * var(--index));
-        }
+        .nav-item, .nav-icon { animation: slideDown 0.5s ease-out forwards; animation-delay: calc(0.1s * var(--index)); }
+        .nav-logo { animation: fadeInUp 0.5s ease-out forwards; }
+        #mobile-menu-toggle { display: none; padding: 10px !important; cursor: pointer; z-index: 3000; font-size: 1.5rem; }
+        @media screen and (max-width: 600px) { #mobile-menu-toggle { display: block !important; } }
 
-        .nav-logo {
-            animation: fadeInLeft 0.5s ease-out forwards;
-        }
-
-        #mobile-menu-toggle {
-            animation: fadeInRight 0.5s ease-out forwards;
-            display: none;
-            padding: 10px;
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 3000;
-            font-size: 1.5rem;
-        }
-
-        @media (max-width: 767px) {
-            #mobile-menu-toggle {
-                display: block !important;
-            }
-        }
-
-        /* Dropdown Menu Styling (Navbar) */
+        /* Dropdown Menu (Navbar) */
         .dropdown-menu {
             position: absolute;
-            top: 100%;
+            top: 100% !important;
             left: 0;
-            background: white;
+            background-color: white !important;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 0.375rem;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            z-index: 1000;
+            border-radius: 6px !important;
+            min-width: 200px !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transform: translateY(-10px) !important;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s !important;
+            z-index: 1000 !important;
         }
-
-        .group:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
+        .group:hover .dropdown-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
         .dropdown-item {
-            display: block;
-            padding: 0.5rem 1rem;
-            color: #374151;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-            animation: slideDown 0.3s ease-out forwards;
-            animation-delay: calc(0.05s * var(--index));
+            display: block !important;
+            padding: 8px 16px !important;
+            color: #374151 !important;
+            text-decoration: none !important;
+            font-size: 0.9rem !important;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out !important;
         }
+        .dropdown-item:hover { background-color: #f3f4f6 !important; color: #d97706 !important; }
 
-        .dropdown-item:hover {
-            background-color: #f3f4f6;
-            color: #d97706;
-            transform: translateX(5px);
-        }
-
-        /* Navbar Hover Underline Effect */
+        /* Navbar Hover Effect */
         .nav-item {
             position: relative;
-            transition: all 0.3s ease;
-            font-family: 'Playfair Display', serif;
-            font-size: 0.95rem;
-            margin: 0 0.5rem;
+            transition: all 0.3s ease-in-out !important;
+            font-family: 'Playfair Display', serif !important;
+            font-size: 0.95rem !important;
+            margin: 0 8px !important;
         }
-
-        .nav-item:hover {
-            color: #d97706;
-            transform: scale(1.05);
-        }
-
+        .nav-item:hover { color: #d97706 !important; }
         .nav-item::after {
             content: '';
-            position: absolute;
-            width: 0;
+            position: absolute !important;
+            width: 0 !important;
             height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: #d97706;
-            transition: width 0.3s ease;
+            bottom: -2px !important;
+            left: 0 !important;
+            background-color: #d97706 !important;
+            transition: width 0.3s ease-in-out !important;
         }
+        .nav-item:hover::after { width: 100% !important; }
 
-        .nav-item:hover::after {
-            width: 100%;
-        }
-
-        /* Dropdown Chevron for Navbar */
-        .nav-item-chevron {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .nav-chevron-icon {
-            display: none;
-            width: 1px;
-            height: 1px;
-            transition: transform 0.3s ease;
-        }
-
-        .group:hover .nav-chevron-icon {
-            transform: rotate(180deg);
-        }
+        /* Navbar Chevron */
+        .nav-item-chevron { display: flex !important; align-items: center !important; gap: 4px !important; }
+        .nav-chevron-icon { font-size: 0.6rem !important; transition: transform 0.3s ease-in-out !important; display: none !important; }
+        @media screen and (min-width: 601px) { .nav-chevron-icon { display: inline !important; } }
+        .group:hover .nav-chevron-icon { transform: rotate(180deg) !important; }
 
         /* Mobile Sidebar */
         #mobile-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            min-height: 100vh;
-            background: white;
-            transform: translateX(-100%);
-            visibility: hidden;
-            transition: transform 0.3s ease, visibility 0.3s ease;
-            z-index: 2500;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            position: fixed !important;
+            top: 60px !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh - 60px) !important;
+            background-color: #ffffff !important;
+            transform: translateX(-100%) !important;
+            visibility: hidden !important;
+            transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out !important;
+            z-index: 2500 !important;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2) !important;
         }
+        #mobile-sidebar.open { transform: translateX(0) !important; visibility: visible !important; }
 
-        #mobile-sidebar.open {
-            transform: translateX(0) !important;
-            visibility: visible !important;
+        /* Product Card */
+        .product-card {
+            animation: fadeInUp 0.6s ease-in-out forwards !important;
+            animation-delay: calc(0.1s * var(--index)) !important;
+            width: 100%;
         }
-
-        /* Search Bar */
-        #search-bar {
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 0;
-            opacity: 0;
+        .product-image-container {
+            position: relative;
+            width: 100% !important;
+            height: 16rem !important;
             overflow: hidden;
         }
-
-        #search-bar.open {
-            max-height: 60px;
-            opacity: 1;
+        .product-image-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
-
-        /* Product Card Animations */
-        .product-card {
-            animation: fadeInUp 0.6s ease-out forwards;
-            animation-delay: calc(0.1s * var(--index));
+        .product-details {
+            text-align: center !important;
+            padding: 8px 0 !important;
         }
 
         /* Category Sidebar Animations */
         .category-filter, .subcategory-item {
-            animation: fadeInLeft 0.5s ease-out forwards;
-            animation-delay: calc(0.1s * var(--index));
-        }
-
-        /* Best Selling Section Animations */
-        .best-selling-image {
-            animation: fadeInRight 0.5s ease-out forwards;
-        }
-
-        .best-selling-text {
-            animation: fadeInLeft 0.5s ease-out forwards;
-            animation-delay: 0.2s;
+            animation: fadeInUp 0.5s ease-in-out forwards !important;
+            animation-delay: calc(0.1s * var(--index)) !important;
         }
 
         /* Footer Animations */
         .footer-item {
-            animation: fadeInUp 0.5s ease-out forwards;
-            animation-delay: calc(0.1s * var(--index));
+            animation: fadeInUp 0.5s ease-out forwards !important;
+            animation-delay: calc(0.1s * var(--index)) !important;
         }
 
-        /* Explore Button Animation */
-        .explore-button {
-            animation: pulse 2s infinite ease-in-out;
-        }
-
-        /* Dropdown Icon Styling */
+        /* Dropdown Icons */
         .chevron-container {
-            display: flex;
-            align-items: center;
-            width: 16px;
-            height: 16px;
+            display: flex !important;
+            align-items: center !important;
+            width: 16px !important;
+            height: 16px !important;
         }
-
         .chevron-icon {
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.3s ease;
+            width: 100% !important;
+            height: 100% !important;
+            transition: opacity 0.3s ease-in-out !important;
         }
+        .chevron-down { opacity: 1 !important; }
+        .chevron-right { opacity: 0 !important; position: absolute !important; visibility: hidden !important; }
+        .dropdown-open .chevron-down { opacity: 0 !important; }
+        .dropdown-open .chevron-right { opacity: 1 !important; visibility: visible !important; }
 
-        .chevron-down {
-            opacity: 1;
-        }
-
-        .chevron-right {
-            opacity: 0;
-            position: absolute;
-        }
-
-        .dropdown-open .chevron-down {
-            opacity: 0;
-        }
-
-        .dropdown-open .chevron-right {
-            opacity: 1;
-        }
-
-        /* Sidebar Dropdown Styling */
+        /* Sidebar Dropdown */
         .sidebar-dropdown {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
+            display: none !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            overflow: hidden !important;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out !important;
         }
-
         .sidebar-dropdown.open {
-            max-height: 500px;
-            opacity: 1;
+            display: block !important;
+            max-height: 500px !important;
+            opacity: 1 !important;
         }
 
-        /* Modal Animation */
-        .modal-open {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Hover Effects for Quick View */
-        .product-card:hover .quick-view {
-            opacity: 1;
-        }
+        /* Quick View */
+        .product-card:hover .quick-view { opacity: 1 !important; }
         .quick-view {
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            opacity: 0 !important;
+            transition: opacity 0.3s ease-in-out !important;
         }
 
-        /* Category Hover Effects */
+        /* Category Hover */
         .category-item:hover, .subcategory-item:hover {
-            color: #d97706;
-            transform: translateX(5px);
-            transition: all 0.3s ease;
+            color: #d97706 !important;
+            transition: color 0.3s ease-in-out !important;
         }
 
-        /* Product Card Styling */
-        .product-card {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        .product-image-container {
-            position: relative;
-            width: 100%;
-            height: 16rem;
-            overflow: hidden;
-        }
-        .product-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: transparent;
-        }
-        .product-details {
-            text-align: center;
-            padding: 1rem 0;
-            background: transparent;
-        }
-        .product-details h3, .product-details p {
-            background: transparent;
-        }
-
-        /* Wishlist Icon Styling */
+        /* Wishlist Icon */
         .wishlist-icon {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            font-size: 1.5rem;
-            color: #374151;
-            cursor: pointer;
-            transition: color 0.2s ease;
-            z-index: 10;
+            position: absolute !important;
+            top: 8px !important;
+            right: 8px !important;
+            font-size: 1.5rem !important;
+            color: #374151 !important;
         }
-        .wishlist-icon:hover {
-            color: #d97706;
-        }
-        .wishlist-icon.filled {
-            color: #d97706;
-        }
+        .wishlist-icon:hover { color: #d97706 !important; }
+        .wishlist-icon.filled { color: #d97706 !important; }
 
-        /* Custom Horizontal Line for Categories */
+        /* Dividers */
         .category-divider {
-            border-top: 1px solid #e5e7eb;
-            width: 90%;
-            margin: 0.5rem 0;
+            width: 90% !important;
+            margin: 8px 0 !important;
+            border-top: 1px solid #e5e7eb !important;
         }
-
-        /* Vertical Line Separator */
         .vertical-divider {
-            border-left: 1px solid #e5e7eb;
-            height: auto;
+            border-left: 1px solid #e5e7eb !important;
+            margin: 0 24px !important;
         }
 
-        /* Center Best Selling Image on Small Devices */
-        @media (max-width: 767px) {
-            .best-selling-container {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .best-selling-image {
-                margin: 0 auto;
-            }
-        }
-
-        /* Modal Close Button */
-        #close-modal, #close-cart-modal {
-            z-index: 10;
-        }
-
-        /* Mobile Sidebar Close Button */
-        #close-sidebar {
-            z-index: 10;
-        }
-
-        /* Mobile Sidebar Adjustments */
-        #mobile-sidebar .text-xl {
-            font-size: 0.95rem;
-        }
-        #mobile-sidebar .text-sm {
-            font-size: 0.75rem;
-        }
-        #mobile-sidebar button span {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        #mobile-sidebar button i {
-            font-size: 0.75rem;
-        }
-
-        /* Cart Modal Styling */
-        #cart-modal input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-        #cart-modal input:focus {
-            border-color: #d97706;
-        }
-
-        /* Gifts Popup Styling */
+        /* Gifts Popup */
         #gifts-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: linear-gradient(135deg, #d97706, #f59e0b);
-            color: white;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
-            transition: transform 0.5s ease-in-out;
-            transform: translateY(-100%);
+            position: fixed !important;
+            left: 0 !important;
+            background: linear-gradient(135deg, #d97706, #f59e0b, #d97706) !important;
+            background-size: 200% 200% !important;
+            animation: gradientFlow 5s ease infinite, bounceIn 0.5s ease-out !important;
+            color: #ffffff !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 32px !important;
+            transition: transform 0.5s ease-in-out !important;
+            transform: translateY(-100%) !important;
         }
-
-        #gifts-popup.open {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 767px) {
+        #gifts-popup.open { transform: translateY(0) !important; }
+        @media screen and (max-width: 600px) {
             #gifts-popup {
-                width: 100%;
-                height: 50vh;
-                border-bottom-left-radius: 1rem;
-                border-bottom-right-radius: 1rem;
+                top: auto !important;
+                bottom: 0 !important;
+                height: 50vh !important;
+                width: 100% !important;
+                border-top-left-radius: 16px !important;
+                border-top-right-radius: 16px !important;
+                transform: translateY(100%) !important;
+            }
+            #gifts-popup.open { transform: translateY(0) !important; }
+        }
+        @media (min-width: 601px) {
+            #gifts-popup {
+                top: 0 !important;
+                width: 50% !important;
+                height: 100vh !important;
+                border-top-right-radius: 16px !important;
+                border-bottom-right-radius: 16px !important;
             }
         }
-
-        @media (min-width: 768px) {
-            #gifts-popup {
-                width: 50%;
-                height: 100vh;
-                border-top-right-radius: 1rem;
-                border-bottom-right-radius: 1rem;
-            }
-        }
-
         #gifts-popup .close-gifts-popup {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem;
-            background: white;
-            color: #d97706;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            position: absolute !important;
+            top: 16px !important;
+            right: 16px !important;
+            padding: 8px !important;
+            background: white !important;
+            color: #d97706 !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+            animation: glowPulse 2s infinite !important;
+        }
+        #gifts-popup .close-gifts-popup:hover {
+            transform: scale(1.2) rotate(15deg) !important;
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.8) !important;
         }
 
-        #gifts-popup .close-gifts-popup:hover {
-            background: #f3f4f6;
+        /* Gift Button */
+        .gift-button {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+            color: #ffffff !important;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+            cursor: pointer !important;
+            z-index: 9999 !important;
+        }
+        .gift-button:hover { transform: scale(1.1) !important; }
+        .gift-button i { font-size: 1.5rem !important; }
+
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+        @media (min-width: 601px) {
+            .products-section {
+                display: flex !important;
+                gap: 24px;
+            }
+            .sidebar {
+                width: 256px !important;
+                flex-shrink: 0;
+            }
+            .category-header {
+                display: flex !important;
+                gap: 24px;
+                margin-bottom: 24px;
+                align-items: start !important;
+            }
+            .category-text-container {
+                background: white !important;
+                padding: 12px !important;
+                border-top-left-radius: 16px !important;
+                border-bottom-right-radius: 16px !important;
+            }
+            .product-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important; /* Four products per row */
+                gap: 24px;
+            }
+        }
+        @media screen and (max-width: 600px) {
+            .products-section { flex-direction: column !important; }
+            .sidebar { width: 100% !important; margin-bottom: 24px; }
+            .vertical-divider { display: none !important; }
+            .category-header {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+            }
+            .category-image {
+                margin-bottom: 16px;
+                display: flex !important;
+                justify-content: center !important;
+            }
+            .category-text-container {
+                background: white !important;
+                padding: 8px !important;
+                border-radius: 8px !important;
+            }
+            .product-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* Two products per row */
+                gap: 16px;
+            }
+        }
+
+        /* Currency Button */
+        .currency-container {
+            position: relative;
+            display: inline-block;
+        }
+        .currency-label {
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #374151;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        .currency-select {
+            background: #d97706 !important;
+            color: white !important;
+            font-size: 0.875rem !important;
+            padding: 6px 24px 6px 8px !important;
+            border-radius: 9999px !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .currency-select:hover {
+            background: #b45309 !important;
+            transform: scale(1.05);
+        }
+        .currency-select option {
+            background: white;
+            color: #374151;
+        }
+        .currency-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .currency-dropdown::after {
+            content: '\f078'; /* Font Awesome chevron-down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Modal Buttons */
+        .modal-button {
+            font-size: 0.875rem !important;
+            padding: 6px 12px !important;
+            width: 100% !important;
+            text-align: left !important;
         }
     </style>
 </head>
@@ -581,126 +475,166 @@
     <!-- Gifts Popup -->
     <div id="gifts-popup">
         <button class="close-gifts-popup" onclick="closeGiftsPopup()">
-            <i class="fas fa-times text-lg"></i>
+            <i class="fas fa-gift text-lg"></i>
         </button>
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Our Exquisite Gifts</h2>
-        <p class="text-lg md:text-xl mb-6">Celebrate special moments with unique African-inspired gifts, crafted with love and tradition.</p>
-        <a href="#products" class="bg-white text-yellow-600 px-6 py-3 rounded-full hover:bg-gray-100 transition animate-pulse" onclick="closeGiftsPopup()">Shop Gifts Now</a>
+        <h2 class="text-3xl md:text-4xl font-semibold mb-4 animate-bounceIn">Discover Our Exquisite Gifts</h2>
+        <p class="text-lg md:text-xl mb-6 animate-fadeInUp">Celebrate special moments with unique African-inspired gifts.</p>
+        <a href="{{ url_for('category_page', category_slug='gifts', subcategory_slug='all') }}"
+           class="bg-white text-yellow-600 px-4 py-2 rounded-full hover:bg-gray-100 transition animate-pulse"
+           onclick="closeGiftsPopup()">Shop Gifts Now</a>
+    </div>
+
+    <!-- Floating Gift Button -->
+    <div class="gift-button" onclick="toggleGiftsPopup()">
+        <i class="fas fa-gift"></i>
     </div>
 
     <!-- Navbar -->
     <nav class="bg-white fixed w-full z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <!-- Mobile Toggler (Left, Small Devices Only) -->
-            <button id="mobile-menu-toggle" class="text-gray-700 text-2xl order-1" onclick="window.toggleSidebar(event)">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <button id="mobile-menu-toggle" class="text-gray-700 text-2xl order-1">
                 <i class="fas fa-bars"></i>
             </button>
-            <!-- Logo (Center on Mobile, Left on Desktop) -->
-            <div class="flex items-center nav-logo order-2 md:order-1">
+            <div class="flex items-center nav-logo order-2">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Zira Collection Logo" class="h-12">
             </div>
-            <!-- Desktop Menu (Center) -->
-            <div class="hidden md:flex flex-1 justify-center items-center space-x-4">
+            <div class="hidden md:flex flex-1 justify-center items-center space-x-4 order-3">
                 <a href="{{ url_for('index') }}" class="nav-item text-gray-700" style="--index: 1;">Home</a>
                 <a href="{{ url_for('discounted_artefacts') }}" class="nav-item text-gray-700" style="--index: 2;">Special Discount</a>
                 <a href="{{ url_for('our_products') }}" class="nav-item text-gray-700" style="--index: 3;">Our Products</a>
                 <div class="relative group">
-                    <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="nav-item text-gray-700 category-filter" style="--index: 4;">
-                        <!-- <span class="nav-item-chevron">All Categories<i class="fas fa-chevron-down nav-chevron-icon hidden md:inline"></i></span> -->
+                    <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}"
+                       class="nav-item text-gray-700 category-filter {{ 'text-yellow-600 font-semibold' if not selected_category else '' }}"
+                       style="--index: 4;" data-category="all">
+                        <span class="nav-item-chevron">All Categories<i class="fas fa-chevron-down nav-chevron-icon"></i></span>
                     </a>
                     <div class="dropdown-menu">
                         {% for category in categories %}
-                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="dropdown-item subcategory-filter" style="--index: {{ loop.index }}">{{ category.name }}</a>
+                        {% if category and category.slug %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                           class="dropdown-item {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug else '' }}"
+                           style="--index: {{ loop.index }};" data-category="{{ category.slug }}">{{ category.name }}</a>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>
                 {% for category in categories %}
+                {% if category and category.slug %}
                 <div class="relative group">
-                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="nav-item text-gray-700" style="--index: {{ loop.index + 4 }}">
-                        <span class="nav-item-chevron">{{ category.name }}</span>
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                       class="nav-item text-gray-700 category-filter {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug else '' }}"
+                       style="--index: {{ loop.index + 4 }};" data-category="{{ category.slug }}">
+                        <span class="nav-item-chevron">{{ category.name }}<i class="fas fa-chevron-down nav-chevron-icon"></i></span>
                     </a>
                     {% if category.subcategories %}
                     <div class="dropdown-menu">
                         {% for subcategory in category.subcategories %}
-                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="dropdown-item subcategory-filter" style="--index: {{ loop.index }}">{{ subcategory.name }}</a>
+                        {% if subcategory and subcategory.slug %}
+                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                           class="dropdown-item {{ 'text-yellow-600 font-semibold' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}"
+                           style="--index: {{ loop.index }};" data-subcategory="{{ subcategory.slug }}">{{ subcategory.name }}</a>
+                        {% endif %}
                         {% endfor %}
                     </div>
                     {% endif %}
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
-            <!-- Icons (Right) -->
-            <div class="flex items-center space-x-4 order-3">
-                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories|length + 6 }};"><i class="fas fa-heart"></i></a>
-                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ categories|length + 7 }};"><i class="fas fa-shopping-cart"></i></a>
-                <select style="background-color:#d97706;" id="currency" class="border rounded p-1 text-gray-700 nav-icon" style="--index: {{ categories|length + 8 }};">
-                    <option value="KES" {% if current_currency == 'KES' %}selected{% endif %}>KES</option>
-                    <option value="USD" {% if current_currency == 'USD' %}selected{% endif %}>USD</option>
-                    <option value="EUR" {% if current_currency == 'EUR' %}selected{% endif %}>EUR</option>
-                    <option value="GBP" {% if current_currency == 'GBP' %}selected{% endif %}>GBP</option>
-                </select>
+            <div class="flex items-center space-x-4 order-4">
+                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ (categories|length) + 5 }};">
+                    <i class="fas fa-heart"></i>
+                </a>
+                <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: {{ (categories|length) + 6 }};">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="currency-container">
+                    <span class="currency-label">CURRENCY</span>
+                    <div class="currency-dropdown">
+                        <select class="currency-select" id="currency">
+                            <option value="KES" {% if current_currency == 'KES' %}selected{% endif %} class="currency-option">🇰🇪 KES</option>
+                            <option value="USD" {% if current_currency == 'USD' %}selected{% endif %} class="currency-option">🇺🇸 USD</option>
+                            <option value="EUR" {% if current_currency == 'EUR' %}selected{% endif %} class="currency-option">🇪🇺 EUR</option>
+                            <option value="GBP" {% if current_currency == 'GBP' %}selected{% endif %} class="currency-option">🇬🇧 GBP</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- Mobile Sidebar -->
         <div id="mobile-sidebar" class="md:hidden">
             <div class="flex flex-col p-4 space-y-4 h-full relative">
-                <!-- Close Button -->
-                <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition z-50" onclick="window.toggleSidebar(event)">
+                <button id="close-sidebar" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white z-50">
                     <i class="fas fa-times text-lg"></i>
                 </button>
-                <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-yellow-600" style="margin-top:40px; padding-top:40px;">Home</a>
+                <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-yellow-600" style="margin-top:40px;">Home</a>
                 <a href="{{ url_for('discounted_artefacts') }}" class="text-gray-700 hover:text-yellow-600">Special Discount</a>
                 <a href="{{ url_for('our_products') }}" class="text-gray-700 hover:text-yellow-600">Our Products</a>
-                <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="text-gray-700 hover:text-yellow-600 category-filter">All Categories</a>
+                <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}"
+                   class="text-gray-700 hover:text-yellow-600 category-filter {{ 'text-yellow-600 font-semibold' if not selected_category else '' }}"
+                   data-category="all">All Categories</a>
                 {% for category in categories %}
-                <div>
-                    <button class="w-full text-left text-gray-700 hover:text-yellow-600 flex justify-between items-center" onclick="toggleMobileDropdown('{{ category.slug }}-mobile')">
-                        <span>{{ category.name }}</span>
+                {% if category and category.slug %}
+                <div class="flex items-center justify-between">
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                       class="text-gray-700 hover:text-yellow-600 category-filter {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug else '' }}"
+                       data-category="{{ category.slug }}">{{ category.name }}</a>
+                    {% if category.subcategories %}
+                    <button class="text-gray-700 hover:text-yellow-600"
+                            onclick="toggleMobileDropdown('{{ category.slug }}-mobile')">
                         <span class="chevron-container">
                             <i class="fas fa-chevron-down chevron-icon chevron-down"></i>
                             <i class="fas fa-chevron-right chevron-icon chevron-right"></i>
                         </span>
                     </button>
-                    <div id="{{ category.slug }}-mobile" class="sidebar-dropdown pl-4 space-y-2">
-                        {% for subcategory in category.subcategories %}
-                        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="block text-gray-600 text-sm hover:text-yellow-600 subcategory-filter">{{ subcategory.name }}</a>
-                        {% endfor %}
-                    </div>
+                    {% endif %}
                 </div>
+                <div id="{{ category.slug }}-mobile" class="sidebar-dropdown pl-4 space-y-2">
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                       class="block text-gray-600 text-sm hover:text-yellow-600 {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug and not selected_subcategory else '' }}"
+                       data-category="{{ category.slug }}" data-subcategory="all">All {{ category.name }}</a>
+                    {% for subcategory in category.subcategories %}
+                    {% if subcategory and subcategory.slug %}
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                       class="block text-gray-600 text-sm hover:text-yellow-600 {{ 'text-yellow-600 font-semibold' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}"
+                       data-subcategory="{{ subcategory.slug }}">{{ subcategory.name }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-container">
+    <section id="home" class="hero-section">
         <div class="hero-bg"></div>
         <div class="hero-bg"></div>
         <div class="hero-bg"></div>
         <div class="hero-bg"></div>
         <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
             <div class="text-center text-white">
-                <h1 class="text-5xl md:text-7xl font-bold mb-4 animate-fadeIn">
-                    {% if selected_subcategory %}
+                <h1 class="text-5xl md:text-7xl font-semibold mb-4 animate-fadeIn">
+                    {% if selected_subcategory and selected_subcategory.name %}
                         {{ selected_category.name }} - {{ selected_subcategory.name }}
-                    {% elif selected_category %}
+                    {% elif selected_category and selected_category.name %}
                         {{ selected_category.name }}
                     {% else %}
-                        All Categories
+                        All Products
                     {% endif %}
                 </h1>
-                <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-200">
-                    {% if selected_subcategory %}
+                <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-100">
+                    {% if selected_subcategory and selected_subcategory.name %}
                         Discover Exquisite {{ selected_subcategory.name }} in {{ selected_category.name }}
-                    {% elif selected_category %}
+                    {% elif selected_category and selected_category.name %}
                         {% if selected_category.name|lower == 'home' %}
                             Elevate Your Space with Authentic African Home Artifacts
                         {% elif selected_category.name|lower == 'kitchen' %}
                             Crafted for Culinary Art: Explore African Kitchen Treasures
                         {% elif selected_category.name|lower == 'decor' %}
-                            Transform Your Home: Authentic African Decor
+                            Transform Your Home Decorations
                         {% elif selected_category.name|lower == 'easter' %}
-                            Celebrate Easter with Unique African Artifacts
+                            Celebrate Easter with African Artifacts
                         {% elif selected_category.name|lower == 'gifts' %}
                             Unique African Gifts for Every Occasion
                         {% else %}
@@ -710,120 +644,119 @@
                         Celebrate the Timeless Spirit of African Craftsmanship
                     {% endif %}
                 </p>
-                <a href="#products" class="explore-button bg-yellow-600 text-white px-6 py-3 rounded-full hover:bg-yellow-700 transition animate-fadeIn delay-400">Explore Artifacts</a>
+                <a href="#products" class="bg-yellow-600 text-white px-6 py-3 rounded-full hover:bg-yellow-700 transition-colors animate-pulse">Explore Artifacts</a>
             </div>
         </div>
     </section>
 
-    <!-- Combined Products Section with Sidebar on Left -->
+    <!-- Products Section -->
     <section id="products" class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row gap-8">
-                <!-- Sidebar Filters (Left) -->
-                <div class="w-full md:w-64 bg-gray-100 p-6 rounded-lg inter-font">
+        <div class="container mx-auto px-4">
+            <div class="products-section">
+                <!-- Sidebar -->
+                <div class="sidebar bg-gray-100 p-6 rounded-lg inter-font">
                     <h3 class="text-2xl font-semibold text-yellow-600 mb-4 uppercase">Categories</h3>
                     <div class="space-y-4">
                         <div>
-                            <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}" class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" data-category="all" style="--index: 1;">
-                                All Categories
+                            <a href="{{ url_for('category_page', category_slug='all', subcategory_slug='all') }}"
+                               class="w-full text-gray-700 hover:text-yellow-600 text-sm category-filter {{ 'text-yellow-600 font-semibold' if not selected_category else '' }}"
+                               data-category="all" style="--index: 1;">
+                                All Products
                             </a>
                             <div class="category-divider"></div>
                         </div>
                         {% set category_index = 2 %}
                         {% for category in categories %}
+                        {% if category and category.slug %}
                         <div>
-                            <button class="w-full text-left flex justify-between items-center text-sm font-semibold uppercase category-filter" 
-                                    data-category="{{ category.slug }}" onclick="toggleDropdown('category-{{ category.slug }}-{{ loop.index }}')" style="--index: {{ category_index }}">
+                            <button class="w-full text-left text-gray-600 hover:text-yellow-600 flex justify-between text-sm font-semibold uppercase category-filter {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug else '' }}"
+                                    data-category="{{ category.slug }}" onclick="toggleDropdown('category-{{ category.slug }}-{{ loop.index }}')" style="--index: {{ category_index }};">
                                 {{ category.name }}
+                                {% if category.subcategories %}
                                 <span class="chevron-container">
-                                    <svg class="w-4 h-4 chevron-icon chevron-down" fill="none" stroke="currentColor" viewBox="0 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                    <svg class="w-4 h-4 chevron-icon chevron-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke="round" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    <i class="fas fa-chevron-down chevron-icon chevron-down"></i>
+                                    <i class="fas fa-chevron-right chevron-icon chevron-right"></i>
                                 </span>
+                                {% endif %}
                             </button>
-                            <div id="category-{{ category.slug }}-{{ loop.index }}" class="sidebar-dropdown mt-2">
-                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="{{ category.slug }}" data-subcategory="all" style="--index: {{ category_index + 1 }}">All {{ category.name }}</a>
+                            {% if category.subcategories %}
+                            <div class="sidebar-dropdown mt-2" id="category-{{ category.slug }}-{{ loop.index }}">
+                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                                   class="subcategory-item block text-gray-600 hover:text-yellow-600 text-sm mt-1 {{ 'text-yellow-600 font-semibold' if selected_category and selected_category.slug == category.slug and not selected_subcategory else '' }}"
+                                   data-category="{{ category.slug }}" data-subcategory="all" style="--index: {{ category_index + 1 }};">All {{ category.name }}</a>
                                 {% for subcategory in category.subcategories %}
-                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}" class="subcategory-item block text-gray-600 text-sm subcategory-filter mt-1" 
-                                   data-category="{{ category.slug }}" data-subcategory="{{ subcategory.slug }}" style="--index: {{ category_index + loop.index + 2 }}">{{ subcategory.name }}</a>
+                                {% if subcategory and subcategory.slug %}
+                                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                                   class="subcategory-item block text-gray-600 hover:text-yellow-600 text-sm mt-2 {{ 'text-yellow-600 font-semibold' if selected_subcategory and selected_subcategory.slug == subcategory.slug else '' }}"
+                                   data-subcategory="{{ subcategory.slug }}" style="--index: {{ category_index + loop.index + 1 }};">{{ subcategory.name }}</a>
+                                {% endif %}
                                 {% endfor %}
                             </div>
+                            {% endif %}
                             <div class="category-divider"></div>
                             {% set category_index = category_index + (category.subcategories|length) + 2 %}
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>
-
                 <!-- Vertical Divider -->
                 <div class="vertical-divider hidden md:block"></div>
-
-                <!-- Main Content (Right) -->
+                <!-- Main Content -->
                 <div class="flex-1">
-                    <!-- Category Section (Replaced Best Selling) -->
-                    <div class="best-selling-container flex flex-col lg:flex-row gap-6 items-start mb-12">
-                        <div class="flex-shrink-0 best-selling-image">
-                            <img src="{{ category_image }}" 
-                                 alt="{{ selected_category.name|default('All Categories') }}" 
-                                 class="rounded-full w-64 h-64 object-cover"
-                                 onerror="this.src='https://png.pngtree.com/background/20230611/original/pngtree-ancient-artifacts-from-an-archaeological-site-in-the-united-states-and-picture-image_3167955.jpg'; this.onerror=null;">
+                    <!-- Category Header -->
+                    <div class="category-header">
+                        <div class="category-image flex-shrink-0">
+                            <img src="{{ category_image | default('/static/uploads/placeholder.jpg') }}"
+                                 alt="{{ selected_category.name if selected_category else 'All Products' }}"
+                                 class="w-64 h-64 object-cover" style="border-radius: 50%;">
                         </div>
-                        <div class="flex-1 inter-font best-selling-text">
-                            <h2 class="text-xl font-medium mb-4 uppercase">{{ selected_category.name|default('All Categories') }}</h2>
-                            <p class="text-gray-600">{{ category_description }}</p>
+                        <div class="category-text-container flex-1 inter-font">
+                            <h2 class="text-xl font-semibold mb-2 uppercase">{{ selected_category.name if selected_category else 'All Products' }}</h2>
+                            <p class="text-gray-600">{{ category_description | default('Explore our collection of authentic African-inspired artifacts.') }}</p>
                         </div>
                     </div>
-
                     <!-- Product Grid -->
-                    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8">
+                    <div id="product-grid" class="product-grid">
                         {% for product in products %}
-                        <div class="product-card transform transition duration-500 hover:scale-105" 
-                             data-category="{{ product.category|lower }}" data-subcategory="{{ product.subcategory|lower }}" style="--index: {{ loop.index }}" data-product-id="{{ product.id }}">
+                        <div class="product-card transform transition duration-500 hover:shadow-lg"
+                             data-product-id="{{ product.id }}-{{ product.type }}"
+                             data-category-slug="{{ product.category_slug | default('all') }}"
+                             data-subcategory-slug="{{ product.subcategory_slug | default('all') }}"
+                             style="--index: {{ loop.index }};">
                             <div class="product-image-container">
-                                <img src="{{ product.image }}" alt="{{ product.title }}">
-                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                                <img src="{{ product.image | default('/static/uploads/placeholder.jpg') }}"
+                                     alt="{{ product.title | default('Product Image') }}"
+                                     class="w-full h-full object-cover">
+                                <button class="quick-view absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg"
+                                        data-product-id="{{ product.id }}-{{ product.type }}"
+                                        data-product-type="{{ product.type }}">
                                     Quick View
                                 </button>
-                                <i class="far fa-heart wishlist-icon add-to-wishlist" data-product-id="{{ product.id }}"></i>
+                                <i class="far fa-heart wishlist-icon add-to-wishlist"
+                                   data-product-id="{{ product.id }}-{{ product.type }}"
+                                   data-product-type="{{ product.type }}"></i>
                             </div>
-                            <div class="product-details inter-font">
-                                <h3 class="text-lg font-medium text-gray-800">{{ product.title }}</h3>
-                                <p class="text-gray-600">{{ product.subcategory }}</p>
-                                <div class="flex justify-center items-center mt-2">
-                                    {% if product.is_discounted %}
-                                    <p class="text-gray-800 font-semibold price" data-base-price="{{ product.discounted_price }}">{{ (product.discounted_price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
-                                    <p class="text-gray-600 text-sm line-through ml-2 original-price" data-base-price="{{ product.price }}">{{ (product.price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
-                                    {% else %}
-                                    <p class="text-gray-800 font-semibold price" data-base-price="{{ product.price }}">{{ (product.price * (exchange_rates[current_currency]|default(1)))|round(2) }} {{ current_currency }}</p>
-                                    {% endif %}
-                                </div>
-                                <div class="flex justify-center gap-2 mt-2">
-                                    <button class="add-to-cart bg-yellow-600 text-white px-3 py-1 rounded-full hover:bg-yellow-700 transition-colors flex items-center" data-product-id="{{ product.id }}">
-                                        <i class="fas fa-cart-plus mr-1"></i> Cart
-                                    </button>
-                                </div>
+                            <div class="product-details">
+                                <h3 class="text-sm font-semibold">{{ product.title | default('N/A') }}</h3>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                    <p id="no-results" class="text-gray-600 text-center mt-8 {{ 'hidden' if products else '' }}">No products found in this category.</p>
+                    <p id="no-products" class="text-gray-600 text-center mt-8 {{ 'hidden' if products else '' }}">No products or gifts found in this category.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-black text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
             <h3 class="text-2xl font-semibold text-yellow-600 mb-4 footer-item" style="--index: 1;">Zira Collection</h3>
-            <p class="text-sm mb-6 footer-item" style="--index: 2;">Celebrating African Artistry Since 2015</p>
+            <p class="text-sm mb-6 footer-item" style="--index: 2;">Celebrating African Artifacts Since 2015</p>
             <div class="flex justify-center gap-4 text-xl mb-6">
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 3;"><i class="fab fa-pinterest"></i></a>
-                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 4;"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 4;"><i class="fab fa-home"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 5;"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 6;"><i class="fab fa-youtube"></i></a>
                 <a href="#" class="hover:text-yellow-600 footer-item" style="--index: 7;"><i class="fab fa-whatsapp"></i></a>
@@ -834,22 +767,22 @@
 
     <!-- Quick View Modal -->
     <div id="quick-view-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-10 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative modal-open">
-            <button id="close-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition-colors z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto relative">
+            <button id="close-modal" class="absolute top-2 right-2 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white z-50">
                 <i class="fas fa-times text-lg"></i>
             </button>
             <div class="modal-content space-y-4">
-                <img id="modal-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-md">
-                <h3 id="modal-name" class="text-2xl font-semibold text-gray-800"></h3>
+                <img id="modal-image" src="" alt="" class="w-full h-64 object-cover rounded-md">
+                <h3 id="modal-name" class="text-2xl font-semibold"></h3>
                 <p id="modal-category" class="text-gray-600"></p>
                 <p id="modal-subcategory" class="text-gray-600"></p>
-                <p id="modal-price" class="text-gray-800 font-semibold"></p>
+                <p id="modal-price" class="text-lg font-semibold text-gray-800"></p>
                 <p id="modal-description" class="text-gray-600"></p>
-                <div class="flex justify-end gap-2">
-                    <button id="modal-add-to-cart" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition-colors flex items-center" data-product-id="">
+                <div class="flex flex-col gap-2">
+                    <button id="modal-add-to-cart" class="modal-button bg-yellow-600 text-white rounded-full hover:bg-yellow-700 flex items-center" data-product-id="" data-product-type="">
                         <i class="fas fa-cart-plus mr-2"></i> Add to Cart
                     </button>
-                    <button id="modal-add-to-wishlist" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition-colors flex items-center" data-product-id="">
+                    <button id="modal-add-to-wishlist" class="modal-button bg-gray-200 text-gray-700 rounded-full hover:bg-yellow-600 hover:text-white flex items-center" data-product-id="" data-product-type="">
                         <i class="fas fa-heart mr-2"></i> Add to Wishlist
                     </button>
                 </div>
@@ -857,21 +790,21 @@
         </div>
     </div>
 
-    <!-- Cart Quantity Modal -->
+    <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full relative">
-            <button id="close-cart-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white transition-colors z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <button id="close-cart-modal" class="absolute top-4 right-4 p-2 bg-gray-200 text-gray-800 rounded-full hover:bg-red-600 hover:text-white">
                 <i class="fas fa-times text-lg"></i>
             </button>
             <div class="space-y-4">
-                <h3 class="text-xl font-semibold text-gray-800">Add to Cart</h3>
-                <p class="text-gray-600">Enter the number of items:</p>
-                <input type="number" id="cart-quantity" min="1" value="1" class="w-full">
+                <h3 class="text-lg font-semibold text-gray-800">Add to Cart</h3>
+                <p class="text-gray-600 text-center">Enter the number of items:</p>
+                <input type="number" min="1" value="1" id="cart-quantity" class="w-full py-2 px-4 border rounded">
                 <div class="flex justify-end gap-2">
-                    <button id="confirm-cart" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition-colors" data-product-id="">
+                    <button id="confirm-cart" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700" data-product-id="" data-product-type="">
                         Confirm
                     </button>
-                    <button id="cancel-cart" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-400 transition-colors">
+                    <button id="cancel-cart" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-400">
                         Cancel
                     </button>
                 </div>
@@ -880,10 +813,9 @@
     </div>
 
     <!-- Toastify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js@latest"></script>
     <script>
-        // Toastify Notification
+        // Toastify
         function showToast(message, type = 'success') {
             Toastify({
                 text: message,
@@ -895,190 +827,114 @@
             }).showToast();
         }
 
-        // Mobile Sidebar Toggle
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-                const mobileSidebar = document.getElementById('mobile-sidebar');
-                const closeSidebar = document.getElementById('close-sidebar');
-
-                // Initialize sidebar
-                if (mobileSidebar) {
-                    mobileSidebar.style.transform = 'translateX(-100%)';
-                    mobileSidebar.style.visibility = 'hidden';
-                    console.log('Sidebar init style:', mobileSidebar.getAttribute('style'));
-                }
-
-                window.toggleSidebar = function(event) {
-                    event.preventDefault();
-                    console.log('Toggling sidebar');
-                    if (mobileSidebar) {
-                        const isOpen = mobileSidebar.classList.toggle('open');
-                        const icon = mobileMenuToggle.querySelector('i');
-                        icon.classList.toggle('fa-bars');
-                        icon.classList.toggle('fa-times');
-                        mobileSidebar.style.transform = isOpen ? 'translateX(0%)' : 'translateX(-100%)';
-                        mobileSidebar.style.visibility = isOpen ? 'visible' : 'hidden';
-                        mobileSidebar.style.transition = 'transform 0.3s ease, visibility 0.3s ease';
-                        mobileSidebar.offsetHeight;
-                        console.log('Sidebar inline style:', mobileSidebar.getAttribute('style'));
-                        console.log('Sidebar classList:', mobileSidebar.classList);
-                        console.log('Sidebar transform:', window.getComputedStyle(mobileSidebar).transform);
-                    } else {
-                        console.error('Mobile sidebar not found');
-                    }
-                };
-
-                if (closeSidebar) {
-                    closeSidebar.addEventListener('click', window.toggleSidebar);
-                    console.log('Close listener attached');
-                } else {
-                    console.warn('Close button not found, but sidebar toggle is still operational');
-                }
-
-                // Gifts Popup Logic
-                const giftsPopup = document.getElementById('gifts-popup');
-                const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}'.toLowerCase();
-                const currentUrl = window.location.pathname.toLowerCase();
-                const isGiftsPage = selectedCategory === 'gifts' || currentUrl.includes('gifts');
-                const popupClosed = sessionStorage.getItem('giftsPopupClosed');
-
-                if (giftsPopup) {
-                    if (isGiftsPage && !popupClosed) {
-                        giftsPopup.classList.add('open');
-                        giftsPopup.style.transform = 'translateY(0)';
-                        console.log('Gifts popup shown on load:', { selectedCategory, currentUrl });
-                    } else {
-                        console.log('Gifts popup not shown:', { selectedCategory, currentUrl, popupClosed });
-                    }
-                } else {
-                    console.error('Gifts popup element not found');
-                }
-            } catch (error) {
-                console.error('Sidebar or popup init error:', error);
+        // Sidebar Toggle
+        window.toggleSidebar = function(event) {
+            event.preventDefault();
+            const sidebar = document.getElementById('mobile-sidebar');
+            const toggle = document.getElementById('mobile-menu-toggle');
+            if (sidebar && toggle) {
+                const isOpen = sidebar.classList.toggle('open');
+                toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
+                toggle.querySelector('i').classList.toggle('fa-times', isOpen);
+                sidebar.style.transform = isOpen ? 'translateX(0)' : 'translateX(-100%)';
+                sidebar.style.visibility = isOpen ? 'visible' : 'hidden';
             }
-        });
+        };
+        document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
+        document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
 
-        // Gifts Popup
-        function closeGiftsPopup() {
-            const popup = document.getElementById('gifts-popup');
-            if (popup) {
-                popup.classList.remove('open');
-                popup.style.transform = 'translateY(-100%)';
-                sessionStorage.setItem('giftsPopupClosed', 'true');
-                console.log('Gifts popup closed');
-            }
-        }
-
-        // Search Bar Toggle
-        const searchToggle = document.getElementById('search-toggle');
-        const searchBar = document.getElementById('search-bar');
-        if (searchToggle) {
-            searchToggle.addEventListener('click', () => {
-                searchBar.classList.toggle('open');
-            });
-        }
-
-        // Mobile Dropdown Toggle
+        // Mobile Dropdown
         function toggleMobileDropdown(id) {
-            console.log('Toggling mobile dropdown:', id);
             const dropdown = document.getElementById(id);
-            if (!dropdown) {
-                console.error('Dropdown not found:', id);
-                return;
+            if (dropdown) {
+                const isOpen = dropdown.classList.toggle('open');
+                const button = dropdown.previousElementSibling.querySelector('button');
+                button.classList.toggle('dropdown-open', isOpen);
+                document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                    if (d.id !== id && d.classList.contains('open')) {
+                        d.classList.remove('open');
+                        d.previousElementSibling.querySelector('button').classList.remove('dropdown-open');
+                    }
+                });
             }
-            const button = dropdown.previousElementSibling;
-            const isOpen = dropdown.classList.toggle('open');
-            button.classList.toggle('dropdown-open', isOpen);
-            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
-                if (d.id !== id && d.classList.contains('open')) {
-                    d.classList.remove('open');
-                    d.previousElementSibling.classList.remove('dropdown-open');
-                }
-            });
-            dropdown.offsetHeight;
-            console.log('Dropdown isOpen:', isOpen, 'Dropdown style:', dropdown.getAttribute('style'));
         }
 
-        // Sidebar Dropdown Toggle
+        // Sidebar Dropdown
         function toggleDropdown(id) {
-            console.log('Toggling dropdown:', id);
             const dropdown = document.getElementById(id);
-            if (!dropdown) {
-                console.error('Dropdown not found:', id);
-                return;
+            if (dropdown) {
+                const isOpen = dropdown.classList.toggle('open');
+                const button = dropdown.previousElementSibling;
+                button.classList.toggle('dropdown-open', isOpen);
+                document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                    if (d.id !== id && d.classList.contains('open')) {
+                        d.classList.remove('open');
+                        d.previousElementSibling.classList.remove('dropdown-open');
+                    }
+                });
             }
-            const button = dropdown.previousElementSibling;
-            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
-                if (d.id !== id) {
-                    d.classList.remove('open');
-                    d.previousElementSibling.classList.remove('dropdown-open');
-                }
-            });
-            const isOpen = dropdown.classList.toggle('open');
-            button.classList.toggle('dropdown-open', isOpen);
         }
 
-        // Currency Handling
+        // Currency
         const currencySelect = document.getElementById('currency');
         let exchangeRates = JSON.parse('{{ exchange_rates|tojson|safe }}');
-        let currentCurrency = '{{ current_currency|safe }}';
+        let currentCurrency = '{{ current_currency | default('KES') | safe }}';
 
-        currencySelect.addEventListener('change', async () => {
-            currentCurrency = currencySelect.value;
-            try {
-                const response = await fetch('/api/exchange_rates');
-                exchangeRates = await response.json();
-                updatePrices();
-                await fetch('/set_currency', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currency: currentCurrency })
-                });
-            } catch (error) {
-                console.error('Error updating currency:', error);
-                showToast('Error updating currency', 'error');
-            }
-        });
-
-        function updatePrices() {
-            document.querySelectorAll('.product-card').forEach(card => {
-                const priceElement = card.querySelector('.price');
-                const originalPriceElement = card.querySelector('.original-price');
-                const basePrice = parseFloat(priceElement.dataset.basePrice);
-                priceElement.textContent = `${(basePrice * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
-                if (originalPriceElement) {
-                    const baseOriginalPrice = parseFloat(originalPriceElement.dataset.basePrice);
-                    originalPriceElement.textContent = `${(baseOriginalPrice * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+        if (currencySelect) {
+            currencySelect.addEventListener('change', async (e) => {
+                currentCurrency = e.target.value;
+                try {
+                    const response = await fetch('/api/exchange_rates');
+                    exchangeRates = await response.json();
+                    updatePrices();
+                    await fetch('/api/set_currency', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currency: currentCurrency })
+                    });
+                    showToast('Currency updated');
+                } catch (error) {
+                    console.error('Error updating currency:', error);
+                    showToast('Error updating currency', 'error');
                 }
             });
+        }
+
+        function updatePrices() {
             const modal = document.getElementById('quick-view-modal');
             if (!modal.classList.contains('hidden')) {
                 const productId = modal.querySelector('#modal-add-to-cart').dataset.productId;
-                const product = products.find(p => p.id == productId);
+                const product = products.find(p => `${p.id}-${p.type}` === productId);
                 if (product) {
-                    document.getElementById('modal-price').textContent = product.is_discounted 
-                        ? `${(product.discounted_price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency} (Was ${(product.price * exchangeRates[currentCurrency]).toFixed(2)})`
-                        : `${(product.price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
+                    const priceElement = modal.querySelector('#modal-price');
+                    if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
+                        priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                    } else {
+                        priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                    }
                 }
             }
         }
 
-        // Product Data
-        const products = JSON.parse('{{ products|tojson|safe }}');
+        // Products
+        let products = [];
+        try {
+            products = JSON.parse('{{ products|tojson|safe }}');
+            console.log('Products:', products);
+        } catch (error) {
+            console.error('Error parsing products:', error);
+        }
 
-        // Category and Subcategory Filtering
+        // Filtering
         function applyFilters() {
             let visibleProducts = 0;
+            const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase() || 'all';
+            const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else '' }}'.toLowerCase() || 'all';
             document.querySelectorAll('.product-card').forEach(card => {
-                const cardCategory = card.getAttribute('data-category').toLowerCase();
-                const cardSubcategory = card.getAttribute('data-subcategory').toLowerCase();
-                const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}'.toLowerCase();
-                const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else ""|safe }}'.toLowerCase();
-                
+                const cardCategory = (card.dataset.categorySlug || 'all').toLowerCase();
+                const cardSubcategory = (card.dataset.subcategorySlug || '').toLowerCase() || 'all';
                 const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
-                const subcategoryMatch = !selectedSubcategory || cardSubcategory === selectedSubcategory;
-
+                const subcategoryMatch = selectedSubcategory === 'all' || cardSubcategory === selectedSubcategory;
                 if (categoryMatch && subcategoryMatch) {
                     card.style.display = 'block';
                     visibleProducts++;
@@ -1086,96 +942,116 @@
                     card.style.display = 'none';
                 }
             });
-
-            const noResults = document.getElementById('no-results');
-            noResults.style.display = visibleProducts === 0 ? 'block' : 'none';
+            document.getElementById('no-products').style.display = visibleProducts > 0 ? 'none' : 'block';
         }
 
-        // Add to Cart
+        // Gifts Popup
+        document.addEventListener('DOMContentLoaded', () => {
+            const giftsPopup = document.getElementById('gifts-popup');
+            const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase();
+            const isGiftsPage = selectedCategory === 'gifts';
+            const popupClosed = sessionStorage.getItem('giftsPopupClosed');
+            if (giftsPopup && !isGiftsPage && !popupClosed) {
+                giftsPopup.classList.add('open');
+                giftsPopup.style.transform = 'translateY(0)';
+            }
+            applyFilters();
+            updatePrices();
+            document.querySelectorAll('.product-image-container img').forEach(img => {
+                img.addEventListener('error', () => {
+                    console.warn(`Image failed to load: ${img.src}`);
+                    img.src = '/static/uploads/placeholder.jpg';
+                });
+            });
+        });
+
+        function toggleGiftsPopup() {
+            const popup = document.getElementById('gifts-popup');
+            if (popup) {
+                const isOpen = popup.classList.toggle('open');
+                popup.style.transform = isOpen ? 'translateY(0)' : (window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)');
+                sessionStorage.setItem('giftsPopupClosed', !isOpen ? 'true' : 'false');
+            }
+        }
+
+        function closeGiftsPopup() {
+            const popup = document.getElementById('gifts-popup');
+            if (popup) {
+                popup.classList.remove('open');
+                popup.style.transform = window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)';
+                sessionStorage.setItem('giftsPopupClosed', 'true');
+            }
+        }
+
+        // Cart
         const cartModal = document.getElementById('cart-modal');
         const closeCartModal = document.getElementById('close-cart-modal');
         const confirmCart = document.getElementById('confirm-cart');
         const cancelCart = document.getElementById('cancel-cart');
         const cartQuantity = document.getElementById('cart-quantity');
 
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const productId = button.dataset.productId;
-                confirmCart.dataset.productId = productId;
-                cartModal.classList.remove('hidden');
-                cartQuantity.value = 1;
-            });
-        });
-
-        confirmCart.addEventListener('click', async () => {
-            const productId = confirmCart.dataset.productId;
-            const quantity = parseInt(cartQuantity.value) || 1;
-            try {
-                const response = await fetch('/api/cart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: parseInt(productId), quantity })
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    showToast('Product added to cart!');
-                    cartModal.classList.add('hidden');
-                } else {
-                    showToast(result.error || 'Failed to add to cart', 'error');
-                    if (result.redirect) {
-                        window.location.href = result.redirect;
+        if (confirmCart) {
+            confirmCart.addEventListener('click', async () => {
+                const productId = confirmCart.dataset.productId;
+                const productType = confirmCart.dataset.productType;
+                const quantity = parseInt(cartQuantity.value) || 1;
+                try {
+                    const response = await fetch('/api/cart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            product_id: parseInt(productId.split('-')[0]),
+                            product_type: productType,
+                            quantity
+                        })
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showToast('Added to cart');
+                        cartModal.classList.add('hidden');
+                    } else {
+                        showToast(`Error: ${result.error || 'Failed to add to cart'}`, 'error');
+                        if (result.redirect) window.location.href = result.redirect;
                     }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    showToast('Error adding to cart', 'error');
                 }
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                showToast('Error adding to cart', 'error');
-            }
-        });
+            });
+        }
 
-        cancelCart.addEventListener('click', () => {
-            cartModal.classList.add('hidden');
-        });
+        if (cancelCart) cancelCart.addEventListener('click', () => cartModal.classList.add('hidden'));
+        if (closeCartModal) closeCartModal.addEventListener('click', () => cartModal.classList.add('hidden'));
+        if (cartModal) {
+            cartModal.addEventListener('click', (e) => {
+                if (e.target === cartModal) cartModal.classList.add('hidden');
+            });
+        }
 
-        closeCartModal.addEventListener('click', () => {
-            cartModal.classList.add('hidden');
-        });
-
-        cartModal.addEventListener('click', (e) => {
-            if (e.target === cartModal) {
-                cartModal.classList.add('hidden');
-            }
-        });
-
-        closeCartModal.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+        // Wishlist
+        document.querySelectorAll('.add-to-wishlist').forEach(button => {
+            button.addEventListener('click', async (e) => {
                 e.preventDefault();
-                cartModal.classList.add('hidden');
-            }
-        });
-
-        // Add to Wishlist
-        document.querySelectorAll('.add-to-wishlist').forEach(icon => {
-            icon.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const productId = icon.dataset.productId;
+                const productId = button.dataset.productId;
+                const productType = button.dataset.productType;
                 try {
                     const response = await fetch('/api/wishlist', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ product_id: parseInt(productId) })
+                        body: JSON.stringify({
+                            product_id: parseInt(productId.split('-')[0]),
+                            product_type: productType
+                        })
                     });
                     const result = await response.json();
                     if (response.ok) {
-                        icon.classList.toggle('far');
-                        icon.classList.toggle('fas');
-                        icon.classList.toggle('filled');
-                        showToast('Product added to wishlist!');
+                        button.classList.toggle('far');
+                        button.classList.toggle('fas');
+                        button.classList.toggle('filled');
+                        showToast(result.message || 'Added to wishlist');
                     } else {
-                        showToast(result.error || 'Failed to add to wishlist', 'error');
-                        if (result.error === 'Unauthorized') {
-                            window.location.href = '/login';
-                        }
+                        showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
+                        if (result.error === 'Unauthorized') window.location.href = '/login';
                     }
                 } catch (error) {
                     console.error('Error adding to wishlist:', error);
@@ -1184,69 +1060,67 @@
             });
         });
 
-        // Quick View Modal
-        const modal = document.getElementById('quick-view-modal');
+        // Quick View
+        const quickViewModal = document.getElementById('quick-view-modal');
         const closeModal = document.getElementById('close-modal');
-        const modalImage = document.getElementById('modal-image');
-        const modalName = document.getElementById('modal-name');
-        const modalCategory = document.getElementById('modal-category');
-        const modalSubcategory = document.getElementById('modal-subcategory');
-        const modalPrice = document.getElementById('modal-price');
-        const modalDescription = document.getElementById('modal-description');
-        const modalAddToCart = document.getElementById('modal-add-to-cart');
-        const modalAddToWishlist = document.getElementById('modal-add-to-wishlist');
 
         document.querySelectorAll('.quick-view').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
-                const productCard = button.closest('.product-card');
-                const productId = productCard.dataset.productId;
-                const product = products.find(p => p.id == productId);
-
-                modalImage.src = product.image;
-                modalImage.alt = product.title;
-                modalName.textContent = product.title;
-                modalCategory.textContent = `Category: ${product.category}`;
-                modalSubcategory.textContent = `Subcategory: ${product.subcategory}`;
-                modalPrice.textContent = product.is_discounted ? 
-                    `${(product.discounted_price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency} (Was ${(product.price * exchangeRates[currentCurrency]).toFixed(2)})`
-                    : `${(product.price * exchangeRates[currentCurrency]).toFixed(2)} ${currentCurrency}`;
-                modalDescription.textContent = product.description;
-                modalAddToCart.dataset.productId = productId;
-                modalAddToWishlist.dataset.productId = productId;
-
-                modal.classList.remove('hidden');
+                const productId = button.dataset.productId;
+                const product = products.find(p => `${p.id}-${p.type}` === productId);
+                if (product) {
+                    document.getElementById('modal-image').src = product.image || '/static/uploads/placeholder.jpg';
+                    document.getElementById('modal-name').textContent = product.title || 'N/A';
+                    document.getElementById('modal-category').textContent = `Category: ${product.category || 'N/A'}`;
+                    document.getElementById('modal-subcategory').textContent = `Subcategory: ${product.subcategory || 'N/A'}`;
+                    const priceElement = document.getElementById('modal-price');
+                    if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
+                        priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                    } else {
+                        priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                    }
+                    document.getElementById('modal-description').textContent = product.description || 'No description';
+                    document.getElementById('modal-add-to-cart').dataset.productId = productId;
+                    document.getElementById('modal-add-to-cart').dataset.productType = button.dataset.productType;
+                    document.getElementById('modal-add-to-wishlist').dataset.productId = productId;
+                    document.getElementById('modal-add-to-wishlist').dataset.productType = button.dataset.productType;
+                    quickViewModal.classList.remove('hidden');
+                } else {
+                    showToast('Product not found', 'error');
+                }
             });
         });
 
-        // Modal Add to Cart
-        modalAddToCart.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const productId = modalAddToCart.dataset.productId;
-            confirmCart.dataset.productId = productId;
+        document.getElementById('modal-add-to-cart')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = e.target.dataset.productId;
+            const productType = e.target.dataset.productType;
+            confirmCart.setAttribute('data-product-id', productId);
+            confirmCart.setAttribute('data-product-type', productType);
             cartModal.classList.remove('hidden');
             cartQuantity.value = 1;
         });
 
-        // Modal Add to Wishlist
-        modalAddToWishlist.addEventListener('click', async (e) => {
+        document.getElementById('modal-add-to-wishlist')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            const productId = modalAddToWishlist.dataset.productId;
+            const productId = e.target.dataset.productId;
+            const productType = e.target.dataset.productType;
             try {
                 const response = await fetch('/api/wishlist', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: parseInt(productId) })
+                    body: JSON.stringify({
+                        product_id: parseInt(productId.split('-')[0]),
+                        product_type: productType
+                    })
                 });
                 const result = await response.json();
                 if (response.ok) {
-                    showToast('Product added to wishlist!');
-                    modal.classList.add('hidden');
+                    showToast(result.message || 'Added to wishlist');
                 } else {
-                    showToast(result.error || 'Failed to add to wishlist', 'error');
-                    if (result.error === 'Unauthorized') {
-                        window.location.href = '/login';
-                    }
+                    showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
+                    if (result.error === 'Unauthorized') window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Error adding to wishlist:', error);
@@ -1254,60 +1128,12 @@
             }
         });
 
-        // Close Modal
-        closeModal.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-
-        // Close Modal on Outside Click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Keyboard Accessibility
-        closeModal.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Initialize Filters
-        applyFilters();
-
-        // Highlight Active Filters
-        const selectedCategory = '{{ selected_category.slug if selected_category else "all"|safe }}';
-        const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else ""|safe }}';
-        if (selectedCategory !== 'all') {
-            const categoryBtn = document.querySelector(`.category-filter[data-category="${selectedCategory}"]`);
-            if (categoryBtn) {
-                categoryBtn.classList.add('text-yellow-600', 'font-semibold');
-            }
-        }
-        if (selectedSubcategory) {
-            const subcategoryBtn = document.querySelector(`.subcategory-filter[data-subcategory="${selectedSubcategory}"]`);
-            if (subcategoryBtn) {
-                subcategoryBtn.classList.add('text-yellow-600', 'font-semibold');
-            }
-        }
-
-        // Ensure Hero Section Visibility
-        window.addEventListener('load', () => {
-            const heroSection = document.getElementById('home');
-            heroSection.style.display = 'block';
-            heroSection.style.opacity = '1';
-        });
-
-        // Prevent Hero Section Hiding
-        document.querySelectorAll('.category-filter, .subcategory-filter').forEach(link => {
-            link.addEventListener('click', () => {
-                const heroSection = document.getElementById('home');
-                heroSection.style.display = 'block';
-                heroSection.style.opacity = '1';
+        if (closeModal) closeModal.addEventListener('click', () => quickViewModal.classList.add('hidden'));
+        if (quickViewModal) {
+            quickViewModal.addEventListener('click', (e) => {
+                if (e.target === quickViewModal) quickViewModal.classList.add('hidden');
             });
-        });
+        }
     </script>
 </body>
 </html>

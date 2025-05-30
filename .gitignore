@@ -1,5 +1,2 @@
-/instance/database.db
-/__pycache__
 /venv
-__pycache__/models.cpython-311.pyc
-instance/database.db
+/__pycache__

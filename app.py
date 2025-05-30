@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,7 +9,7 @@ from sqlalchemy import desc
 from datetime import datetime, timedelta
 from slugify import slugify
 import os
-import uuid 
+import uuid
 from dotenv import load_dotenv
 import secrets
 import random
@@ -19,27 +18,34 @@ import base64
 import logging
 import requests
 from sqlalchemy.sql import func
-from sqlalchemy.exc import SQLAlchemyError 
-from datetime import datetime, timedelta 
+from sqlalchemy.exc import SQLAlchemyError
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-atexit.register(lambda: scheduler.shutdown())
+from collections import namedtuple
 
+# Load environment variables
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+# Set database URI to project root with absolute path
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'database.db')
+# app.config['UPLOAD_FOLDER'] = os.path.join('static', 'Uploads'.lower())
+app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
 app.config['SESSION_COOKIE_NAME'] = 'session'
+
+# Ensure upload folder exists
+upload_folder = os.path.join(app.static_folder or 'static', 'Uploads'.lower())
+if not os.path.exists(upload_folder):
+    os.makedirs(upload_folder)
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -54,11 +60,13 @@ API_KEY = os.environ.get('EXCHANGE_RATE_API_KEY')
 SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD']
 CACHE_DURATION = timedelta(days=1)
 
-# Ensure upload folder exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+# Unified product structure
+UnifiedProduct = namedtuple('UnifiedProduct', [
+    'id', 'title', 'image', 'category_slug', 'subcategory_slug', 'price',
+    'discounted_price', 'is_discounted', 'category', 'subcategory', 'description', 'type'
+])
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -67,6 +75,15 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 
+def get_image_path(image, default='placeholder.jpg'):
+    if not image:
+        return '/static/uploads/placeholder.jpg'
+    filename = os.path.basename(image)  # Ensure only filename is used
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(file_path):
+        return f"/static/uploads/{filename}"
+    logger.warning(f"Image not found: {file_path}")
+    return '/static/uploads/placeholder.jpg'
 
 def update_exchange_rates():
     with app.app_context():
@@ -100,20 +117,22 @@ def update_exchange_rates():
 scheduler = BackgroundScheduler()
 scheduler.add_job(update_exchange_rates, 'interval', days=1, next_run_time=datetime.utcnow())
 scheduler.start()
-
+atexit.register(lambda: scheduler.shutdown())
 
 # Utility functions
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 def save_file(file):
     if file and allowed_file(file.filename):
-        filename = secure_filename(f"{datetime.now().timestamp()}_{file.filename}")
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        return filename
+        filename = secure_filename(file.filename)
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        try:
+            file.save(file_path)
+            app.logger.debug(f"Saved file: {file_path}")
+            return unique_filename
+        except Exception as e:
+            app.logger.error(f"Failed to save file {filename}: {str(e)}")
+            return None
+    app.logger.warning(f"Invalid file upload attempt: {file.filename if file else 'None'}")
     return None
 
 def generate_random_password(length=12):
@@ -166,13 +185,24 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     image = db.Column(db.String(255), nullable=True)
     price = db.Column(db.Float, nullable=False)
-    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)  # Add foreign key
+    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     subcategory_id = db.Column(db.Integer, db.ForeignKey('subcategory.id'), nullable=True)
     category = db.relationship('Category', back_populates='products')
     subcategory = db.relationship('Subcategory', back_populates='products')
-    discount = db.relationship('Discount', back_populates='product', uselist=False)  # Add relationship
+    discount = db.relationship('Discount', back_populates='product', uselist=False)
+
+    @property
+    def discounted_price(self):
+        if self.discount and self.discount.is_active():
+            discount_percent = self.discount.percent
+            return self.price * (1 - discount_percent / 100)
+        return None
+
+    @property
+    def is_discounted(self):
+        return self.discount is not None and self.discount.is_active()
 
 class Order(db.Model):
     __tablename__ = 'order'
@@ -200,13 +230,13 @@ class Category(db.Model):
     __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    slug = db.Column(db.String(100), nullable=True)
-    description = db.Column(db.Text, nullable=True)  # Already present
-    image = db.Column(db.String(255), nullable=True)  # Add image field
+    slug = db.Column(db.String(100), unique=True, nullable=False)  # Changed to nullable=False
+    description = db.Column(db.Text, nullable=True)
+    image = db.Column(db.String(255), nullable=True)
     products = db.relationship('Product', back_populates='category')
     subcategories = db.relationship('Subcategory', back_populates='category')
     gifts = db.relationship('Gift', back_populates='category')
-
+    
 class Subcategory(db.Model):
     __tablename__ = 'subcategory'
     id = db.Column(db.Integer, primary_key=True)
@@ -224,7 +254,11 @@ class Discount(db.Model):
     percent = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    product = db.relationship('Product', back_populates='discount', uselist=False)  # One-to-one relationship
+    product = db.relationship('Product', back_populates='discount', uselist=False)
+
+    def is_active(self):
+        now = datetime.utcnow().date()
+        return self.start_date <= now <= self.end_date
 
 class Artisan(db.Model):
     __tablename__ = 'artisan'
@@ -291,6 +325,19 @@ class Gift(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     category = db.relationship('Category', back_populates='gifts')
     subcategory = db.relationship('Subcategory', back_populates='gifts')
+    discount_id = db.Column(db.Integer, db.ForeignKey('discount.id'), nullable=True)
+    discount = db.relationship('Discount', backref='gifts', uselist=False)
+
+    @property
+    def discounted_price(self):
+        if self.discount and self.discount.is_active():
+            discount_percent = self.discount.percent
+            return self.price * (1 - discount_percent / 100)
+        return None
+
+    @property
+    def is_discounted(self):
+        return self.discount is not None and self.discount.is_active()
 
 
     
@@ -660,7 +707,7 @@ def add_product():
             category_id=data['category_id'],
             subcategory_id=data.get('subcategory_id'),
             price=float(data['price']),
-            discount_id=discount_id,  # Set discount_id instead of discount
+            discount_id=discount_id,
             description=data.get('description'),
             image=image_filename
         )
@@ -668,7 +715,11 @@ def add_product():
         db.session.commit()
 
         logger.info(f'Product added successfully: {product.id}')
-        return jsonify({'id': product.id, 'message': 'Product added successfully'}), 201
+        return jsonify({
+            'id': product.id,
+            'message': 'Product added successfully',
+            'image': get_image_path(image_filename)
+        }), 201
 
     except Exception as e:
         db.session.rollback()
@@ -702,12 +753,16 @@ def get_products():
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
         logger.error(f'Error fetching products: {str(e)}')
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500     
     
 @app.route('/api/discounted_artefacts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_product(id):
     # Fetch product or return 404 if not found
-    product = Product.query.get_or_404(id)
+    try:
+        product = Product.query.get_or_404(id)
+    except Exception as e:
+        logger.error(f"Error fetching product {id}: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
 
     if request.method == 'GET':
         try:
@@ -911,15 +966,24 @@ def handle_product(id):
             return jsonify({'error': 'Unauthorized'}), 401
 
         try:
+            # Delete associated order items
+            deleted_items = OrderItem.query.filter_by(product_id=product.id).delete()
+            logger.debug(f"Deleted {deleted_items} order items for product {id}")
+
             # Delete associated discount if exists
             if product.discount:
                 db.session.delete(product.discount)
+                logger.debug(f"Deleted discount for product {id}")
 
             # Delete product image file if exists
             if product.image:
                 image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image)
                 if os.path.exists(image_path):
-                    os.remove(image_path)
+                    try:
+                        os.remove(image_path)
+                        logger.debug(f"Deleted image file: {image_path}")
+                    except OSError as e:
+                        logger.warning(f"Failed to delete image file {image_path}: {str(e)}")
 
             # Delete product
             db.session.delete(product)
@@ -929,11 +993,11 @@ def handle_product(id):
         except SQLAlchemyError as e:
             db.session.rollback()
             logger.error(f"Database error deleting product {id}: {str(e)}")
-            return jsonify({'error': 'Database error'}), 500
+            return jsonify({'error': f'Database error: {str(e)}'}), 500
         except Exception as e:
             db.session.rollback()
             logger.error(f"Unexpected error deleting product {id}: {str(e)}")
-            return jsonify({'error': 'Internal server error'}), 500
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
         
 @app.route('/api/gifts', methods=['GET'])
 def get_gifts():
@@ -1856,40 +1920,51 @@ def handle_user(id):
 def handle_categories():
     if request.method == 'GET':
         try:
-            categories = Category.query.all()
-            return jsonify([
-                {
+            categories = db.session.query(Category).all()
+            serialized_categories = []
+            for category in categories:
+                image_path = get_image_path(category.image)
+                logger.debug(f"Category ID: {category.id}, Name: {category.name}, Raw Image: {category.image!r}, Constructed Image Path: {image_path}")
+                if 'default_category.jpg' in image_path:
+                    logger.error(f"Category ID: {category.id} returned default_category.jpg, should be placeholder.jpg")
+                serialized_categories.append({
                     'id': category.id,
                     'name': category.name,
-                    'description': category.description,
-                    'image': category.image
-                } for category in categories
-            ])
-        except SQLAlchemyError as e:
-            logging.error(f"Database error in GET /api/categories: {str(e)}")
+                    'slug': category.slug,
+                    'description': category.description or '',
+                    'image': image_path
+                })
+            logger.info(f"Returning {len(serialized_categories)} categories")
+            return jsonify(serialized_categories)
+        except db.SQLAlchemyError as e:
+            logger.error(f"Database error in GET /api/categories: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
-            logging.error(f"Unexpected error in GET /api/categories: {str(e)}")
+            logger.error(f"Unexpected error in GET /api/categories: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
 
     elif request.method == 'POST':
         try:
-            # Check if the request contains FormData
             if not request.form.get('name'):
                 return jsonify({'error': 'Category name is required'}), 400
 
-            # Initialize category data
             name = request.form.get('name').strip()
             description = request.form.get('description', '').strip()
+
+            # Generate slug
+            base_slug = slugify(name)
+            slug = base_slug
+            counter = 1
+            while Category.query.filter_by(slug=slug).first():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
 
             # Handle image upload
             image_filename = None
             if 'image' in request.files:
                 file = request.files['image']
                 if file and file.filename and allowed_file(file.filename):
-                    # Secure the filename to prevent malicious input
                     filename = secure_filename(file.filename)
-                    # Generate a unique filename to avoid conflicts
                     unique_filename = f"{uuid.uuid4().hex}_{filename}"
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
                     file.save(file_path)
@@ -1900,6 +1975,7 @@ def handle_categories():
             # Create new category
             new_category = Category(
                 name=name,
+                slug=slug,
                 description=description or None,
                 image=image_filename
             )
@@ -1910,20 +1986,27 @@ def handle_categories():
                 'message': 'Category added successfully',
                 'id': new_category.id,
                 'name': new_category.name,
+                'slug': new_category.slug,
                 'description': new_category.description,
-                'image': new_category.image
+                'image': get_image_path(new_category.image)
             }), 201
 
-        except SQLAlchemyError as e:
+        except db.SQLAlchemyError as e:
             db.session.rollback()
-            logging.error(f"Database error in POST /api/categories: {str(e)}")
+            logger.error(f"Database error in POST /api/categories: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
             if image_filename and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], image_filename)):
-                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))  # Clean up uploaded file on error
-            logging.error(f"Unexpected error in POST /api/categories: {str(e)}")
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            logger.error(f"Unexpected error in POST /api/categories: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
+
+# Helper function for allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png'}
+
+
 
 # Route to handle GET, PUT, DELETE for a specific category
 @app.route('/api/categories/<int:id>', methods=['GET', 'PUT', 'DELETE'])
@@ -2688,168 +2771,135 @@ def our_products():
         current_currency='USD'
     )
     
-@app.route('/category/', defaults={'category_slug': 'all', 'subcategory_slug': 'all'})
-@app.route('/category/<category_slug>/', defaults={'subcategory_slug': 'all'})
-@app.route('/category/<category_slug>/<subcategory_slug>')
-def category_page(category_slug='all', subcategory_slug='all'):
+@app.route('/category')
+def category_default():
+    """
+    Redirects /category to category_page with default slugs to display all categories.
+    """
     try:
-        # Get current currency from session, default to KES
+        logger.debug("Redirecting /category to category_page with category_slug='all', subcategory_slug='all'")
+        return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
+    except Exception as e:
+        logger.error(f"Unexpected error in /category: {str(e)}")
+        return render_template('500.html', error=str(e)), 500
+
+@app.route('/categories')
+def categories():
+    """
+    Redirects to category_page with default slugs to display all categories.
+    """
+    try:
+        logger.debug("Redirecting /categories to category_page with category_slug='all', subcategory_slug='all'")
+        return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
+    except Exception as e:
+        logger.error(f"Unexpected error in /categories: {str(e)}")
+        return render_template('500.html', error=str(e)), 500
+
+@app.route('/category/<category_slug>/<subcategory_slug>')
+def category_page(category_slug, subcategory_slug):
+    try:
+        # Fetch exchange rates and current currency
+        exchange_rates = ExchangeRate.query.order_by(ExchangeRate.timestamp.desc()).first()
+        exchange_rates_dict = {
+            'KES': 1.0,
+            'USD': exchange_rates.usd if exchange_rates else 1.0,
+            'EUR': exchange_rates.eur if exchange_rates else 1.0,
+            'GBP': exchange_rates.gbp if exchange_rates else 1.0
+        }
         current_currency = session.get('currency', 'KES')
 
-        # Fetch all categories for navbar
+        # Fetch categories
         categories = Category.query.all()
-
-        # Fetch exchange rates
-        exchange_rates = {
-            'EUR': 0.0073,
-            'GBP': 0.0061,
-            'KES': 1.0,
-            'USD': 0.0077
-        }
-        recent_rate = ExchangeRate.query.order_by(ExchangeRate.updated_at.desc()).first()
-        if recent_rate and recent_rate.updated_at > datetime.utcnow() - CACHE_DURATION:
-            exchange_rates = {
-                'EUR': recent_rate.eur,
-                'GBP': recent_rate.gbp,
-                'KES': recent_rate.kes,
-                'USD': recent_rate.usd
-            }
 
         # Initialize variables
-        products = []
         selected_category = None
         selected_subcategory = None
-        page_title = "All Categories - Zira Collections"
-        category_image = "https://png.pngtree.com/background/20230611/original/pngtree-ancient-artifacts-from-an-archaeological-site-in-the-united-kingdom-picture-image_3167955.jpg"
-        category_description = "Explore a wide range of African artistry across all our categories."
+        products = []
+        category_image = '/static/uploads/placeholder.jpg'
+        category_description = 'Explore our collection of authentic African-inspired artifacts.'
 
         # Handle category and subcategory filtering
-        if category_slug.lower() != 'all':
+        if category_slug.lower() == 'all':
+            products = Product.query.all()
+        else:
             selected_category = Category.query.filter_by(slug=category_slug).first()
             if not selected_category:
-                logging.error(f"Category not found: {category_slug}")
-                return render_template('404.html'), 404
-            category_image = f"/static/uploads/{selected_category.image}" if selected_category.image else category_image
-            category_description = selected_category.description or category_description
-            page_title = f"{selected_category.name} - Zira Collections"
+                logger.warning(f"Category not found: {category_slug}")
+                return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
 
-            if subcategory_slug.lower() != 'all':
+            # Handle category image
+            category_image = get_image_path(selected_category.image)
+            category_description = selected_category.description or f'Explore our collection of {selected_category.name} artifacts.'
+
+            if subcategory_slug.lower() == 'all':
+                products = Product.query.filter_by(category_id=selected_category.id).all()
+            else:
                 selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug, category_id=selected_category.id).first()
                 if not selected_subcategory:
-                    logging.error(f"Subcategory not found: {subcategory_slug} for category {category_slug}")
-                    return render_template('404.html'), 404
-                products = Product.query.filter_by(category_id=selected_category.id, subcategory_id=selected_subcategory.id).options(
-                    joinedload(Product.discount)
-                ).order_by(Product.created_at.desc()).all()
-                page_title = f"{selected_category.name} - {selected_subcategory.name} - Zira Collections"
-            else:
-                products = Product.query.filter_by(category_id=selected_category.id).options(
-                    joinedload(Product.discount)
-                ).order_by(Product.created_at.desc()).all()
-        else:
-            if subcategory_slug.lower() != 'all':
-                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug).first()
-                if not selected_subcategory:
-                    logging.error(f"Subcategory not found: {subcategory_slug}")
-                    return render_template('404.html'), 404
-                products = Product.query.filter_by(subcategory_id=selected_subcategory.id).options(
-                    joinedload(Product.discount)
-                ).order_by(Product.created_at.desc()).all()
-                page_title = f"All Categories - {selected_subcategory.name} - Zira Collections"
-            else:
-                products = Product.query.options(joinedload(Product.discount)).order_by(Product.created_at.desc()).all()
+                    logger.warning(f"Subcategory not found: {subcategory_slug} in category: {category_slug}")
+                    return redirect(url_for('category_page', category_slug=category_slug, subcategory_slug='all'))
+                products = Product.query.filter_by(subcategory_id=selected_subcategory.id).all()
 
-        # Prepare product data
-        today = datetime.utcnow().date()
-        product_data = []
-        for p in products:
-            discounted_price = p.price
-            is_discounted = False
-            if p.discount and p.discount.start_date <= today <= p.discount.end_date:
-                discounted_price = p.price * (1 - p.discount.percent / 100)
-                is_discounted = True
-            product_data.append({
-                'id': p.id,
-                'title': p.title.strip() if p.title else "Unnamed Product",
-                'category': p.category.name.strip() if p.category and p.category.name else "Uncategorized",
-                'subcategory': p.subcategory.name.strip() if p.subcategory and p.subcategory.name else "None",
-                'price': float(p.price),
-                'discounted_price': float(discounted_price),
-                'is_discounted': is_discounted,
-                'discount_percent': p.discount.percent if is_discounted else None,
-                'image': f"/static/uploads/{p.image}" if p.image else "https://via.placeholder.com/300x200",
-                'description': p.description if p.description else "No description available."
+        # Serialize products
+        serialized_products = []
+        for product in products:
+            serialized_products.append({
+                'id': product.id,
+                'title': product.title,
+                'image': get_image_path(product.image),
+                'price': float(product.price),
+                'discounted_price': float(product.discounted_price) if product.discounted_price else None,
+                'is_discounted': product.is_discounted,
+                'category': product.category.name if product.category else 'N/A',
+                'subcategory': product.subcategory.name if product.subcategory else 'N/A',
+                'category_slug': product.category.slug if product.category else 'all',
+                'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
+                'description': product.description or 'No description available',
+                'type': 'product'
             })
 
-        # Log for debugging
-        logging.debug(f"Rendering category.html: category_slug={category_slug}, subcategory_slug={subcategory_slug}, products={len(product_data)}")
-        logging.debug(f"selected_category.image: {selected_category.image if selected_category else None}, category_image: {category_image}")
+        # Handle gifts for 'gifts' category
+        if category_slug.lower() == 'gifts':
+            gift_query = Gift.query
+            if selected_category:
+                gift_query = gift_query.filter_by(category_id=selected_category.id)
+            if subcategory_slug.lower() != 'all':
+                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug).first()
+                if selected_subcategory:
+                    gift_query = gift_query.filter_by(subcategory_id=selected_subcategory.id)
+            gifts = gift_query.all()
+            for gift in gifts:
+                serialized_products.append({
+                    'id': gift.id,
+                    'title': gift.product_name,
+                    'image': get_image_path(gift.image),
+                    'price': float(gift.price),
+                    'discounted_price': float(gift.discounted_price) if gift.discounted_price else None,
+                    'is_discounted': gift.is_discounted,
+                    'category': gift.category.name if gift.category else 'Gifts',
+                    'subcategory': gift.subcategory.name if gift.subcategory else 'N/A',
+                    'category_slug': gift.category.slug if gift.category else 'gifts',
+                    'subcategory_slug': gift.subcategory.slug if gift.subcategory else 'all',
+                    'description': gift.description or 'No description available',
+                    'type': 'gift'
+                })
 
+        logger.debug(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, products={len(serialized_products)}")
         return render_template(
             'category.html',
             categories=categories,
-            products=product_data,
             selected_category=selected_category,
             selected_subcategory=selected_subcategory,
+            products=serialized_products,
             category_image=category_image,
             category_description=category_description,
-            exchange_rates=exchange_rates,
-            current_currency=current_currency,
-            page_title=page_title,
-            today=today,
-            debug=True
+            exchange_rates=exchange_rates_dict,
+            current_currency=current_currency
         )
-
-    except SQLAlchemyError as e:
-        logging.error(f"Database error in /category/{category_slug}/{subcategory_slug}: {str(e)}")
-        return render_template('500.html'), 500
     except Exception as e:
-        logging.error(f"Unexpected error in /category/{category_slug}/{subcategory_slug}: {str(e)}")
-        return render_template('500.html'), 500
+        logger.error(f"Error in category_page: {str(e)}")
+        return render_template('error.html', error='Failed to load category'), 500
     
-@app.route('/categories')
-def default_category_page():
-    return category_page(category_slug='all', subcategory_slug='all')
-    
-@app.route('/categories')
-@app.route('/categories/<string:slug>')
-def categories(slug=None):
-    try:
-        # Get current currency from session (default to KES)
-        current_currency = session.get('currency', 'KES')
-
-        # Fetch all categories for display (e.g., in a sidebar or dropdown)
-        categories = Category.query.all()
-
-        if slug:
-            # If a category slug is provided, fetch products for that category
-            category = Category.query.filter_by(slug=slug).first_or_404()
-            products = Product.query.filter_by(category_id=category.id).order_by(Product.created_at.desc()).all()
-            page_title = f"{category.name} - Zira Collections"
-        else:
-            # If no slug, show all categories or a general category overview
-            products = Product.query.order_by(Product.created_at.desc()).limit(12).all()  # Limit for overview
-            page_title = "Categories - Zira Collections"
-
-        # Log the fetched data for debugging
-        logging.debug(f"Rendering category.html: slug={slug}, categories={len(categories)}, products={len(products)}")
-
-        return render_template(
-            'category.html',
-            categories=categories,
-            products=products,
-            selected_category=category if slug else None,
-            today=datetime.utcnow().date(),
-            current_currency=current_currency,
-            page_title=page_title
-        )
-
-    except SQLAlchemyError as e:
-        logging.error(f"Database error in /categories: {str(e)}")
-        return render_template('500.html'), 500
-    except Exception as e:
-        logging.error(f"Unexpected error in /categories: {str(e)}")
-        return render_template('500.html'), 500
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
 def products():
@@ -2867,45 +2917,108 @@ def products():
 
 @app.route('/api/wishlist', methods=['GET', 'POST'])
 def handle_wishlist():
+    # Check if user is logged in
     if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+        return jsonify({'error': 'Unauthorized', 'redirect': '/login'}), 401
+
+    # Get user
     user = User.query.filter_by(email=session['user']).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
+
     user_id = user.id
+
     if request.method == 'GET':
-        wishlist_items = Wishlist.query.filter_by(user_id=user_id).join(Product).all()
-        return jsonify([
-            {
-                'id': item.id,
-                'product_id': item.product_id,
-                'name': item.product.name,
-                'price': item.product.price,
-                'image': item.product.image
-            } for item in wishlist_items
-        ])
-    if request.method == 'POST':
+        # Retrieve wishlist items
+        try:
+            wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
+            response = []
+            for item in wishlist_items:
+                item_data = {
+                    'id': item.id,
+                    'product_id': item.product_id,
+                    'product_type': item.product_type
+                }
+                if item.product_type == 'product':
+                    product = Product.query.get(item.product_id)
+                    if product:
+                        item_data.update({
+                            'name': product.title,
+                            'price': product.price,
+                            'image': product.image
+                        })
+                    else:
+                        continue  # Skip invalid product
+                elif item.product_type == 'gift':
+                    gift = Gift.query.get(item.product_id)
+                    if gift:
+                        item_data.update({
+                            'name': gift.product_name,
+                            'price': gift.price,
+                            'image': gift.image
+                        })
+                    else:
+                        continue  # Skip invalid gift
+                response.append(item_data)
+            return jsonify(response)
+        except SQLAlchemyError as e:
+            logging.error(f"Database error in GET /api/wishlist: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            logging.error(f"Unexpected error in GET /api/wishlist: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    elif request.method == 'POST':
+        # Add item to wishlist
         try:
             data = request.get_json()
             product_id = data.get('product_id')
+            product_type = data.get('product_type', 'product')
+
+            # Validate input
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
-            product = Product.query.get(product_id)
-            if not product:
-                return jsonify({'error': 'Product not found'}), 404
-            if Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first():
-                return jsonify({'message': 'Product already in wishlist'}), 200
-            wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
+            if product_type not in ['product', 'gift']:
+                return jsonify({'error': 'Invalid product type'}), 400
+
+            # Get item based on type
+            if product_type == 'product':
+                item = Product.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Product not found'}), 404
+            else:  # gift
+                item = Gift.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Gift not found'}), 404
+                # Check availability
+                today = datetime.utcnow().date()
+                if item.start_date > today or item.end_date < today:
+                    return jsonify({'error': 'Gift is not available at this time'}), 400
+
+            # Check if item is already in wishlist
+            if Wishlist.query.filter_by(user_id=user_id, product_id=product_id, product_type=product_type).first():
+                return jsonify({'message': 'Item already in wishlist'}), 200
+
+            wishlist_item = Wishlist(
+                user_id=user_id,
+                product_id=product_id,
+                product_type=product_type
+            )
             db.session.add(wishlist_item)
             db.session.commit()
-            return jsonify({'message': 'Product added to wishlist'}), 201
+            return jsonify({
+                'message': 'Item added to wishlist',
+                'product_id': product_id,
+                'product_type': product_type
+            }), 201
+
         except SQLAlchemyError as e:
             db.session.rollback()
             logging.error(f"Database error in POST /api/wishlist: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
         except Exception as e:
             db.session.rollback()
-            logging.error(f"Unexpected error i/wishn POST /api/wishlist: {str(e)}")
+            logging.error(f"Unexpected error in POST /api/wishlist: {str(e)}")
             return jsonify({'error': 'Internal server error'}), 500
         
         
@@ -2940,27 +3053,52 @@ def handle_cart():
     if request.method == 'GET':
         # Retrieve cart items
         try:
-            cart_items = Cart.query.filter_by(user_id=user_id).join(Product).all()
-            return jsonify([
-                {
+            cart_items = Cart.query.filter_by(user_id=user_id).all()
+            response = []
+            for item in cart_items:
+                item_data = {
                     'id': item.id,
                     'product_id': item.product_id,
-                    'name': item.product.name,
-                    'price': item.product.price,
-                    'image': item.product.image,
                     'quantity': item.quantity,
-                    'total_price': round(item.product.price * item.quantity, 2)
-                } for item in cart_items
-            ])
+                    'product_type': item.product_type
+                }
+                if item.product_type == 'product':
+                    product = Product.query.get(item.product_id)
+                    if product:
+                        item_data.update({
+                            'name': product.title,
+                            'price': product.price,
+                            'image': product.image,
+                            'total_price': round(product.price * item.quantity, 2)
+                        })
+                    else:
+                        continue  # Skip invalid product
+                elif item.product_type == 'gift':
+                    gift = Gift.query.get(item.product_id)
+                    if gift:
+                        item_data.update({
+                            'name': gift.product_name,
+                            'price': gift.price,
+                            'image': gift.image,
+                            'total_price': round(gift.price * item.quantity, 2)
+                        })
+                    else:
+                        continue  # Skip invalid gift
+                response.append(item_data)
+            return jsonify(response)
         except SQLAlchemyError as e:
             logging.error(f"Database error in GET /api/cart: {str(e)}")
             return jsonify({'error': 'Database error'}), 500
+        except Exception as e:
+            logging.error(f"Unexpected error in GET /api/cart: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
 
     elif request.method == 'POST':
-        # Add or update product in cart
+        # Add or update item in cart
         try:
             data = request.get_json()
             product_id = data.get('product_id')
+            product_type = data.get('product_type', 'product')
             quantity = data.get('quantity', 1)
 
             # Validate input
@@ -2968,26 +3106,47 @@ def handle_cart():
                 return jsonify({'error': 'Product ID is required'}), 400
             if not isinstance(quantity, int) or quantity < 1:
                 return jsonify({'error': 'Quantity must be a positive integer'}), 400
+            if product_type not in ['product', 'gift']:
+                return jsonify({'error': 'Invalid product type'}), 400
 
-            product = Product.query.get(product_id)
-            if not product:
-                return jsonify({'error': 'Product not found'}), 404
+            # Get item based on type
+            if product_type == 'product':
+                item = Product.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Product not found'}), 404
+                # Check stock if applicable
+                if hasattr(item, 'stock') and item.stock < quantity:
+                    return jsonify({'error': f'Only {item.stock} items available in stock'}), 400
+            else:  # gift
+                item = Gift.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Gift not found'}), 404
+                # Check availability based on gift dates
+                today = datetime.utcnow().date()
+                if item.start_date > today or item.end_date < today:
+                    return jsonify({'error': 'Gift is not available at this time'}), 400
 
-            # Check stock availability (if applicable)
-            if hasattr(product, 'stock') and product.stock < quantity:
-                return jsonify({'error': f'Only {product.stock} items available in stock'}), 400
-
-            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id, product_type=product_type).first()
             if cart_item:
                 # Update existing cart item
                 cart_item.quantity += quantity
             else:
                 # Add new cart item
-                cart_item = Cart(user_id=user_id, product_id=product_id, quantity=quantity)
+                cart_item = Cart(
+                    user_id=user_id,
+                    product_id=product_id,
+                    product_type=product_type,
+                    quantity=quantity
+                )
                 db.session.add(cart_item)
 
             db.session.commit()
-            return jsonify({'message': 'Product added to cart', 'product_id': product_id, 'quantity': cart_item.quantity}), 201
+            return jsonify({
+                'message': 'Item added to cart',
+                'product_id': product_id,
+                'product_type': product_type,
+                'quantity': cart_item.quantity
+            }), 201
 
         except SQLAlchemyError as e:
             db.session.rollback()
@@ -3003,6 +3162,7 @@ def handle_cart():
         try:
             data = request.get_json()
             product_id = data.get('product_id')
+            product_type = data.get('product_type', 'product')
             quantity = data.get('quantity')
 
             # Validate input
@@ -3010,22 +3170,38 @@ def handle_cart():
                 return jsonify({'error': 'Product ID is required'}), 400
             if not isinstance(quantity, int) or quantity < 1:
                 return jsonify({'error': 'Quantity must be a positive integer'}), 400
+            if product_type not in ['product', 'gift']:
+                return jsonify({'error': 'Invalid product type'}), 400
 
-            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id, product_type=product_type).first()
             if not cart_item:
                 return jsonify({'error': 'Cart item not found'}), 404
 
-            product = Product.query.get(product_id)
-            if not product:
-                return jsonify({'error': 'Product not found'}), 404
-
-            # Check stock availability (if applicable)
-            if hasattr(product, 'stock') and product.stock < quantity:
-                return jsonify({'error': f'Only {product.stock} items available in stock'}), 400
+            # Get item based on type
+            if product_type == 'product':
+                item = Product.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Product not found'}), 404
+                # Check stock if applicable
+                if hasattr(item, 'stock') and item.stock < quantity:
+                    return jsonify({'error': f'Only {item.stock} items available in stock'}), 400
+            else:  # gift
+                item = Gift.query.get(product_id)
+                if not item:
+                    return jsonify({'error': 'Gift not found'}), 404
+                # Check availability
+                today = datetime.utcnow().date()
+                if item.start_date > today or item.end_date < today:
+                    return jsonify({'error': 'Gift is not available at this time'}), 400
 
             cart_item.quantity = quantity
             db.session.commit()
-            return jsonify({'message': 'Cart item updated', 'product_id': product_id, 'quantity': quantity}), 200
+            return jsonify({
+                'message': 'Cart item updated',
+                'product_id': product_id,
+                'product_type': product_type,
+                'quantity': quantity
+            }), 200
 
         except SQLAlchemyError as e:
             db.session.rollback()
@@ -3037,21 +3213,28 @@ def handle_cart():
             return jsonify({'error': 'Internal server error'}), 500
 
     elif request.method == 'DELETE':
-        # Remove product from cart
+        # Remove item from cart
         try:
             data = request.get_json()
             product_id = data.get('product_id')
+            product_type = data.get('product_type', 'product')
 
             if not product_id:
                 return jsonify({'error': 'Product ID is required'}), 400
+            if product_type not in ['product', 'gift']:
+                return jsonify({'error': 'Invalid product type'}), 400
 
-            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+            cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id, product_type=product_type).first()
             if not cart_item:
                 return jsonify({'error': 'Cart item not found'}), 404
 
             db.session.delete(cart_item)
             db.session.commit()
-            return jsonify({'message': 'Product removed from cart', 'product_id': product_id}), 200
+            return jsonify({
+                'message': 'Item removed from cart',
+                'product_id': product_id,
+                'product_type': product_type
+            }), 200
 
         except SQLAlchemyError as e:
             db.session.rollback()

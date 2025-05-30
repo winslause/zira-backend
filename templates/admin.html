@@ -1659,7 +1659,7 @@ async function populateCategories() {
                 <td>${category.id}</td>
                 <td>${category.name}</td>
                 <td>${category.description || 'N/A'}</td>
-                <td>${category.image ? `<img src="/static/uploads/${category.image}" alt="${category.name}" class="image-preview" onerror="this.src='/static/uploads/default_category.jpg'">` : 'No Image'}</td>
+                <td>${category.image ? `<img src="${category.image}" alt="${category.name}" class="image-preview" onerror="this.src='/static/uploads/placeholder.jpg'">` : 'No Image'}</td>
                 <td>
                     <button class="action-btn text-blue-600 hover:text-blue-800" onclick="editCategory(${category.id})"><i class="fas fa-edit"></i></button>
                     <button class="action-btn text-red-600 hover:text-red-800" onclick="deleteCategory(${category.id})"><i class="fas fa-trash"></i></button>
@@ -1667,7 +1667,7 @@ async function populateCategories() {
             </tr>
         `).join('');
     } catch (error) {
-        showToast(error.message, 'error');
+        showToast('Failed to load categories: ' + error.message, 'error');
     }
 }
 
@@ -2225,8 +2225,8 @@ async function editCategory(id) {
         document.getElementById('category-name').value = category.name;
         document.getElementById('category-description').value = category.description || '';
         const preview = document.getElementById('category-image-preview');
-        if (category.image) {
-            preview.src = `/static/uploads/${category.image}`;
+        if (category.image && !category.image.includes('placeholder.jpg')) {
+            preview.src = category.image; // Use absolute URL
             preview.classList.remove('hidden');
         } else {
             preview.classList.add('hidden');
