@@ -1514,20 +1514,75 @@ toggleCountryDropdown('country-btn', 'country-dropdown');
 toggleCountryDropdown('mobile-country-btn', 'mobile-country-dropdown');
 
 // Update Currency (Shared for Desktop and Mobile)
+// Update Currency (Shared for Desktop and Mobile)
 function updateCurrency(e, dropdownId, btnId) {
-    e.preventDefault();
-    const country = e.target.getAttribute('data-country');
-    const flag = e.target.getAttribute('data-flag');
-    currentCurrency = e.target.getAttribute('data-currency');
-    const button = document.getElementById(btnId);
-    const dropdown = document.getElementById(dropdownId);
-    if (button && dropdown) {
+    console.log('updateCurrency: Started', { dropdownId, btnId });
+    try {
+        e.preventDefault();
+        console.log('updateCurrency: preventDefault called');
+        
+        const country = e.target.getAttribute('data-country');
+        const flag = e.target.getAttribute('data-flag');
+        const currency = e.target.getAttribute('data-currency');
+        if (!country || !flag || !currency) {
+            console.error('updateCurrency: Missing attributes', { country, flag, currency });
+            return;
+        }
+        currentCurrency = currency;
+        console.log('updateCurrency: Currency set to', currentCurrency);
+
+        const button = document.getElementById(btnId);
+        const dropdown = document.getElementById(dropdownId);
+        if (!button || !dropdown) {
+            console.error('updateCurrency: DOM elements not found', { btnId, dropdownId });
+            return;
+        }
+
+        console.log('updateCurrency: Updating UI');
         button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
         dropdown.classList.add('hidden');
         updatePrices();
-        console.log('Currency updated to:', currentCurrency);
-    } else {
-        console.error(`Button (${btnId}) or dropdown (${dropdownId}) not found`);
+        console.log('updateCurrency: UI updated, prices recalculated');
+
+        console.log('updateCurrency: Sending fetch to /set_currency');
+        fetch('/set_currency', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currency: currentCurrency })
+        })
+        .then(response => {
+            console.log('updateCurrency: Fetch response', { status: response.status });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('updateCurrency: Currency saved', data);
+            if (typeof Toastify !== 'undefined') {
+                Toastify({
+                    text: 'Currency updated successfully',
+                    duration: 3000,
+                    close: true,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#4ade80'
+                }).showToast();
+            }
+        })
+        .catch(error => {
+            console.error('updateCurrency: Fetch failed', error.message);
+            if (typeof Toastify !== 'undefined') {
+                Toastify({
+                    text: 'Failed to update currency',
+                    duration: 3000,
+                    close: true,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#f87171'
+                }).showToast();
+            }
+        });
+    } catch (error) {
+        console.error('updateCurrency: Unexpected error', error.message);
     }
 }
 document.querySelectorAll('.country-option').forEach(option => {

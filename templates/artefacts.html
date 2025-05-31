@@ -993,6 +993,7 @@ body, .navbar {
     <!-- Navbar -->
     <!-- Navbar -->
 <!-- Navbar -->
+<!-- Navbar -->
 <nav class="navbar bg-white fixed w-full z-1000 shadow-md">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <!-- Mobile Menu Toggle -->
@@ -1012,26 +1013,26 @@ body, .navbar {
             <a href="{{ url_for('discounted_artefacts') }}" class="nav-item text-gray-700 hover:text-yellow-600 transition {{ 'font-bold text-yellow-600' if request.endpoint == 'discount_uris' }}" style="--index: 3;">Special Discount</a>
             <!-- Dynamic Categories -->
             {% for category in categories %}
-<div class="relative group" style="--index: {{ loop.index + 3 }};">
-    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
-       class="nav-item text-gray-700 hover:text-yellow-600 transition flex items-center {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug }}">
-        {{ category.name }}
-        {% if category.subcategories %}
-        <i class="fas fa-chevron-down ml-1 text-sm"></i>
-        {% endif %}
-    </a>
-    {% if category.subcategories %}
-    <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-20 min-w-[200px]">
-        {% for subcategory in category.subcategories %}
-        <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
-           class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
-            {{ subcategory.name }}
-        </a>
-        {% endfor %}
-    </div>
-    {% endif %}
-</div>
-{% endfor %}
+            <div class="relative group" style="--index: {{ loop.index + 3 }};">
+                <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug='all') }}"
+                   class="nav-item text-gray-700 hover:text-yellow-600 transition flex items-center {{ 'font-bold text-yellow-600' if selected_category and selected_category.slug == category.slug }}">
+                    {{ category.name }}
+                    {% if category.subcategories %}
+                    <i class="fas fa-chevron-down ml-1 text-sm"></i>
+                    {% endif %}
+                </a>
+                {% if category.subcategories %}
+                <div class="dropdown-menu hidden absolute bg-white shadow-lg rounded-md mt-0 z-20 min-w-[200px]">
+                    {% for subcategory in category.subcategories %}
+                    <a href="{{ url_for('category_page', category_slug=category.slug, subcategory_slug=subcategory.slug) }}"
+                       class="dropdown-item block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-yellow-600 {{ 'font-bold text-yellow-600' if selected_subcategory and selected_subcategory.slug == subcategory.slug }}">
+                        {{ subcategory.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
         <!-- Right Icons and Currency -->
         <div class="flex items-center space-x-4 order-4">
@@ -1045,15 +1046,19 @@ body, .navbar {
             <!-- Wishlist and Cart -->
             <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 5;"><i class="fas fa-heart"></i></a>
             <a href="{{ url_for('account') }}" class="text-gray-700 hover:text-yellow-600 nav-icon" style="--index: 6;"><i class="fas fa-shopping-cart"></i></a>
-            <!-- Currency Selector -->
-            <div class="currency-container relative flex flex-col items-center" >
+            <!-- Currency Dropdown -->
+            <div class="currency-container relative flex flex-col items-center">
                 <span class="floating-text text-xs text-gray-700 mb-1">Currency</span>
-                <select style="background-color:#b45309 ;" id="currency-select" class="currency-select bg-white text-gray-700 px-3 py-1 rounded-full shadow-md hover:bg-gray-100 transition text-sm">
-                    <option value="USD" data-flag="🇺🇸" {{ 'selected' if current_currency == 'USD' }}>USD</option>
-                    <option value="EUR" data-flag="🇪🇺" {{ 'selected' if current_currency == 'EUR' }}>EUR</option>
-                    <option value="GBP" data-flag="🇬🇧" {{ 'selected' if current_currency == 'GBP' }}>GBP</option>
-                    <option value="KES" data-flag="🇰🇪" {{ 'selected' if current_currency == 'KES' }}>KES</option>
-                </select>
+                <button id="currency-btn" class="currency-btn bg-[#b45309] text-white px-3 py-1 rounded-full shadow-md hover:bg-gray-100 hover:text-gray-700 transition text-sm flex items-center" aria-expanded="false">
+                    <span class="flag">{{ '🇺🇸' if current_currency == 'USD' else '🇪🇺' if current_currency == 'EUR' else '🇬🇧' if current_currency == 'GBP' else '🇰🇪' }}</span>
+                    <span class="ml-1">{{ current_currency }}</span>
+                </button>
+                <div id="currency-dropdown" class="hidden absolute bg-white shadow-md rounded-md p-4 w-32 top-full mt-2 z-20">
+                    <a href="#" class="block py-1 hover:text-gray-900 country-option" data-currency="USD" data-flag="🇺🇸"><span class="text-sm mr-2">🇺🇸</span>USD</a>
+                    <a href="#" class="block py-1 hover:text-gray-900 country-option" data-currency="EUR" data-flag="🇪🇺"><span class="text-sm mr-2">🇪🇺</span>EUR</a>
+                    <a href="#" class="block py-1 hover:text-gray-900 country-option" data-currency="GBP" data-flag="🇬🇧"><span class="text-sm mr-2">🇬🇧</span>GBP</a>
+                    <a href="#" class="block py-1 hover:text-gray-900 country-option" data-currency="KES" data-flag="🇰🇪"><span class="text-sm mr-2">🇰🇪</span>KES</a>
+                </div>
             </div>
         </div>
     </div>
@@ -1468,805 +1473,796 @@ body, .navbar {
 
     <!-- JavaScript -->
  <script>
-  // Currency Conversion Logic (KES as base currency)
-let exchangeRates = {
-    EUR: 0.0073, // Fallback rates
-    GBP: 0.0061,
-    KES: 1,
-    USD: 0.0077
-};
-let currentCurrency = '{{ current_currency | safe }}';
+    // Currency Conversion Logic (KES as base currency)
+    let exchangeRates = {
+        EUR: 0.0073, // Fallback rates
+        GBP: 0.0061,
+        KES: 1,
+        USD: 0.0077
+    };
+    let currentCurrency = '{{ current_currency | safe }}';
 
-// API Configuration
-const API_URL = '/api/exchange_rates';
-const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
+    // API Configuration
+    const API_URL = '/api/exchange_rates';
+    const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort(); // Sorted alphabetically
 
-// Fetch Exchange Rates from Backend
-async function fetchExchangeRates() {
-    console.log('Fetching exchange rates from backend');
-    try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-            console.error(`Backend error: ${response.status} ${response.statusText}`);
-            throw new Error('Backend request failed');
+    // Fetch Exchange Rates from Backend
+    async function fetchExchangeRates() {
+        console.log('Fetching exchange rates from backend');
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+                console.error(`Backend error: ${response.status} ${response.statusText}`);
+                throw new Error('Backend request failed');
+            }
+            const rates = await response.json();
+            if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+                console.error('Invalid backend response:', rates);
+                throw new Error('Invalid backend response');
+            }
+
+            // Update exchange rates
+            exchangeRates = { ...rates };
+            console.log('Fetched exchange rates:', exchangeRates);
+            updatePrices();
+        } catch (error) {
+            console.error('Error fetching exchange rates:', error);
+            console.warn('Using fallback exchange rates');
+            updatePrices();
         }
-        const rates = await response.json();
-        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
-            console.error('Invalid backend response:', rates);
-            throw new Error('Invalid backend response');
-        }
-
-        // Update exchange rates
-        exchangeRates = { ...rates };
-        console.log('Fetched exchange rates:', exchangeRates);
-        updatePrices();
-    } catch (error) {
-        console.error('Error fetching exchange rates:', error);
-        console.warn('Using fallback exchange rates');
-        updatePrices();
     }
-}
 
-// Toast Notification
-function showToast(message, backgroundColor = '#4ade80') {
-    Toastify({
-        text: message,
-        duration: 3000,
-        close: true,
-        gravity: 'top',
-        position: 'right',
-        backgroundColor: backgroundColor,
-        stopOnFocus: true
-    }).showToast();
-}
+    // Toast Notification
+    function showToast(message, backgroundColor = '#4ade80') {
+        Toastify({
+            text: message,
+            duration: 3000,
+            close: true,
+            gravity: 'top',
+            position: 'right',
+            backgroundColor: backgroundColor,
+            stopOnFocus: true
+        }).showToast();
+    }
 
-// Toggle Currency Dropdown (Mobile and Desktop)
-function toggleCurrencyDropdown(buttonId, dropdownId) {
-    return function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const dropdown = document.getElementById(dropdownId);
-        if (dropdown) {
-            dropdown.classList.toggle('hidden');
-            console.log(`${dropdownId} toggled:`, !dropdown.classList.contains('hidden'), 'Screen width:', window.innerWidth);
+    // Toggle Currency Dropdown
+    function toggleCurrencyDropdown() {
+        return function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('currency-dropdown');
+            const button = document.getElementById('currency-btn');
+            if (dropdown && button) {
+                const isOpen = !dropdown.classList.contains('hidden');
+                dropdown.classList.toggle('hidden');
+                button.setAttribute('aria-expanded', !isOpen);
+                console.log('Currency dropdown toggled:', !dropdown.classList.contains('hidden'), 'Screen width:', window.innerWidth);
+            } else {
+                console.error('Currency dropdown or button not found');
+            }
+        };
+    }
+
+    // Toggle Mobile Sidebar
+    window.toggleSidebar = function(event) {
+        event.preventDefault();
+        const sidebar = document.getElementById('mobile-sidebar');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        if (sidebar && toggle) {
+            const isOpen = sidebar.classList.toggle('open');
+            toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
+            toggle.querySelector('i').classList.toggle('fa-times', isOpen);
+            toggle.querySelector('i').classList.add('animate-rotateToggle');
+            setTimeout(() => toggle.querySelector('i').classList.remove('animate-rotateToggle'), 300);
+            console.log('Sidebar toggled:', isOpen, 'Screen width:', window.innerWidth);
         } else {
-            console.error(`${dropdownId} element not found`);
+            console.error('Sidebar or toggle element not found');
         }
     };
-}
 
-// Toggle Mobile Sidebar
-window.toggleSidebar = function(event) {
-    event.preventDefault();
-    const sidebar = document.getElementById('mobile-sidebar');
-    const toggle = document.getElementById('mobile-menu-toggle');
-    if (sidebar && toggle) {
-        const isOpen = sidebar.classList.toggle('open');
-        toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
-        toggle.querySelector('i').classList.toggle('fa-times', isOpen);
-        toggle.querySelector('i').classList.add('animate-rotateToggle');
-        setTimeout(() => toggle.querySelector('i').classList.remove('animate-rotateToggle'), 300);
-        console.log('Sidebar toggled:', isOpen, 'Screen width:', window.innerWidth);
-    } else {
-        console.error('Sidebar or toggle element not found');
-    }
-};
-
-// Toggle Mobile Dropdowns (for categories in sidebar)
-window.toggleMobileDropdown = function(button) {
-    const dropdown = button.nextElementSibling;
-    const icon = button.querySelector('i');
-    if (dropdown && icon) {
-        const isActive = dropdown.classList.toggle('active');
-        button.classList.toggle('active', isActive);
-        button.setAttribute('aria-expanded', isActive);
-        dropdown.style.maxHeight = isActive ? `${dropdown.scrollHeight}px` : '0';
-        dropdown.style.opacity = isActive ? '1' : '0';
-        console.log(`Mobile dropdown toggled for ${button.previousElementSibling.textContent.trim()}:`, isActive, 'Screen width:', window.innerWidth);
-    } else {
-        console.error('Dropdown or icon not found for button:', button);
-    }
-};
-
-// Initialize Mobile Dropdown Event Listeners
-function initializeMobileDropdowns() {
-    document.querySelectorAll('.sidebar-dropdown-toggle').forEach(button => {
-        // Remove existing listeners to prevent duplicates
-        button.removeEventListener('click', button._toggleHandler);
-        button._toggleHandler = () => window.toggleMobileDropdown(button);
-        button.addEventListener('click', button._toggleHandler);
-        // Ensure ARIA attribute is set
-        button.setAttribute('aria-expanded', button.classList.contains('active') ? 'true' : 'false');
-        console.log('Attached listener to dropdown toggle:', button.previousElementSibling.textContent.trim());
-    });
-}
-
-// Initialize Category Dropdowns (Desktop Navbar)
-function initializeCategoryDropdowns() {
-    const categoryGroups = document.querySelectorAll('#desktop-navbar .group');
-    console.log(`Found ${categoryGroups.length} category groups`);
-
-    categoryGroups.forEach((group, index) => {
-        const categoryLink = group.querySelector('.nav-item');
-        const dropdownMenu = group.querySelector('.dropdown-menu');
-        const categoryName = categoryLink ? categoryLink.textContent.trim() : `Category ${index + 1}`;
-
-        if (!dropdownMenu) {
-            console.warn(`No dropdown menu found for category: ${categoryName}`);
-            return;
-        }
-
-        // Verify subcategories
-        const subcategoryItems = dropdownMenu.querySelectorAll('.dropdown-item');
-        if (subcategoryItems.length === 0) {
-            console.warn(`No subcategories found for category: ${categoryName}`);
+    // Toggle Mobile Dropdowns (for categories in sidebar)
+    window.toggleMobileDropdown = function(button) {
+        const dropdown = button.nextElementSibling;
+        const icon = button.querySelector('i');
+        if (dropdown && icon) {
+            const isActive = dropdown.classList.toggle('active');
+            button.classList.toggle('active', isActive);
+            button.setAttribute('aria-expanded', isActive);
+            dropdown.style.maxHeight = isActive ? `${dropdown.scrollHeight}px` : '0';
+            dropdown.style.opacity = isActive ? '1' : '0';
+            console.log(`Mobile dropdown toggled for ${button.previousElementSibling.textContent.trim()}:`, isActive, 'Screen width:', window.innerWidth);
         } else {
-            console.log(`Initialized dropdown for ${categoryName} with ${subcategoryItems.length} subcategories`);
+            console.error('Dropdown or icon not found for button:', button);
         }
+    };
 
-        // Add hover event listeners for debugging (CSS handles actual hover)
-        group.addEventListener('mouseenter', () => {
-            if (!dropdownMenu.classList.contains('hidden')) {
-                console.log(`Dropdown already visible for ${categoryName}`);
+    // Initialize Mobile Dropdown Event Listeners
+    function initializeMobileDropdowns() {
+        document.querySelectorAll('.sidebar-dropdown-toggle').forEach(button => {
+            // Remove existing listeners to prevent duplicates
+            button.removeEventListener('click', button._toggleHandler);
+            button._toggleHandler = () => window.toggleMobileDropdown(button);
+            button.addEventListener('click', button._toggleHandler);
+            // Ensure ARIA attribute is set
+            button.setAttribute('aria-expanded', button.classList.contains('active') ? 'true' : 'false');
+            console.log('Attached listener to dropdown toggle:', button.previousElementSibling.textContent.trim());
+        });
+    }
+
+    // Initialize Category Dropdowns (Desktop Navbar)
+    function initializeCategoryDropdowns() {
+        const categoryGroups = document.querySelectorAll('#desktop-navbar .group');
+        console.log(`Found ${categoryGroups.length} category groups`);
+
+        categoryGroups.forEach((group, index) => {
+            const categoryLink = group.querySelector('.nav-item');
+            const dropdownMenu = group.querySelector('.dropdown-menu');
+            const categoryName = categoryLink ? categoryLink.textContent.trim
+
+() : `Category ${index + 1}`;
+
+            if (!dropdownMenu) {
+                console.warn(`No dropdown menu found for category: ${categoryName}`);
                 return;
             }
-            dropdownMenu.classList.remove('hidden');
-            console.log(`Showing dropdown for ${categoryName}`);
+
+            // Verify subcategories
+            const subcategoryItems = dropdownMenu.querySelectorAll('.dropdown-item');
+            if (subcategoryItems.length === 0) {
+                console.warn(`No subcategories found for category: ${categoryName}`);
+            } else {
+                console.log(`Initialized dropdown for ${categoryName} with ${subcategoryItems.length} subcategories`);
+            }
+
+            // Add hover event listeners for debugging (CSS handles actual hover)
+            group.addEventListener('mouseenter', () => {
+                if (!dropdownMenu.classList.contains('hidden')) {
+                    console.log(`Dropdown already visible for ${categoryName}`);
+                    return;
+                }
+                dropdownMenu.classList.remove('hidden');
+                console.log(`Showing dropdown for ${categoryName}`);
+            });
+
+            group.addEventListener('mouseleave', () => {
+                dropdownMenu.classList.add('hidden');
+                console.log(`Hiding dropdown for ${categoryName}`);
+            });
+        });
+    }
+
+    // Update Prices
+    function updatePrices() {
+        // Validate currency
+        if (!exchangeRates[currentCurrency]) {
+            console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+            currentCurrency = 'KES';
+        }
+
+        // Convert product prices from KES to selected currency
+        document.querySelectorAll('.price').forEach(priceElement => {
+            const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
+            if (isNaN(basePriceKES)) {
+                console.error('Invalid base price:', priceElement, 'data-price:', priceElement.getAttribute('data-price'));
+                priceElement.textContent = `${currentCurrency} N/A`;
+                return;
+            }
+            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
         });
 
-        group.addEventListener('mouseleave', () => {
-            dropdownMenu.classList.add('hidden');
-            console.log(`Hiding dropdown for ${categoryName}`);
+        document.querySelectorAll('.discounted-price').forEach(priceElement => {
+            const baseDiscountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price'));
+            if (isNaN(baseDiscountedPriceKES)) {
+                console.error('Invalid discounted price:', priceElement, 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+                priceElement.textContent = `${currentCurrency} N/A`;
+                return;
+            }
+            const convertedPrice = (baseDiscountedPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
         });
-    });
-}
 
-// Update Prices
-function updatePrices() {
-    // Validate currency
-    if (!exchangeRates[currentCurrency]) {
-        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
-        currentCurrency = 'KES';
+        // Update Price Filter Options (convert KES ranges to selected currency)
+        const priceFilter = document.querySelector('.price-filter');
+        if (priceFilter) {
+            const selectedValue = priceFilter.value;
+            const rangeLow = 13000; // Approx 100 USD in KES
+            const rangeHigh = 26000; // Approx 200 USD in KES
+            priceFilter.innerHTML = `
+                <option value="all">All Prices</option>
+                <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
+                <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
+                <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
+            `;
+            priceFilter.value = selectedValue;
+        }
+
+        // Update modal price if open
+        const modalPrice = document.getElementById('modal-price');
+        if (modalPrice && modalPrice.dataset.price) {
+            modalPrice.textContent = `${currentCurrency} ${(parseFloat(modalPrice.dataset.price) * exchangeRates[currentCurrency]).toFixed(2)}`;
+        }
     }
 
-    // Convert product prices from KES to selected currency
-    document.querySelectorAll('.price').forEach(priceElement => {
-        const basePriceKES = parseFloat(priceElement.getAttribute('data-price'));
-        if (isNaN(basePriceKES)) {
-            console.error('Invalid base price:', priceElement, 'data-price:', priceElement.getAttribute('data-price'));
-            priceElement.textContent = `${currentCurrency} N/A`;
-            return;
-        }
-        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-    });
+    // Filter Logic
+    let selectedCategory = 'all';
+    let selectedPriceRange = 'all';
+    let searchQuery = '';
 
-    document.querySelectorAll('.discounted-price').forEach(priceElement => {
-        const baseDiscountedPriceKES = parseFloat(priceElement.getAttribute('data-discounted-price'));
-        if (isNaN(baseDiscountedPriceKES)) {
-            console.error('Invalid discounted price:', priceElement, 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-            priceElement.textContent = `${currentCurrency} N/A`;
-            return;
-        }
-        const convertedPrice = (baseDiscountedPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-    });
+    const applyFilters = () => {
+        let visibleProducts = 0;
+        document.querySelectorAll('.product-card').forEach(card => {
+            // Category Filter
+            const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
+            // Price Filter (compare in KES)
+            const priceKES = parseFloat(card.querySelector('.price').getAttribute('data-price'));
+            let priceMatch = true;
+            if (selectedPriceRange === '0-13000') {
+                priceMatch = priceKES <= 13000;
+            } else if (selectedPriceRange === '13000-26000') {
+                priceMatch = priceKES > 13000 && priceKES <= 26000;
+            } else if (selectedPriceRange === '26000+') {
+                priceMatch = priceKES > 26000;
+            }
+            // Search Filter
+            const name = card.getAttribute('data-name').toLowerCase();
+            const category = card.getAttribute('data-category').toLowerCase();
+            const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
 
-    // Update Price Filter Options (convert KES ranges to selected currency)
-    const priceFilter = document.querySelector('.price-filter');
-    if (priceFilter) {
-        const selectedValue = priceFilter.value;
-        const rangeLow = 13000; // Approx 100 USD in KES
-        const rangeHigh = 26000; // Approx 200 USD in KES
-        priceFilter.innerHTML = `
-            <option value="all">All Prices</option>
-            <option value="0-${rangeLow}">${currentCurrency} 0 - ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)}</option>
-            <option value="${rangeLow}-${rangeHigh}">${currentCurrency} ${(rangeLow * exchangeRates[currentCurrency]).toFixed(2)} - ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}</option>
-            <option value="${rangeHigh}+">${currentCurrency} ${(rangeHigh * exchangeRates[currentCurrency]).toFixed(2)}+</option>
-        `;
-        priceFilter.value = selectedValue;
-    }
+            // Combined Filter
+            if (categoryMatch && priceMatch && searchMatch) {
+                card.style.display = 'block';
+                visibleProducts++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
 
-    // Update modal price if open
-    const modalPrice = document.getElementById('modal-price');
-    if (modalPrice && modalPrice.dataset.price) {
-        modalPrice.textContent = `${currentCurrency} ${(parseFloat(modalPrice.dataset.price) * exchangeRates[currentCurrency]).toFixed(2)}`;
-    }
-}
-
-// Filter Logic
-let selectedCategory = 'all';
-let selectedPriceRange = 'all';
-let searchQuery = '';
-
-const applyFilters = () => {
-    let visibleProducts = 0;
-    document.querySelectorAll('.product-card').forEach(card => {
-        // Category Filter
-        const categoryMatch = selectedCategory === 'all' || card.getAttribute('data-category') === selectedCategory;
-        // Price Filter (compare in KES)
-        const priceKES = parseFloat(card.querySelector('.price').getAttribute('data-price'));
-        let priceMatch = true;
-        if (selectedPriceRange === '0-13000') {
-            priceMatch = priceKES <= 13000;
-        } else if (selectedPriceRange === '13000-26000') {
-            priceMatch = priceKES > 13000 && priceKES <= 26000;
-        } else if (selectedPriceRange === '26000+') {
-            priceMatch = priceKES > 26000;
-        }
-        // Search Filter
-        const name = card.getAttribute('data-name').toLowerCase();
-        const category = card.getAttribute('data-category').toLowerCase();
-        const searchMatch = !searchQuery || name.includes(searchQuery) || category.includes(searchQuery);
-
-        // Combined Filter
-        if (categoryMatch && priceMatch && searchMatch) {
-            card.style.display = 'block';
-            visibleProducts++;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-
-    // Toggle No Results Messages
-    const noProducts = document.querySelector('.no-results:not(#no-search-results)');
-    const noSearchResults = document.getElementById('no-search-results');
-    if (visibleProducts === 0) {
-        if (searchQuery) {
-            noSearchResults.style.display = 'block';
-            if (noProducts) noProducts.style.display = 'none';
+        // Toggle No Results Messages
+        const noProducts = document.querySelector('.no-results:not(#no-search-results)');
+        const noSearchResults = document.getElementById('no-search-results');
+        if (visibleProducts === 0) {
+            if (searchQuery) {
+                noSearchResults.style.display = 'block';
+                if (noProducts) noProducts.style.display = 'none';
+            } else {
+                noSearchResults.style.display = 'none';
+                if (noProducts) noProducts.style.display = 'block';
+            }
         } else {
             noSearchResults.style.display = 'none';
-            if (noProducts) noProducts.style.display = 'block';
+            if (noProducts) noProducts.style.display = 'none';
         }
-    } else {
-        noSearchResults.style.display = 'none';
-        if (noProducts) noProducts.style.display = 'none';
-    }
-};
-
-// Open Product Details Modal
-function openProductModal(id, name, category, price, description, image) {
-    const modal = document.getElementById('product-details-modal');
-    const modalImage = document.getElementById('modal-image');
-    const modalName = document.getElementById('modal-name');
-    const modalCategory = document.getElementById('modal-category');
-    const modalPrice = document.getElementById('modal-price');
-    const modalDescription = document.getElementById('modal-description');
-    const addToCartButton = document.getElementById('modal-add-to-cart');
-
-    // Set modal content
-    modalImage.src = image;
-    modalImage.alt = name;
-    modalName.textContent = name;
-    modalCategory.textContent = `Category: ${category}`;
-    modalPrice.textContent = `${currentCurrency} ${(price * exchangeRates[currentCurrency]).toFixed(2)}`;
-    modalPrice.dataset.price = price; // Store base price for currency updates
-    modalDescription.textContent = description || 'No description available.';
-
-    // Show modal
-    modal.classList.remove('hidden');
-
-    // Add to Cart button handler
-    addToCartButton.onclick = () => {
-        modal.classList.add('hidden');
-        addToCart(id);
     };
-}
 
-// Add to Wishlist
-function addToWishlist(productId) {
-    const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`) || 
-                       document.querySelector(`[data-product-id="${productId}"]`);
-    const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`);
-    const icon = wishlistBtn.querySelector('i');
-    const tooltip = wishlistBtn.querySelector('.tooltip');
-    const isActive = wishlistBtn.classList.contains('active');
-    const method = isActive ? 'DELETE' : 'POST';
-    const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
+    // Open Product Details Modal
+    function openProductModal(id, name, category, price, description, image) {
+        const modal = document.getElementById('product-details-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalName = document.getElementById('modal-name');
+        const modalCategory = document.getElementById('modal-category');
+        const modalPrice = document.getElementById('modal-price');
+        const modalDescription = document.getElementById('modal-description');
+        const addToCartButton = document.getElementById('modal-add-to-cart');
 
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: method === 'POST' ? JSON.stringify({ product_id: productId }) : null,
-        credentials: 'include'
-    })
-    .then(response => {
-        if (response.status === 401) {
-            showToast("Please login to add any item to your wishlist.", "#f87171");
-            setTimeout(() => {
-                window.location.href = '/user_login';
-            }, 3000);
-            return null;
-        }
-        if (!response.ok) {
-            throw new Error(`Failed to update wishlist: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data) {
-            showToast(data.message, "#4ade80");
-            wishlistBtn.classList.toggle('active');
-            icon.classList.toggle('fas');
-            icon.classList.toggle('far');
-            tooltip.textContent = wishlistBtn.classList.contains('active') ? 'Remove from Wishlist' : 'Add to Wishlist';
-        }
-    })
-    .catch(error => {
-        if (error.message !== 'Failed to update wishlist: Unauthorized') {
-            console.error('Error managing wishlist:', error);
-            showToast('Failed to update wishlist: ' + error.message, "#f87171");
-        }
-    });
-}
+        // Set modal content
+        modalImage.src = image;
+        modalImage.alt = name;
+        modalName.textContent = name;
+        modalCategory.textContent = `Category: ${category}`;
+        modalPrice.textContent = `${currentCurrency} ${(price * exchangeRates[currentCurrency]).toFixed(2)}`;
+        modalPrice.dataset.price = price; // Store base price for currency updates
+        modalDescription.textContent = description || 'No description available.';
 
-// Add to Cart with Quantity Popup
-function addToCart(productId) {
-    const modal = document.getElementById('quantity-modal');
-    const quantityInput = document.getElementById('quantity-input');
-    const confirmButton = document.getElementById('confirm-quantity');
-    const cancelButton = document.getElementById('cancel-quantity');
+        // Show modal
+        modal.classList.remove('hidden');
 
-    quantityInput.value = 1;
-    modal.classList.remove('hidden');
+        // Add to Cart button handler
+        addToCartButton.onclick = () => {
+            modal.classList.add('hidden');
+            addToCart(id);
+        };
+    }
 
-    const confirmHandler = () => {
-        const quantity = parseInt(quantityInput.value);
-        if (isNaN(quantity) || quantity < 1) {
-            showToast("Please enter a valid quantity (1 or more).", "#f87171");
-            return;
-        }
+    // Add to Wishlist
+    function addToWishlist(productId) {
+        const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`) || 
+                           document.querySelector(`[data-product-id="${productId}"]`);
+        const wishlistBtn = productCard ? productCard.querySelector('.wishlist-btn') : document.querySelector(`.wishlist-btn[onclick*="addToWishlist(${productId})"]`);
+        const icon = wishlistBtn.querySelector('i');
+        const tooltip = wishlistBtn.querySelector('.tooltip');
+        const isActive = wishlistBtn.classList.contains('active');
+        const method = isActive ? 'DELETE' : 'POST';
+        const url = isActive ? `/api/wishlist/${productId}` : '/api/wishlist';
 
-        fetch('/api/cart', {
-            method: 'POST',
+        fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ product_id: productId, quantity: quantity }),
+            body: method === 'POST' ? JSON.stringify({ product_id: productId }) : null,
             credentials: 'include'
         })
         .then(response => {
-            if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
-                showToast(response.status === 401 ? "Please login to add any item to your cart." : "Session expired. Please log in.", "#f87171");
-                modal.classList.add('hidden');
+            if (response.status === 401) {
+                showToast("Please login to add any item to your wishlist.", "#f87171");
                 setTimeout(() => {
                     window.location.href = '/user_login';
-                }, response.status === 401 ? 3000 : 4000);
+                }, 3000);
                 return null;
             }
             if (!response.ok) {
-                throw new Error(`Failed to add to cart: ${response.statusText}`);
+                throw new Error(`Failed to update wishlist: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
             if (data) {
                 showToast(data.message, "#4ade80");
-                modal.classList.add('hidden');
+                wishlistBtn.classList.toggle('active');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('far');
+                tooltip.textContent = wishlistBtn.classList.contains('active') ? 'Remove from Wishlist' : 'Add to Wishlist';
             }
         })
         .catch(error => {
-            if (error.message !== 'Failed to add to cart: Unauthorized') {
-                console.error('Error adding to cart:', error);
-                showToast('Failed to add to cart: ' + error.message, "#f87171");
+            if (error.message !== 'Failed to update wishlist: Unauthorized') {
+                console.error('Error managing wishlist:', error);
+                showToast('Failed to update wishlist: ' + error.message, "#f87171");
             }
-        })
-        .finally(() => {
+        });
+    }
+
+    // Add to Cart with Quantity Popup
+    function addToCart(productId) {
+        const modal = document.getElementById('quantity-modal');
+        const quantityInput = document.getElementById('quantity-input');
+        const confirmButton = document.getElementById('confirm-quantity');
+        const cancelButton = document.getElementById('cancel-quantity');
+
+        quantityInput.value = 1;
+        modal.classList.remove('hidden');
+
+        const confirmHandler = () => {
+            const quantity = parseInt(quantityInput.value);
+            if (isNaN(quantity) || quantity < 1) {
+                showToast("Please enter a valid quantity (1 or more).", "#f87171");
+                return;
+            }
+
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId, quantity: quantity }),
+                credentials: 'include'
+            })
+            .then(response => {
+                if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
+                    showToast(response.status === 401 ? "Please login to add any item to your cart." : "Session expired. Please log in.", "#f87171");
+                    modal.classList.add('hidden');
+                    setTimeout(() => {
+                        window.location.href = '/user_login';
+                    }, response.status === 401 ? 3000 : 4000);
+                    return null;
+                }
+                if (!response.ok) {
+                    throw new Error(`Failed to add to cart: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    showToast(data.message, "#4ade80");
+                    modal.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                if (error.message !== 'Failed to add to cart: Unauthorized') {
+                    console.error('Error adding to cart:', error);
+                    showToast('Failed to add to cart: ' + error.message, "#f87171");
+                }
+            })
+            .finally(() => {
+                confirmButton.removeEventListener('click', confirmHandler);
+                cancelButton.removeEventListener('click', cancelHandler);
+            });
+        };
+
+        const cancelHandler = () => {
+            modal.classList.add('hidden');
             confirmButton.removeEventListener('click', confirmHandler);
             cancelButton.removeEventListener('click', cancelHandler);
-        });
-    };
+        };
 
-    const cancelHandler = () => {
-        modal.classList.add('hidden');
-        confirmButton.removeEventListener('click', confirmHandler);
-        cancelButton.removeEventListener('click', cancelHandler);
-    };
-
-    confirmButton.addEventListener('click', confirmHandler);
-    cancelButton.addEventListener('click', cancelHandler);
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, initializing exchange rates and dropdowns');
-
-    // Initialize Exchange Rates
-    fetchExchangeRates();
-
-    // Initialize Dropdowns
-    initializeMobileDropdowns();
-    initializeCategoryDropdowns();
-
-    // Currency Dropdowns
-    const mobileCurrencyButton = document.getElementById('mobile-country-btn');
-    const desktopCurrencyButton = document.getElementById('desktop-country-btn');
-    if (mobileCurrencyButton) {
-        mobileCurrencyButton.addEventListener('click', toggleCurrencyDropdown('mobile-country-btn', 'mobile-country-dropdown'));
-    } else {
-        console.error('Mobile currency button not found');
-    }
-    if (desktopCurrencyButton) {
-        desktopCurrencyButton.addEventListener('click', toggleCurrencyDropdown('desktop-country-btn', 'desktop-country-dropdown'));
-    } else {
-        console.error('Desktop currency button not found');
+        confirmButton.addEventListener('click', confirmHandler);
+        cancelButton.addEventListener('click', cancelHandler);
     }
 
-    // Close Currency Dropdowns on Outside Click
-    document.addEventListener('click', (e) => {
-        const dropdowns = [
-            { id: 'mobile-country-dropdown', buttonId: 'mobile-country-btn' },
-            { id: 'desktop-country-dropdown', buttonId: 'desktop-country-btn' }
-        ];
-        dropdowns.forEach(({ id, buttonId }) => {
-            const dropdown = document.getElementById(id);
-            const button = document.getElementById(buttonId);
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page loaded, initializing exchange rates and dropdowns');
+
+        // Initialize Exchange Rates
+        fetchExchangeRates();
+
+        // Initialize Dropdowns
+        initializeMobileDropdowns();
+        initializeCategoryDropdowns();
+
+        // Currency Dropdown
+        const currencyButton = document.getElementById('currency-btn');
+        if (currencyButton) {
+            currencyButton.addEventListener('click', toggleCurrencyDropdown());
+        } else {
+            console.error('Currency button not found');
+        }
+
+        // Close Currency Dropdown on Outside Click
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('currency-dropdown');
+            const button = document.getElementById('currency-btn');
             if (dropdown && button && !dropdown.contains(e.target) && !button.contains(e.target)) {
                 if (!dropdown.classList.contains('hidden')) {
                     dropdown.classList.add('hidden');
-                    console.log(`${id} closed (outside click)`, 'Screen width:', window.innerWidth);
+                    button.setAttribute('aria-expanded', 'false');
+                    console.log('Currency dropdown closed (outside click)', 'Screen width:', window.innerWidth);
                 }
             }
         });
-    });
 
-    // Currency Selection
-    document.querySelectorAll('.country-option').forEach(option => {
-        option.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const country = e.target.getAttribute('data-country');
-            const flag = e.target.getAttribute('data-flag');
-            currentCurrency = e.target.getAttribute('data-currency');
-            // Update both buttons
-            const buttons = [document.getElementById('mobile-country-btn'), document.getElementById('desktop-country-btn')];
-            buttons.forEach(button => {
+        // Currency Selection
+        document.querySelectorAll('.country-option').forEach(option => {
+            option.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const currency = e.target.getAttribute('data-currency');
+                const flag = e.target.getAttribute('data-flag');
+                currentCurrency = currency;
+                // Update button display
+                const button = document.getElementById('currency-btn');
                 if (button) {
-                    button.innerHTML = `<span class="flag">${flag}</span> ${country}`;
+                    button.innerHTML = `<span class="flag">${flag}</span><span class="ml-1">${currency}</span>`;
+                    button.setAttribute('aria-expanded', 'false');
                 }
-            });
-            // Close both dropdowns
-            ['mobile-country-dropdown', 'desktop-country-dropdown'].forEach(id => {
-                const dropdown = document.getElementById(id);
+                // Close dropdown
+                const dropdown = document.getElementById('currency-dropdown');
                 if (dropdown) {
                     dropdown.classList.add('hidden');
                 }
-            });
-            // Persist currency to backend
-            try {
-                const response = await fetch('/api/set_currency', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currency: currentCurrency }),
-                    credentials: 'include'
-                });
-                if (!response.ok) throw new Error('Failed to set currency');
-                await fetchExchangeRates();
-                showToast(`Currency changed to ${currentCurrency}`, '#4ade80');
-            } catch (error) {
-                console.error('Error setting currency:', error);
-                showToast('Failed to change currency', '#f87171');
-                updatePrices(); // Update locally if backend fails
-            }
-        });
-    });
-
-    // Mobile Sidebar and Dropdowns
-    document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
-    document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
-
-    // Mobile Search Toggle
-    document.getElementById('mobile-search-icon').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const searchBar = document.getElementById('mobile-search-bar');
-        if (searchBar) {
-            searchBar.classList.toggle('active');
-            searchBar.classList.toggle('hidden');
-            const icon = document.getElementById('mobile-search-icon');
-            icon.classList.add('animate-bounce');
-            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
-            console.log('Mobile search bar toggled:', searchBar.classList.contains('active'));
-        } else {
-            console.error('Mobile search bar element not found');
-        }
-    });
-
-    // Live Search
-    document.querySelectorAll('.search-input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            searchQuery = e.target.value.trim().toLowerCase();
-            applyFilters();
-        });
-    });
-
-    // Category Filter
-    document.querySelectorAll('.filter-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            selectedCategory = e.target.getAttribute('data-filter');
-            document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
-            e.target.classList.add('font-bold', 'text-yellow-600');
-            applyFilters();
-        });
-    });
-
-    // Price Range Filter
-    document.querySelector('.price-filter').addEventListener('change', (e) => {
-        selectedPriceRange = e.target.value;
-        applyFilters();
-    });
-
-    // Display Options
-    document.querySelectorAll('.display-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
-            e.target.classList.add('active');
-
-            const grid = document.querySelector('.product-grid');
-            grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
-
-            if (e.target.classList.contains('list-view')) {
-                grid.classList.add('list-view');
-            } else {
-                const cols = e.target.getAttribute('data-cols');
-                grid.classList.add(`cols-${cols}`);
-            }
-        });
-    });
-
-    // Wishlist Button Toggle
-    document.querySelectorAll('.wishlist-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.classList.toggle('active');
-            const icon = btn.querySelector('i');
-            icon.classList.toggle('fas');
-            icon.classList.toggle('far');
-        });
-    });
-
-    // Filter Toggler Button (Mobile)
-    document.getElementById('filter-toggler').addEventListener('click', () => {
-        const sidebar = document.querySelector('.sidebar');
-        const button = document.getElementById('filter-toggler');
-        sidebar.classList.toggle('open');
-        button.classList.add('animate-pulse');
-        setTimeout(() => button.classList.remove('animate-pulse'), 300);
-    });
-
-    // Filter Close Button (Mobile)
-    document.getElementById('filter-close-btn').addEventListener('click', () => {
-        const sidebar = document.querySelector('.sidebar');
-        const icon = document.querySelector('#filter-close-btn i');
-        sidebar.classList.remove('open');
-        icon.classList.add('animate-rotateToggle');
-        setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-        applyFilters();
-    });
-
-    // Close Filter Sidebar When Clicking Outside (Mobile)
-    document.addEventListener('click', (e) => {
-        const sidebar = document.querySelector('.sidebar');
-        const toggler = document.getElementById('filter-toggler');
-        const closeBtn = document.getElementById('filter-close-btn');
-        if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
-            sidebar.classList.remove('open');
-            applyFilters();
-        }
-    });
-
-    // Event Delegation for Product Clicks
-    document.getElementById('product-grid').addEventListener('click', (e) => {
-        const target = e.target.closest('.product-image, .product-name');
-        if (!target) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const productCard = target.closest('.product-card');
-        if (!productCard) return;
-
-        const id = productCard.getAttribute('data-product-id');
-        const name = productCard.getAttribute('data-name');
-        const category = productCard.getAttribute('data-category');
-        const price = parseFloat(productCard.querySelector('.price').getAttribute('data-price'));
-        const description = productCard.getAttribute('data-description');
-        const image = productCard.querySelector('img').src;
-
-        openProductModal(id, name, category, price, description, image);
-    });
-
-    // Close Product Details Modal
-    const closeButton = document.getElementById('close-product-modal');
-    if (closeButton) {
-        const newCloseButton = closeButton.cloneNode(true);
-        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
-        newCloseButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const modal = document.getElementById('product-details-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                console.log('Close button clicked: Modal closed');
-            } else {
-                console.error('Modal element not found');
-            }
-        });
-    }
-
-    // Close Modal on Outside Click
-    document.getElementById('product-details-modal').addEventListener('click', (e) => {
-        const modal = document.getElementById('product-details-modal');
-        if (e.target === modal) {
-            modal.classList.add('hidden');
-            console.log('Outside modal clicked: Modal closed');
-        }
-    });
-
-    // Keyboard Accessibility for Modal Close
-    document.getElementById('close-product-modal').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            document.getElementById('product-details-modal').classList.add('hidden');
-        }
-    });
-
-    // Floating Button Positioning
-    function adjustFloatingButtonPositions() {
-        const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
-        let aboutOffset = 16;
-        floatingButtons.forEach(button => {
-            if (button !== document.querySelector('.discount-btn-container') &&
-                button !== document.querySelector('.whatsapp-btn-container')) {
-                const buttonBottom = parseInt(getComputedStyle(button).bottom) || 0;
-                const buttonHeight = button.offsetHeight || 48;
-                aboutOffset = Math.max(aboutOffset, buttonBottom + buttonHeight + 16);
-            }
-        });
-        const aboutButton = document.querySelector('.discount-btn-container');
-        if (aboutButton) {
-            aboutButton.style.bottom = `${aboutOffset}px`;
-        }
-    }
-    adjustFloatingButtonPositions();
-    window.addEventListener('resize', adjustFloatingButtonPositions);
-
-    // Discount Popup Toggle
-    if (typeof jQuery !== 'undefined') {
-        $(document).ready(function() {
-            $('#discount-btn').off('click').on('click', function() {
-                $('#discount-page').removeClass('-translate-x-full');
-                console.log('Discount button clicked');
-            });
-            $('#close-discount').off('click').on('click', function() {
-                $('#discount-page').addClass('-translate-x-full');
-                console.log('Close discount clicked');
-            });
-        });
-    } else {
-        console.error('jQuery is not loaded');
-    }
-
-    // WhatsApp Button Click Handler
-    const whatsappBtn = document.querySelector('.whatsapp-btn-container .floating-btn');
-    if (whatsappBtn) {
-        whatsappBtn.addEventListener('click', () => {
-            const phoneNumber = '+254701539003';
-            const message = 'Hello, I have a question about Zira Collection!';
-            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-            console.log('WhatsApp button clicked');
-        });
-    }
-
-    // Contact Form Submission
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            console.log('Form submitted');
-            const formData = new FormData(e.target);
-            const data = {
-                subject: formData.get('subject'),
-                message: formData.get('message'),
-            };
-            console.log('Form data:', data);
-
-            const showFlashMessage = (text, isSuccess) => {
-                console.log('Showing flash message:', text, isSuccess);
-                const flashMessage = document.getElementById('flash-message1');
-                if (flashMessage) {
-                    flashMessage.textContent = text;
-                    flashMessage.className = isSuccess ? 'success' : 'error';
-                    flashMessage.style.display = 'block';
-                    flashMessage.classList.add('show');
-                    setTimeout(() => {
-                        flashMessage.classList.remove('show');
-                        setTimeout(() => {
-                            flashMessage.style.display = 'none';
-                        }, 500);
-                    }, 5000);
+                // Persist currency to backend using /set_currency
+                try {
+                    const response = await fetch('/set_currency', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currency: currentCurrency }),
+                        credentials: 'include'
+                    });
+                    if (!response.ok) throw new Error('Failed to set currency');
+                    await fetchExchangeRates();
+                    showToast(`Currency changed to ${currentCurrency}`, '#4ade80');
+                } catch (error) {
+                    console.error('Error setting currency:', error);
+                    showToast('Failed to change currency', '#f87171');
+                    updatePrices(); // Update locally if backend fails
                 }
-            };
+            });
+        });
 
-            try {
-                const response = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    credentials: 'include',
-                });
-                console.log('Response status:', response.status);
-                const result = await response.json();
-                console.log('Response data:', result);
-                if (!response.ok) throw new Error(result.error || 'Failed to send message');
-                showFlashMessage('Your message has been sent successfully! We will get back to you shortly', true);
-                e.target.reset();
-            } catch (error) {
-                console.error('Error:', error.message);
-                showFlashMessage(`Error: ${error.message}`, false);
+        // Mobile Sidebar and Dropdowns
+        document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
+        document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
+
+        // Mobile Search Toggle
+        document.getElementById('mobile-search-icon').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const searchBar = document.getElementById('mobile-search-bar');
+            if (searchBar) {
+                searchBar.classList.toggle('active');
+                searchBar.classList.toggle('hidden');
+                const icon = document.getElementById('mobile-search-icon');
+                icon.classList.add('animate-bounce');
+                setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+                console.log('Mobile search bar toggled:', searchBar.classList.contains('active'));
+            } else {
+                console.error('Mobile search bar element not found');
             }
         });
-    }
 
-    // Keyboard Accessibility for Floating Buttons
-    document.getElementById('discount-btn').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        // Live Search
+        document.querySelectorAll('.search-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                applyFilters();
+            });
+        });
+
+        // Category Filter
+        document.querySelectorAll('.filter-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedCategory = e.target.getAttribute('data-filter');
+                document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('font-bold', 'text-yellow-600'));
+                e.target.classList.add('font-bold', 'text-yellow-600');
+                applyFilters();
+            });
+        });
+
+        // Price Range Filter
+        document.querySelector('.price-filter').addEventListener('change', (e) => {
+            selectedPriceRange = e.target.value;
+            applyFilters();
+        });
+
+        // Display Options
+        document.querySelectorAll('.display-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.display-option').forEach(opt => opt.classList.remove('active'));
+                e.target.classList.add('active');
+
+                const grid = document.querySelector('.product-grid');
+                grid.classList.remove('cols-2', 'cols-3', 'cols-4', 'cols-5', 'list-view');
+
+                if (e.target.classList.contains('list-view')) {
+                    grid.classList.add('list-view');
+                } else {
+                    const cols = e.target.getAttribute('data-cols');
+                    grid.classList.add(`cols-${cols}`);
+                }
+            });
+        });
+
+        // Wishlist Button Toggle
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const icon = btn.querySelector('i');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('far');
+            });
+        });
+
+        // Filter Toggler Button (Mobile)
+        document.getElementById('filter-toggler').addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const button = document.getElementById('filter-toggler');
+            sidebar.classList.toggle('open');
+            button.classList.add('animate-pulse');
+            setTimeout(() => button.classList.remove('animate-pulse'), 300);
+        });
+
+        // Filter Close Button (Mobile)
+        document.getElementById('filter-close-btn').addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const icon = document.querySelector('#filter-close-btn i');
+            sidebar.classList.remove('open');
+            icon.classList.add('animate-rotateToggle');
+            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            applyFilters();
+        });
+
+        // Close Filter Sidebar When Clicking Outside (Mobile)
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const toggler = document.getElementById('filter-toggler');
+            const closeBtn = document.getElementById('filter-close-btn');
+            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggler.contains(e.target) && !closeBtn.contains(e.target)) {
+                sidebar.classList.remove('open');
+                applyFilters();
+            }
+        });
+
+        // Event Delegation for Product Clicks
+        document.getElementById('product-grid').addEventListener('click', (e) => {
+            const target = e.target.closest('.product-image, .product-name');
+            if (!target) return;
+
             e.preventDefault();
-            $('#discount-page').removeClass('-translate-x-full');
+            e.stopPropagation();
+
+            const productCard = target.closest('.product-card');
+            if (!productCard) return;
+
+            const id = productCard.getAttribute('data-product-id');
+            const name = productCard.getAttribute('data-name');
+            const category = productCard.getAttribute('data-category');
+            const price = parseFloat(productCard.querySelector('.price').getAttribute('data-price'));
+            const description = productCard.getAttribute('data-description');
+            const image = productCard.querySelector('img').src;
+
+            openProductModal(id, name, category, price, description, image);
+        });
+
+        // Close Product Details Modal
+        const closeButton = document.getElementById('close-product-modal');
+        if (closeButton) {
+            const newCloseButton = closeButton.cloneNode(true);
+            closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+            newCloseButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const modal = document.getElementById('product-details-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    console.log('Close button clicked: Modal closed');
+                } else {
+                    console.error('Modal element not found');
+                }
+            });
         }
-    });
-    document.getElementById('close-discount').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            $('#discount-page').addClass('-translate-x-full');
-        }
-    });
-    if (whatsappBtn) {
-        whatsappBtn.addEventListener('keydown', (e) => {
+
+        // Close Modal on Outside Click
+        document.getElementById('product-details-modal').addEventListener('click', (e) => {
+            const modal = document.getElementById('product-details-modal');
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                console.log('Outside modal clicked: Modal closed');
+            }
+        });
+
+        // Keyboard Accessibility for Modal Close
+        document.getElementById('close-product-modal').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                document.getElementById('product-details-modal').classList.add('hidden');
+            }
+        });
+
+        // Floating Button Positioning
+        function adjustFloatingButtonPositions() {
+            const floatingButtons = document.querySelectorAll('[style*="position: fixed"][style*="bottom"][style*="left"]');
+            let aboutOffset = 16;
+            floatingButtons.forEach(button => {
+                if (button !== document.querySelector('.discount-btn-container') &&
+                    button !== document.querySelector('.whatsapp-btn-container')) {
+                    const buttonBottom = parseInt(getComputedStyle(button).bottom) || 0;
+                    const buttonHeight = button.offsetHeight || 48;
+                    aboutOffset = Math.max(aboutOffset, buttonBottom + buttonHeight + 16);
+                }
+            });
+            const aboutButton = document.querySelector('.discount-btn-container');
+            if (aboutButton) {
+                aboutButton.style.bottom = `${aboutOffset}px`;
+            }
+        }
+        adjustFloatingButtonPositions();
+        window.addEventListener('resize', adjustFloatingButtonPositions);
+
+        // Discount Popup Toggle
+        if (typeof jQuery !== 'undefined') {
+            $(document).ready(function() {
+                $('#discount-btn').off('click').on('click', function() {
+                    $('#discount-page').removeClass('-translate-x-full');
+                    console.log('Discount button clicked');
+                });
+                $('#close-discount').off('click').on('click', function() {
+                    $('#discount-page').addClass('-translate-x-full');
+                    console.log('Close discount clicked');
+                });
+            });
+        } else {
+            console.error('jQuery is not loaded');
+        }
+
+        // WhatsApp Button Click Handler
+        const whatsappBtn = document.querySelector('.whatsapp-btn-container .floating-btn');
+        if (whatsappBtn) {
+            whatsappBtn.addEventListener('click', () => {
                 const phoneNumber = '+254701539003';
                 const message = 'Hello, I have a question about Zira Collection!';
                 const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
-            }
-        });
-    }
+                console.log('WhatsApp button clicked');
+            });
+        }
 
-    // Observe for dynamically added categories (Mobile Sidebar)
-    const sidebarObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length) {
-                const newButtons = document.querySelectorAll('.sidebar-dropdown-toggle');
-                if (newButtons.length > 0) {
-                    console.log('New sidebar dropdown toggles detected, re-initializing');
-                    initializeMobileDropdowns();
+        // Contact Form Submission
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log('Form submitted');
+                const formData = new FormData(e.target);
+                const data = {
+                    subject: formData.get('subject'),
+                    message: formData.get('message'),
+                };
+                console.log('Form data:', data);
+
+                const showFlashMessage = (text, isSuccess) => {
+                    console.log('Showing flash message:', text, isSuccess);
+                    const flashMessage = document.getElementById('flash-message1');
+                    if (flashMessage) {
+                        flashMessage.textContent = text;
+                        flashMessage.className = isSuccess ? 'success' : 'error';
+                        flashMessage.style.display = 'block';
+                        flashMessage.classList.add('show');
+                        setTimeout(() => {
+                            flashMessage.classList.remove('show');
+                            setTimeout(() => {
+                                flashMessage.style.display = 'none';
+                            }, 500);
+                        }, 5000);
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                        credentials: 'include',
+                    });
+                    console.log('Response status:', response.status);
+                    const result = await response.json();
+                    console.log('Response data:', result);
+                    if (!response.ok) throw new Error(result.error || 'Failed to send message');
+                    showFlashMessage('Your message has been sent successfully! We will get back to you shortly', true);
+                    e.target.reset();
+                } catch (error) {
+                    console.error('Error:', error.message);
+                    showFlashMessage(`Error: ${error.message}`, false);
                 }
+            });
+        }
+
+        // Keyboard Accessibility for Floating Buttons
+        document.getElementById('discount-btn').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $('#discount-page').removeClass('-translate-x-full');
             }
         });
-    });
-    sidebarObserver.observe(document.getElementById('mobile-sidebar'), { childList: true, subtree: true });
-
-    // Observe for dynamically added categories (Desktop Navbar)
-    const navbarObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length) {
-                const newGroups = document.querySelectorAll('#desktop-navbar .group');
-                if (newGroups.length > 0) {
-                    console.log('New category groups detected, re-initializing dropdowns');
-                    initializeCategoryDropdowns();
+        document.getElementById('close-discount').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $('#discount-page').addClass('-translate-x-full');
+            }
+        });
+        if (whatsappBtn) {
+            whatsappBtn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const phoneNumber = '+254701539003';
+                    const message = 'Hello, I have a question about Zira Collection!';
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
                 }
-            }
-        });
-    });
-    navbarObserver.observe(document.getElementById('desktop-navbar'), { childList: true, subtree: true });
-});
+            });
+        }
 
-// Initialize Prices and Filters
-updatePrices();
-applyFilters();
- </script>
+        // Observe for dynamically added categories (Mobile Sidebar)
+        const sidebarObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length) {
+                    const newButtons = document.querySelectorAll('.sidebar-dropdown-toggle');
+                    if (newButtons.length > 0) {
+                        console.log('New sidebar dropdown toggles detected, re-initializing');
+                        initializeMobileDropdowns();
+                    }
+                }
+            });
+        });
+        sidebarObserver.observe(document.getElementById('mobile-sidebar'), { childList: true, subtree: true });
+
+        // Observe for dynamically added categories (Desktop Navbar)
+        const navbarObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length) {
+                    const newGroups = document.querySelectorAll('#desktop-navbar .group');
+                    if (newGroups.length > 0) {
+                        console.log('New category groups detected, re-initializing dropdowns');
+                        initializeCategoryDropdowns();
+                    }
+                }
+            });
+        });
+        navbarObserver.observe(document.getElementById('desktop-navbar'), { childList: true, subtree: true });
+    });
+
+    // Initialize Prices and Filters
+    updatePrices();
+    applyFilters();
+</script>
  <script src="{{ url_for('static', filename='js/email.js') }}"></script>
 </body>
 </html>

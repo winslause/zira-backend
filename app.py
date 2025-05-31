@@ -3781,6 +3781,8 @@ def get_exchange_rates():
         }
         return jsonify(fallback_rates), 200
     
+
+    
     
 @app.errorhandler(404)
 def not_found(e):

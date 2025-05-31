@@ -887,7 +887,7 @@
                     const response = await fetch('/api/exchange_rates');
                     exchangeRates = await response.json();
                     updatePrices();
-                    await fetch('/api/set_currency', {
+                    await fetch('/set_currency', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ currency: currentCurrency })

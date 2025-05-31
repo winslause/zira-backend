@@ -1430,552 +1430,505 @@
     </footer>
 
 <script>
-    // Currency Conversion Logic (KES as base currency)
-    let exchangeRates = {
-        EUR: 0.0073,
-        GBP: 0.0061,
-        KES: 1,
-        USD: 0.0077
-    };
-    let currentCurrency = '{{ current_currency | safe }}';
+// Currency Conversion Logic (KES as base currency)
+let exchangeRates = {
+    EUR: 0.0073,
+    GBP: 0.0061,
+    KES: 1,
+    USD: 0.0077
+};
+let currentCurrency = '{{ current_currency | safe }}';
 
-    // API Configuration
-    const API_URL = '/api/exchange_rates';
-    const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort();
+// API Configuration
+const API_URL = '/api/exchange_rates';
+const SUPPORTED_CURRENCIES = ['EUR', 'GBP', 'KES', 'USD'].sort();
 
-    // Fetch Exchange Rates from Backend
-    async function fetchExchangeRates() {
-        console.log('Fetching exchange rates from backend');
-        try {
-            const response = await fetch(API_URL);
-            if (!response.ok) {
-                console.error(`Backend error: ${response.status} ${response.statusText}`);
-                throw new Error('Backend request failed');
-            }
-            const rates = await response.json();
-            if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
-                console.error('Invalid backend response:', rates);
-                throw new Error('Invalid backend response');
-            }
-            exchangeRates = { ...rates };
-            console.log('Fetched exchange rates:', exchangeRates);
-            updatePrices();
-        } catch (error) {
-            console.error('Error fetching exchange rates:', error);
-            console.warn('Using fallback exchange rates');
-            updatePrices();
+// Fetch Exchange Rates from Backend
+async function fetchExchangeRates() {
+    console.log('Fetching exchange rates from:', API_URL);
+    try {
+        const response = await fetch(API_URL, { credentials: 'include' });
+        if (!response.ok) {
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            throw new Error('Failed to fetch exchange rates');
         }
+        const rates = await response.json();
+        if (!rates.EUR || !rates.GBP || !rates.KES || !rates.USD) {
+            console.error('Invalid backend response:', rates);
+            throw new Error('Invalid exchange rates');
+        }
+        exchangeRates = { ...rates };
+        console.log('Fetched exchange rates:', exchangeRates);
+        updatePrices();
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        console.warn('Using fallback exchange rates');
+        updatePrices();
+    }
+}
+
+// Initialize Currency Button
+function initializeCurrencyButton() {
+    const storedCountry = localStorage.getItem('country') || 'Kenya';
+    const storedFlag = localStorage.getItem('flag') || '🇰🇪';
+    const storedCurrency = localStorage.getItem('currency') || currentCurrency;
+    currentCurrency = storedCurrency;
+
+    const countryBtn = document.getElementById('country-btn');
+    const mobileCountryBtn = document.getElementById('mobile-country-btn');
+    if (countryBtn) {
+        countryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${storedFlag}</span> ${storedCurrency}`;
+    }
+    if (mobileCountryBtn) {
+        mobileCountryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${storedFlag}</span> ${storedCurrency}`;
+    }
+    document.querySelectorAll('#country-btn-container, #mobile-country-btn-container').forEach(container => {
+        container.classList.add('currency-loaded');
+    });
+    updatePrices();
+}
+
+// Update Wishlist, Cart, and Order Prices
+function updatePrices() {
+    console.log('Updating prices for currency:', currentCurrency);
+    let cartTotal = 0;
+
+    // Validate currency
+    if (!exchangeRates[currentCurrency]) {
+        console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
+        currentCurrency = 'KES';
+        localStorage.setItem('currency', currentCurrency);
     }
 
-    // Helper Function to Format Dates Safely
-    function formatDate(dateInput) {
-        console.log('Formatting date:', dateInput);
-        if (!dateInput) {
-            console.warn('Date input is null or undefined');
-            return 'Unknown';
-        }
-        try {
-            const date = new Date(dateInput);
-            if (isNaN(date.getTime())) {
-                console.warn(`Invalid date: ${dateInput}`);
-                return 'Unknown';
-            }
-            return date.toISOString().split('T')[0];
-        } catch (error) {
-            console.error(`Error formatting date ${dateInput}:`, error);
-            return 'Unknown';
-        }
-    }
+    // Update Wishlist Prices
+    document.querySelectorAll('#wishlist-items .wishlist-card .price').forEach(priceElement => {
+        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+        const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
 
-    // Toggle Country Dropdown
-    document.getElementById('country-btn')?.addEventListener('click', () => {
-        console.log('Toggling country dropdown');
-        const dropdown = document.getElementById('country-dropdown');
-        if (dropdown) {
-            dropdown.classList.toggle('hidden');
-        } else {
-            console.error('Country dropdown not found');
-        }
-    });
-
-    // Toggle Mobile Country Dropdown
-    document.getElementById('mobile-country-btn')?.addEventListener('click', () => {
-        console.log('Toggling mobile country dropdown');
-        const dropdown = document.getElementById('mobile-country-dropdown');
-        if (dropdown) {
-            dropdown.classList.toggle('hidden');
-        } else {
-            console.error('Mobile country dropdown not found');
-        }
-    });
-
-    // Update Currency for Mobile
-    document.querySelectorAll('#mobile-country-dropdown .country-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            console.log('Mobile currency option clicked');
-            e.preventDefault();
-            const country = e.target.getAttribute('data-country');
-            const flag = e.target.getAttribute('data-flag');
-            currentCurrency = e.target.getAttribute('data-currency');
-            const countryBtn = document.getElementById('mobile-country-btn');
-            if (countryBtn) {
-                countryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${flag}</span> ${country}`;
-            }
-            const dropdown = document.getElementById('mobile-country-dropdown');
-            if (dropdown) {
-                dropdown.classList.add('hidden');
-            }
-            updatePrices();
-        });
-    });
-
-    // Update Currency
-    document.querySelectorAll('.country-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            console.log('Currency option clicked');
-            e.preventDefault();
-            const country = e.target.getAttribute('data-country');
-            const flag = e.target.getAttribute('data-flag');
-            currentCurrency = e.target.getAttribute('data-currency');
-            const countryBtn = document.getElementById('country-btn');
-            if (countryBtn) {
-                countryBtn.innerHTML = `<span class="flag">${flag}</span> ${country}`;
-            }
-            const dropdown = document.getElementById('country-dropdown');
-            if (dropdown) {
-                dropdown.classList.add('hidden');
-            }
-            updatePrices();
-        });
-    });
-
-    // Update Wishlist, Cart, and Order Prices
-    function updatePrices() {
-        console.log('Updating prices for currency:', currentCurrency);
-        let cartTotal = 0;
-
-        // Validate currency
-        if (!exchangeRates[currentCurrency]) {
-            console.warn(`Invalid currency: ${currentCurrency}, defaulting to KES`);
-            currentCurrency = 'KES';
+        if (isNaN(basePriceKES)) {
+            console.error('Invalid base price for wishlist item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
         }
 
-        // Update Wishlist Prices
-        document.querySelectorAll('#wishlist-items .wishlist-card .price').forEach(priceElement => {
-            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-            const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
+        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+        console.log(`Wishlist item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
 
-            if (isNaN(basePriceKES)) {
-                console.error('Invalid base price for wishlist item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-                priceElement.textContent = `${currentCurrency} N/A`;
-                return;
-            }
-
-            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-            console.log(`Wishlist item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-            if (originalPriceElement) {
-                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-                if (isNaN(originalPriceKES)) {
-                    console.error('Invalid original price for wishlist item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                    originalPriceElement.textContent = `${currentCurrency} N/A`;
-                } else {
-                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                    console.log(`Wishlist item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-                }
-            }
-        });
-
-        // Update Cart Prices and Total
-        document.querySelectorAll('#cart-items .cart-card .price').forEach(priceElement => {
-            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-            const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
-            const quantityElement = priceElement.closest('.cart-card').querySelector('input[type="number"]');
-            const quantity = quantityElement ? parseInt(quantityElement.value) || 1 : 1;
-
-            if (isNaN(basePriceKES)) {
-                console.error('Invalid base price for cart item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-                priceElement.textContent = `${currentCurrency} N/A`;
-                return;
-            }
-
-            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-            cartTotal += basePriceKES * quantity;
-            console.log(`Cart item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Quantity: ${quantity}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-            if (originalPriceElement) {
-                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-                if (isNaN(originalPriceKES)) {
-                    console.error('Invalid original price for cart item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                    originalPriceElement.textContent = `${currentCurrency} N/A`;
-                } else {
-                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                    console.log(`Cart item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-                }
-            }
-        });
-
-        // Update Order Prices
-        document.querySelectorAll('#order-items .price').forEach(priceElement => {
-            const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
-            const basePriceKES = parseFloat(
-                hasDiscount 
-                    ? priceElement.getAttribute('data-discounted-price') 
-                    : priceElement.getAttribute('data-price')
-            );
-
-            if (isNaN(basePriceKES)) {
-                console.error('Invalid base price for order item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
-                priceElement.textContent = `${currentCurrency} N/A`;
-                return;
-            }
-
-            const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
-            priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
-            console.log(`Order item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
-
-            const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
-            if (originalPriceElement) {
-                const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
-                if (isNaN(originalPriceKES)) {
-                    console.error('Invalid original price for order item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
-                    originalPriceElement.textContent = `${currentCurrency} N/A`;
-                } else {
-                    const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
-                    originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
-                    console.log(`Order item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
-                }
-            }
-        });
-
-        // Update Order Totals
-        document.querySelectorAll('#order-items .total-price[data-total-price]').forEach(totalElement => {
-            const baseTotalKES = parseFloat(totalElement.getAttribute('data-total-price'));
-            if (isNaN(baseTotalKES)) {
-                console.error('Invalid base total for order:', totalElement, 'data-total-price:', totalElement.getAttribute('data-total-price'));
-                totalElement.textContent = `${currentCurrency} N/A`;
+        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+        if (originalPriceElement) {
+            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+            if (isNaN(originalPriceKES)) {
+                console.error('Invalid original price for wishlist item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                originalPriceElement.textContent = `${currentCurrency} N/A`;
             } else {
-                const convertedTotal = (baseTotalKES * exchangeRates[currentCurrency]).toFixed(2);
-                totalElement.textContent = `${currentCurrency} ${convertedTotal}`;
-                console.log(`Order total - Base total (KES): ${baseTotalKES}, Converted total: ${currentCurrency} ${convertedTotal}`);
+                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                console.log(`Wishlist item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
             }
-        });
+        }
+    });
 
-        // Update Cart Total
-        const cartTotalElement = document.getElementById('cart-total');
-        if (cartTotalElement) {
-            const convertedTotal = (cartTotal * exchangeRates[currentCurrency]).toFixed(2);
-            cartTotalElement.textContent = `${currentCurrency} ${convertedTotal}`;
-            console.log(`Cart total - Base total (KES): ${cartTotal}, Converted total: ${currentCurrency} ${convertedTotal}`);
+    // Update Cart Prices and Total
+    document.querySelectorAll('#cart-items .cart-card .price').forEach(priceElement => {
+        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+        const basePriceKES = parseFloat(priceElement.getAttribute('data-discounted-price') || priceElement.getAttribute('data-price'));
+        const quantityElement = priceElement.closest('.cart-card').querySelector('input[type="number"]');
+        const quantity = quantityElement ? parseInt(quantityElement.value) || 1 : 1;
+
+        if (isNaN(basePriceKES)) {
+            console.error('Invalid base price for cart item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
+
+        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+        cartTotal += basePriceKES * quantity;
+        console.log(`Cart item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Quantity: ${quantity}, Converted price: ${currentCurrency} ${convertedPrice}`);
+
+        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+        if (originalPriceElement) {
+            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+            if (isNaN(originalPriceKES)) {
+                console.error('Invalid original price for cart item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                originalPriceElement.textContent = `${currentCurrency} N/A`;
+            } else {
+                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                console.log(`Cart item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
+            }
+        }
+    });
+
+    // Update Order Prices
+    document.querySelectorAll('#order-items .price').forEach(priceElement => {
+        const hasDiscount = priceElement.getAttribute('data-has-discount') === 'true';
+        const basePriceKES = parseFloat(
+            hasDiscount 
+                ? priceElement.getAttribute('data-discounted-price') 
+                : priceElement.getAttribute('data-price')
+        );
+
+        if (isNaN(basePriceKES)) {
+            console.error('Invalid base price for order item:', priceElement, 'data-price:', priceElement.getAttribute('data-price'), 'data-discounted-price:', priceElement.getAttribute('data-discounted-price'));
+            priceElement.textContent = `${currentCurrency} N/A`;
+            return;
+        }
+
+        const convertedPrice = (basePriceKES * exchangeRates[currentCurrency]).toFixed(2);
+        priceElement.textContent = `${currentCurrency} ${convertedPrice}`;
+        console.log(`Order item - Has discount: ${hasDiscount}, Base price (KES): ${basePriceKES}, Converted price: ${currentCurrency} ${convertedPrice}`);
+
+        const originalPriceElement = priceElement.parentElement.querySelector('[data-original-price]');
+        if (originalPriceElement) {
+            const originalPriceKES = parseFloat(originalPriceElement.getAttribute('data-original-price'));
+            if (isNaN(originalPriceKES)) {
+                console.error('Invalid original price for order item:', originalPriceElement, 'data-original-price:', originalPriceElement.getAttribute('data-original-price'));
+                originalPriceElement.textContent = `${currentCurrency} N/A`;
+            } else {
+                const convertedOriginalPrice = (originalPriceKES * exchangeRates[currentCurrency]).toFixed(2);
+                originalPriceElement.textContent = `${currentCurrency} ${convertedOriginalPrice}`;
+                console.log(`Order item - Original price (KES): ${originalPriceKES}, Converted original price: ${currentCurrency} ${convertedOriginalPrice}`);
+            }
+        }
+    });
+
+    // Update Order Totals
+    document.querySelectorAll('#order-items .total-price[data-total-price]').forEach(totalElement => {
+        const baseTotalKES = parseFloat(totalElement.getAttribute('data-total-price'));
+        if (isNaN(baseTotalKES)) {
+            console.error('Invalid base total for order:', totalElement, 'data-total-price:', totalElement.getAttribute('data-total-price'));
+            totalElement.textContent = `${currentCurrency} N/A`;
         } else {
-            console.warn('Cart total element not found');
-        }
-    }
-
-    // Initialize Exchange Rates on Page Load
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('Page loaded, initializing exchange rates');
-        fetchExchangeRates();
-    });
-
-    // Modal Functions
-    function openModal(modalId) {
-        console.log(`Attempting to open modal: ${modalId}`);
-        const modal = document.getElementById(modalId);
-        if (!modal) {
-            console.error(`Modal ${modalId} not found`);
-            showToast(`Modal ${modalId} not found`, 'error');
-            return;
-        }
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        if (modalId === 'checkout-modal') {
-            updatePaymentDetails();
-            toggleMessageCode();
-        }
-        console.log(`Modal ${modalId} opened successfully`);
-    }
-
-    function closeModal(modalId) {
-        console.log(`Attempting to close modal: ${modalId}`);
-        const modal = document.getElementById(modalId);
-        if (!modal) {
-            console.error(`Modal ${modalId} not found`);
-            return;
-        }
-        modal.classList.remove('open');
-        document.body.style.overflow = 'auto';
-        console.log(`Modal ${modalId} closed successfully`);
-    }
-
-    // Update Profile
-    function updateProfile(event) {
-        event.preventDefault();
-        console.log('Updating profile');
-        const form = event.target;
-        const data = {
-            name: form.name.value,
-            email: form.email.value,
-            phone_number: form.phone_number.value
-        };
-        fetch('/api/users/{{ user.id }}', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            credentials: 'include'
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            if (status >= 400) {
-                throw new Error(body.error || 'Failed to update profile');
-            }
-            showToast(body.message || 'User updated successfully', 'success');
-            closeModal('profile-modal');
-            setTimeout(() => {
-                console.log('Reloading page after profile update');
-                location.reload();
-            }, 3000);
-        })
-        .catch(error => {
-            console.error('Error updating profile:', error);
-            showToast('Failed to update profile: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '/login';
-            }
-        });
-    }
-
-    // Change Profile Picture
-    document.getElementById('picture-form')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        console.log('Submitting profile picture');
-        const fileInput = e.target.querySelector('input[type="file"]');
-        if (fileInput.files[0]) {
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
-            fetch('/api/profile/picture', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            })
-            .then(response => response.json().then(data => ({ status: response.status, body: data })))
-            .then(({ status, body }) => {
-                if (status >= 400) {
-                    throw new Error(body.error || 'Failed to update profile picture');
-                }
-                if (body.image_url) {
-                    document.getElementById('profile-pic').src = body.image_url;
-                    showToast('Profile picture updated!', 'success');
-                } else {
-                    showToast('Failed to update profile picture', 'error');
-                }
-                closeModal('picture-modal');
-            })
-            .catch(error => {
-                console.error('Error uploading picture:', error);
-                showToast('Failed to upload picture: ' + error.message, 'error');
-                if (error.message.includes('Unauthorized')) {
-                    window.location.href = '/login';
-                }
-            });
+            const convertedTotal = (baseTotalKES * exchangeRates[currentCurrency]).toFixed(2);
+            totalElement.textContent = `${currentCurrency} ${convertedTotal}`;
+            console.log(`Order total - Base total (KES): ${baseTotalKES}, Converted total: ${currentCurrency} ${convertedTotal}`);
         }
     });
 
-    // Add Address
-    document.getElementById('address-form')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        console.log('Adding address');
-        fetch('/api/profile/address', {
+    // Update Cart Total
+    const cartTotalElement = document.getElementById('cart-total');
+    if (cartTotalElement) {
+        const convertedTotal = (cartTotal * exchangeRates[currentCurrency]).toFixed(2);
+        cartTotalElement.textContent = `${currentCurrency} ${convertedTotal}`;
+        console.log(`Cart total - Base total (KES): ${cartTotal}, Converted total: ${currentCurrency} ${convertedTotal}`);
+    } else {
+        console.warn('Cart total element not found');
+    }
+}
+
+// Helper Function to Format Dates Safely
+function formatDate(dateInput) {
+    console.log('Formatting date:', dateInput);
+    if (!dateInput) {
+        console.warn('Date input is null or undefined');
+        return 'Unknown';
+    }
+    try {
+        const date = new Date(dateInput);
+        if (isNaN(date.getTime())) {
+            console.warn(`Invalid date: ${dateInput}`);
+            return 'Unknown';
+        }
+        return date.toISOString().split('T')[0];
+    } catch (error) {
+        console.error(`Error formatting date ${dateInput}:`, error);
+        return 'Unknown';
+    }
+}
+
+// Modal Functions
+function openModal(modalId) {
+    console.log(`Attempting to open modal: ${modalId}`);
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error(`Modal ${modalId} not found`);
+        showToast(`Modal ${modalId} not found`, 'error');
+        return;
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (modalId === 'checkout-modal') {
+        updatePaymentDetails();
+        toggleMessageCode();
+    }
+    console.log(`Modal ${modalId} opened successfully`);
+}
+
+function closeModal(modalId) {
+    console.log(`Attempting to close modal: ${modalId}`);
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error(`Modal ${modalId} not found`);
+        return;
+    }
+    modal.classList.remove('open');
+    document.body.style.overflow = 'auto';
+    console.log(`Modal ${modalId} closed successfully`);
+}
+
+// Update Profile
+function updateProfile(event) {
+    event.preventDefault();
+    console.log('Updating profile');
+    const form = event.target;
+    const data = {
+        name: form.name.value,
+        email: form.email.value,
+        phone_number: form.phone_number.value
+    };
+    fetch('/api/users/{{ user.id }}', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to update profile');
+        }
+        showToast(body.message || 'User updated successfully', 'success');
+        closeModal('profile-modal');
+        setTimeout(() => {
+            console.log('Reloading page after profile update');
+            location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error updating profile:', error);
+        showToast('Failed to update profile: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    });
+}
+
+// Change Profile Picture
+document.getElementById('picture-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log('Submitting profile picture');
+    const fileInput = e.target.querySelector('input[type="file"]');
+    if (fileInput.files[0]) {
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        fetch('/api/profile/picture', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                street: e.target.street.value,
-                city: e.target.city.value,
-                country: e.target.country.value,
-                postal_code: e.target.postal_code.value,
-            }),
+            body: formData,
             credentials: 'include'
         })
         .then(response => response.json().then(data => ({ status: response.status, body: data })))
         .then(({ status, body }) => {
             if (status >= 400) {
-                throw new Error(body.error || 'Failed to add address');
+                throw new Error(body.error || 'Failed to update profile picture');
             }
-            showToast(body.message || 'Address added successfully', 'success');
-            closeModal('address-modal');
-            setTimeout(() => {
-                console.log('Reloading page after adding address');
-                location.reload();
-            }, 3000);
+            if (body.image_url) {
+                document.getElementById('profile-pic').src = body.image_url;
+                showToast('Profile picture updated!', 'success');
+            } else {
+                showToast('Failed to update profile picture', 'error');
+            }
+            closeModal('picture-modal');
         })
         .catch(error => {
-            console.error('Error adding address:', error);
-            showToast('Failed to add address: ' + error.message, 'error');
+            console.error('Error uploading picture:', error);
+            showToast('Failed to upload picture: ' + error.message, 'error');
             if (error.message.includes('Unauthorized')) {
                 window.location.href = '/login';
             }
         });
-    });
+    }
+});
 
-    // Remove from Wishlist
-    function removeFromWishlist(wishlistId) {
-        console.log(`Removing wishlist item: ${wishlistId}`);
-        fetch(`/api/wishlist/${wishlistId}`, {
+// Add Address
+document.getElementById('address-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log('Adding address');
+    fetch('/api/profile/address', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            street: e.target.street.value,
+            city: e.target.city.value,
+            country: e.target.country.value,
+            postal_code: e.target.postal_code.value,
+        }),
+        credentials: 'include'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to add address');
+        }
+        showToast(body.message || 'Address added successfully', 'success');
+        closeModal('address-modal');
+        setTimeout(() => {
+            console.log('Reloading page after adding address');
+            location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error adding address:', error);
+        showToast('Failed to add address: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    });
+});
+
+// Remove from Wishlist
+function removeFromWishlist(wishlistId) {
+    console.log(`Removing wishlist item: ${wishlistId}`);
+    fetch(`/api/wishlist/${wishlistId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to remove from wishlist');
+        }
+        showToast(body.message || 'Removed from wishlist', 'success');
+        setTimeout(() => {
+            console.log('Reloading page after removing from wishlist');
+            location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error removing from wishlist:', error);
+        showToast('Failed to remove from wishlist: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    });
+}
+
+// Add to Cart from Wishlist
+function addToCartFromWishlist(wishlistId, productId, productType) {
+    console.log(`Adding to cart from wishlist: ${wishlistId}, product: ${productId}, type: ${productType}`);
+    fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            product_id: productId, 
+            quantity: 1,
+            product_type: productType
+        }),
+        credentials: 'include'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to add to cart');
+        }
+        return fetch(`/api/wishlist/${wishlistId}`, {
             method: 'DELETE',
             credentials: 'include'
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            if (status >= 400) {
-                throw new Error(body.error || 'Failed to remove from wishlist');
-            }
-            showToast(body.message || 'Removed from wishlist', 'success');
-            setTimeout(() => {
-                console.log('Reloading page after removing from wishlist');
-                location.reload();
-            }, 3000);
-        })
-        .catch(error => {
-            console.error('Error removing from wishlist:', error);
-            showToast('Failed to remove from wishlist: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '/login';
-            }
         });
-    }
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to remove from wishlist');
+        }
+        showToast('Product moved to cart', 'success');
+        setTimeout(() => {
+            console.log('Reloading page after moving to cart');
+            location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error moving to cart:', error);
+        showToast('Failed to move product to cart: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    });
+}
 
-    // Add to Cart from Wishlist
-    function addToCartFromWishlist(wishlistId, productId, productType) {
-        console.log(`Adding to cart from wishlist: ${wishlistId}, product: ${productId}, type: ${productType}`);
-        fetch('/api/cart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+// Update Cart Quantity
+async function updateCartQuantity(productId, quantity, productType) {
+    console.log(`Updating quantity for product ${productId}: ${quantity}, type: ${productType}`);
+    if (quantity < 1) {
+        showToast('Quantity must be at least 1', 'error');
+        return;
+    }
+    const cartCard = document.querySelector(`.cart-card[data-product-id="${productId}"][data-product-type="${productType}"]`);
+    const priceElement = cartCard.querySelector('.price');
+    const quantityInput = cartCard.querySelector('input[type="number"]');
+
+    try {
+        const response = await fetch('/api/cart', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 product_id: productId, 
-                quantity: 1,
+                quantity: parseInt(quantity), 
                 product_type: productType
             }),
             credentials: 'include'
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            if (status >= 400) {
-                throw new Error(body.error || 'Failed to add to cart');
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showToast(data.message || 'Quantity updated successfully', 'success');
+            if (quantityInput) {
+                quantityInput.value = parseInt(quantity);
             }
-            return fetch(`/api/wishlist/${wishlistId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            if (status >= 400) {
-                throw new Error(body.error || 'Failed to remove from wishlist');
-            }
-            showToast('Product moved to cart', 'success');
+            updatePrices();
             setTimeout(() => {
-                console.log('Reloading page after moving to cart');
+                console.log('Reloading page after updating quantity');
                 location.reload();
             }, 3000);
-        })
-        .catch(error => {
-            console.error('Error moving to cart:', error);
-            showToast('Failed to move product to cart: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '/login';
+        } else {
+            showToast(data.error || 'Failed to update quantity', 'error');
+            if (data.redirect) {
+                window.location.href = data.redirect;
             }
-        });
-    }
-
-    // Update Cart Quantity
-    async function updateCartQuantity(productId, quantity, productType) {
-        console.log(`Updating quantity for product ${productId}: ${quantity}, type: ${productType}`);
-        if (quantity < 1) {
-            showToast('Quantity must be at least 1', 'error');
-            return;
         }
-        const cartCard = document.querySelector(`.cart-card[data-product-id="${productId}"][data-product-type="${productType}"]`);
-        const priceElement = cartCard.querySelector('.price');
-        const quantityInput = cartCard.querySelector('input[type="number"]');
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+        showToast(`Failed to update quantity: ${error.message}`, 'error');
+    }
+}
 
-        try {
-            const response = await fetch('/api/cart', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    product_id: productId, 
-                    quantity: parseInt(quantity), 
-                    product_type: productType
-                }),
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (response.ok) {
-                showToast(data.message || 'Quantity updated successfully', 'success');
-                if (quantityInput) {
-                    quantityInput.value = parseInt(quantity);
-                }
-                updatePrices();
-                setTimeout(() => {
-                    console.log('Reloading page after updating quantity');
-                    location.reload();
-                }, 3000);
-            } else {
-                showToast(data.error || 'Failed to update quantity', 'error');
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                }
-            }
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-            showToast(`Failed to update quantity: ${error.message}`, 'error');
+// Remove from Cart
+function removeFromCart(productId, productType) {
+    console.log(`Removing from cart: ${productId}, type: ${productType}`);
+    fetch('/api/cart', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ product_id: productId, product_type: productType }),
+        credentials: 'include'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 400) {
+            throw new Error(body.error || 'Failed to remove from cart');
         }
-    }
+        showToast(body.message || 'Removed from cart', 'success');
+        setTimeout(() => {
+            console.log('Reloading page after removing from cart');
+            location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error removing from cart:', error);
+        showToast('Failed to remove from cart: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    });
+}
 
-    // Remove from Cart
-    function removeFromCart(productId, productType) {
-        console.log(`Removing from cart: ${productId}, type: ${productType}`);
-        fetch('/api/cart', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ product_id: productId, product_type: productType }),
-            credentials: 'include'
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            if (status >= 400) {
-                throw new Error(body.error || 'Failed to remove from cart');
-            }
-            showToast(body.message || 'Removed from cart', 'success');
-            setTimeout(() => {
-                console.log('Reloading page after removing from cart');
-                location.reload();
-            }, 3000);
-        })
-        .catch(error => {
-            console.error('Error removing from cart:', error);
-            showToast('Failed to remove from cart: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '/login';
-            }
-        });
-    }
-
-    // Place Order
 // Place Order
 function placeOrder(event) {
     event.preventDefault();
@@ -1997,7 +1950,7 @@ function placeOrder(event) {
         return;
     }
 
-    // Validate message code for immediate payment (not needed since 'immediate' is disabled)
+    // Validate message code for immediate payment
     const messageCodeInput = form.querySelector('input[name="message_code"]');
     if (paymentMethodValue === 'immediate' && (!messageCodeInput || !messageCodeInput.value.trim())) {
         console.error('Message code required for immediate payment');
@@ -2005,7 +1958,7 @@ function placeOrder(event) {
         return;
     }
 
-    // Collect form data (include name in payload)
+    // Collect form data
     const name = form.querySelector('input[name="name"]').value.trim();
     const data = {
         name: name,
@@ -2056,440 +2009,516 @@ function placeOrder(event) {
         }
     });
 }
-    // Cancel Order
-    function cancelOrder(orderId) {
-        console.log(`Initiating cancel order for ID: ${orderId}`);
-        if (!confirm('Are you sure you want to cancel this order?')) {
-            console.log('Order cancellation aborted by user');
-            return;
-        }
 
-        fetch(`/api/orders/${orderId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+// Cancel Order
+function cancelOrder(orderId) {
+    console.log(`Initiating cancel order for ID: ${orderId}`);
+    if (!confirm('Are you sure you want to cancel this order?')) {
+        console.log('Order cancellation aborted by user');
+        return;
+    }
+
+    fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `HTTP error ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        showToast(data.message || 'Order canceled successfully', 'success');
+        setTimeout(() => {
+            console.log('Reloading page after canceling order');
+            window.location.reload();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error canceling order:', error);
+        showToast(`Failed to cancel order: ${error.message}`, 'error');
+        if (error.message.includes('Unauthorized') || error.message.includes('401')) {
+            window.location.href = '/login';
+        }
+    });
+}
+
+// Show Toast Notification
+function showToast(message, type = 'success') {
+    console.log(`Showing toast: ${message}, type: ${type}`);
+    if (typeof Toastify === 'undefined') {
+        console.error('Toastify library not loaded');
+        alert(message);
+        return;
+    }
+    try {
+        Toastify({
+            text: message,
+            duration: 4000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: type === 'error' ? '#f87171' : '#22c55e',
+            stopOnFocus: true,
+            style: {
+                zIndex: '3000'
+            }
+        }).showToast();
+        console.log(`Toast displayed: ${message}`);
+    } catch (error) {
+        console.error('Error displaying Toastify toast:', error);
+        alert(message);
+    }
+}
+
+// Populate Orders
+async function populateOrders() {
+    console.log('Populating orders');
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.error || `HTTP error ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            showToast(data.message || 'Order canceled successfully', 'success');
-            setTimeout(() => {
-                console.log('Reloading page after canceling order');
-                window.location.reload();
-            }, 3000);
-        })
-        .catch(error => {
-            console.error('Error canceling order:', error);
-            showToast(`Failed to cancel order: ${error.message}`, 'error');
-            if (error.message.includes('Unauthorized') || error.message.includes('401')) {
-                window.location.href = '/login';
-            }
         });
-    }
-
-    // Show Toast Notification
-    function showToast(message, type = 'success') {
-        console.log(`Showing toast: ${message}, type: ${type}`);
-        if (typeof Toastify === 'undefined') {
-            console.error('Toastify library not loaded');
-            alert(message);
-            return;
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to fetch orders');
         }
-        try {
-            Toastify({
-                text: message,
-                duration: 4000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: type === 'error' ? '#f87171' : '#22c55e',
-                stopOnFocus: true,
-                style: {
-                    zIndex: '3000'
-                }
-            }).showToast();
-            console.log(`Toast displayed: ${message}`);
-        } catch (error) {
-            console.error('Error displaying Toastify toast:', error);
-            alert(message);
-        }
-    }
-
-    // Populate Orders
-    async function populateOrders() {
-        console.log('Populating orders');
-        try {
-            const response = await fetch('/api/orders', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch orders');
-            }
-            const orders = Array.isArray(data) ? data : [];
-            console.log('Fetched orders:', orders.map(o => ({ id: o.id, status: o.status, created_at: o.created_at, total: o.total, items: o.items })));
-            const orderItems = document.getElementById('order-items');
-            if (orderItems) {
-                orderItems.innerHTML = orders.length === 0
-                    ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
-                    : `
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Date</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Items</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${orders.map(order => {
-                                    const totalConverted = (order.total * exchangeRates[currentCurrency]).toFixed(2);
-                                    const statusLower = order.status ? order.status.toLowerCase().trim() : '';
-                                    console.log(`Order ${order.id} created_at: ${order.created_at}, formatted: ${formatDate(order.created_at)}`);
-                                    return `
-                                        <tr class="order-card">
-                                            <td>#${order.id || 'N/A'}</td>
-                                            <td>${formatDate(order.created_at)}</td>
-                                            <td>
-                                                <span class="total-price" data-total-price="${order.total || 0}">${currentCurrency} ${totalConverted}</span>
-                                            </td>
-                                            <td>${order.status || 'Unknown'}</td>
-                                            <td>
-                                                ${order.items && Array.isArray(order.items) ? order.items.map(item => `
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        ${item.image ? `
-                                                            <img loading="lazy" src="/static/uploads/${item.image}" alt="${item.product_name || 'Product'}" class="w-10 h-10 object-contain rounded">
-                                                        ` : `
-                                                            <img loading="lazy" src="https://via.placeholder.com/40x40" alt="No image" class="w-10 h-10 object-contain rounded">
-                                                        `}
-                                                        <div>
-                                                            <p class="text-sm font-medium text-gray-800">${item.product_name || 'Unknown'}</p>
-                                                            <p class="text-xs text-gray-600">Qty: ${item.quantity || 1}</p>
-                                                        </div>
+        const orders = Array.isArray(data) ? data : [];
+        console.log('Fetched orders:', orders.map(o => ({ id: o.id, status: o.status, created_at: o.created_at, total: o.total, items: o.items })));
+        const orderItems = document.getElementById('order-items');
+        if (orderItems) {
+            orderItems.innerHTML = orders.length === 0
+                ? '<div class="custom-card p-6"><p class="text-gray-600 text-lg">You have no orders.</p></div>'
+                : `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Items</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => {
+                                const totalConverted = (order.total * exchangeRates[currentCurrency]).toFixed(2);
+                                const statusLower = order.status ? order.status.toLowerCase().trim() : '';
+                                console.log(`Order ${order.id} created_at: ${order.created_at}, formatted: ${formatDate(order.created_at)}`);
+                                return `
+                                    <tr class="order-card">
+                                        <td>#${order.id || 'N/A'}</td>
+                                        <td>${formatDate(order.created_at)}</td>
+                                        <td>
+                                            <span class="total-price" data-total-price="${order.total || 0}">${currentCurrency} ${totalConverted}</span>
+                                        </td>
+                                        <td>${order.status || 'Unknown'}</td>
+                                        <td>
+                                            ${order.items && Array.isArray(order.items) ? order.items.map(item => `
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    ${item.image ? `
+                                                        <img loading="lazy" src="/static/uploads/${item.image}" alt="${item.product_name || 'Product'}" class="w-10 h-10 object-contain rounded">
+                                                    ` : `
+                                                        <img loading="lazy" src="https://via.placeholder.com/40x40" alt="No image" class="w-10 h-10 object-contain rounded">
+                                                    `}
+                                                    <div>
+                                                        <p class="text-sm font-medium text-gray-800">${item.product_name || 'Unknown'}</p>
+                                                        <p class="text-xs text-gray-600">Qty: ${item.quantity || 1}</p>
                                                     </div>
-                                                `).join('') : '<p class="text-gray-600">No items</p>'}
-                                            </td>
-                                            <td>
-                                                ${statusLower === 'pending' ? `
-                                                    <button class="action-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id || 0})">Cancel</button>
-                                                ` : `
-                                                    <span>No action available</span>
-                                                `}
-                                            </td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                updatePrices();
-            } else {
-                console.error('Order items container (#order-items) not found');
-                showToast('Failed to load orders: Container not found', 'error');
-            }
-        } catch (error) {
-            console.error('Error fetching orders:', error);
-            const orderItems = document.getElementById('order-items');
-            if (orderItems) {
-                orderItems.innerHTML = '<div class="custom-card p-6"><p class="text-gray-600 text-lg">Failed to load orders. Please try again later.</p></div>';
-            }
-            if (error.message.includes('Unauthorized')) {
-                showToast('Session expired, please log in', 'error');
-                window.location.href = '/login';
-            } else {
-                showToast('Failed to load orders: ' + error.message, 'error');
-            }
-        }
-    }
-
-    // Toggle Message Code Field
-    function toggleMessageCode() {
-        console.log('Toggling message code visibility');
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (paymentMethod) {
-            console.log('Payment method:', paymentMethod.value);
-            const messageCodeSection = document.getElementById('message-code-section');
-            if (messageCodeSection) {
-                messageCodeSection.style.display = paymentMethod.value === 'immediate' ? 'block' : 'none';
-                if (paymentMethod.value !== 'immediate') {
-                    const messageCodeInput = document.querySelector('input[name="message_code"]');
-                    if (messageCodeInput) {
-                        messageCodeInput.value = '';
-                    }
-                }
-            } else {
-                console.error('Message code section not found');
-            }
-        } else {
-            console.warn('No payment method selected in toggleMessageCode');
-        }
-    }
-
-    // Update Payment Details
-    function updatePaymentDetails() {
-        console.log('Updating payment details');
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        const immediateDetails = document.getElementById('immediate-payment-details');
-        const deliveryDetails = document.getElementById('delivery-payment-details');
-
-        if (immediateDetails && deliveryDetails) {
-            if (paymentMethod && paymentMethod.value === 'immediate') {
-                immediateDetails.classList.remove('hidden');
-                deliveryDetails.classList.add('hidden');
-            } else {
-                immediateDetails.classList.add('hidden');
-                deliveryDetails.classList.remove('hidden');
-            }
-        } else {
-            console.error('Payment details elements not found');
-            showToast('Payment details not found', 'error');
-        }
-    }
-
-    // Mobile Navbar Toggle
-    document.getElementById('nav-toggler')?.addEventListener('click', () => {
-        console.log('Toggling mobile navbar');
-        const sidebar = document.getElementById('mobile-sidebar');
-        const icon = document.querySelector('#nav-toggler i');
-        if (sidebar && icon) {
-            sidebar.classList.toggle('-translate-x-full');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-        }
-    });
-
-    // Close Mobile Sidebar
-    document.getElementById('close-mobile-sidebar')?.addEventListener('click', () => {
-        console.log('Closing mobile sidebar');
-        const sidebar = document.getElementById('mobile-sidebar');
-        const icon = document.querySelector('#nav-toggler i');
-        if (sidebar && icon) {
-            sidebar.classList.add('-translate-x-full');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-times');
-            icon.classList.add('animate-rotateToggle');
-            setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
-        }
-    });
-
-    // Mobile Search Toggle
-    document.getElementById('mobile-search-icon')?.addEventListener('click', () => {
-        console.log('Toggling mobile search');
-        const searchBar = document.getElementById('mobile-search-bar');
-        const icon = document.getElementById('mobile-search-icon');
-        if (searchBar && icon) {
-            searchBar.classList.toggle('active');
-            icon.classList.add('animate-bounce');
-            setTimeout(() => icon.classList.remove('animate-bounce'), 200);
-        }
-    });
-
-    // Close Modals on Outside Click
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                console.log(`Closing modal ${modal.id} on outside click`);
-                closeModal(modal.id);
-            }
-        });
-    });
-
-    // Toggle Password Visibility
-    function togglePassword(inputId) {
-        console.log(`Toggling password visibility for ${inputId}`);
-        const input = document.getElementById(inputId);
-        const icon = input?.nextElementSibling;
-        if (!input || !icon) {
-            console.error(`Input or icon not found for ${inputId}`);
-            return;
-        }
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-        icon.classList.add('animate-pulse');
-        setTimeout(() => icon.classList.remove('animate-pulse'), 300);
-    }
-
-    // Change Password
-    async function changePassword(event) {
-        event.preventDefault();
-        console.log('Change password function called');
-        const form = document.getElementById('password-form');
-        if (!form) {
-            console.error('Password form not found');
-            showToast('Form error, please try again', 'error');
-            return;
-        }
-        const oldPassword = form.querySelector('#old-password')?.value;
-        const newPassword = form.querySelector('#new-password')?.value;
-        const confirmPassword = form.querySelector('#confirm-password')?.value;
-
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            console.log('Validation failed: Missing password fields');
-            showToast('All password fields are required', 'error');
-            return;
-        }
-        if (newPassword.length < 8) {
-            console.log('Validation failed: New password too short');
-            showToast('New password must be at least 8 characters long', 'error');
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            console.log('Validation failed: Passwords do not match');
-            showToast('New passwords do not match', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/change_password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    old_password: oldPassword,
-                    new_password: newPassword,
-                    confirm_password: confirmPassword
-                }),
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to change password');
-            }
-            showToast(data.message || 'Password changed successfully', 'success');
-            closeModal('password-modal');
-            setTimeout(() => {
-                console.log('Reloading page after password change');
-                location.reload();
-            }, 3000);
-        } catch (error) {
-            console.error('Error changing password:', error);
-            showToast('Failed to change password: ' + error.message, 'error');
-            if (error.message.includes('Unauthorized')) {
-                window.location.href = '/login';
-            }
-        }
-    }
-
-    // Run on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('Page loaded, initializing account page');
-        try {
-            const passwordButton = document.getElementById('change-password-btn');
-            if (passwordButton) {
-                passwordButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openModal('password-modal');
-                });
-            } else {
-                console.error('Change Password button (#change-password-btn) not found');
-            }
-
-            function initializePasswordForm() {
-                const passwordForm = document.getElementById('password-form');
-                const submitButton = document.getElementById('change-password-submit');
-                if (passwordForm) {
-                    passwordForm.addEventListener('submit', changePassword);
-                }
-                if (submitButton) {
-                    submitButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (passwordForm) {
-                            changePassword({ preventDefault: () => {}, target: passwordForm });
-                        } else {
-                            showToast('Form error, please try again', 'error');
-                        }
-                    });
-                }
-            }
-
-            initializePasswordForm();
-
-            const passwordModal = document.getElementById('password-modal');
-            if (passwordModal) {
-                const observer = new MutationObserver(() => {
-                    if (paymentModal.classList.contains('open')) {
-                        initializePasswordForm();
-                    }
-                });
-                observer.observe(passwordModal, { attributes: true, attributeFilter: ['class'] });
-            }
-
-            // Initialize checkout form submission
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) {
-                checkoutForm.addEventListener('submit', (event) => {
-                    console.log('Checkout form submitted');
-                    placeOrder(event);
-                });
-            } else {
-                console.error('Checkout form (#checkout-form) not found');
-            }
-
+                                                </div>
+                                            `).join('') : '<p class="text-gray-600">No items</p>'}
+                                        </td>
+                                        <td>
+                                            ${statusLower === 'pending' ? `
+                                                <button class="action-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700" onclick="cancelOrder(${order.id || 0})">Cancel</button>
+                                            ` : `
+                                                <span>No action available</span>
+                                            `}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
             updatePrices();
-            toggleMessageCode();
-            populateOrders();
-        } catch (error) {
-            console.error('Error during page initialization:', error);
-            showToast('Page initialization failed: ' + error.message, 'error');
+        } else {
+            console.error('Order items container (#order-items) not found');
+            showToast('Failed to load orders: Container not found', 'error');
         }
-    });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        const orderItems = document.getElementById('order-items');
+        if (orderItems) {
+            orderItems.innerHTML = '<div class="custom-card p-6"><p class="text-gray-600 text-lg">Failed to load orders. Please try again later.</p></div>';
+        }
+        if (error.message.includes('Unauthorized')) {
+            showToast('Session expired, please log in', 'error');
+            window.location.href = '/login';
+        } else {
+            showToast('Failed to load orders: ' + error.message, 'error');
+        }
+    }
+}
 
-    // Initialize Desktop Category Dropdowns
-    document.querySelectorAll('.nav-hover').forEach(nav => {
-        const dropdown = nav.querySelector('.dropdown-menu');
-        if (dropdown) {
-            nav.addEventListener('mouseenter', () => {
-                console.log('Showing desktop dropdown for category');
-                dropdown.classList.remove('hidden');
-                dropdown.style.opacity = '1';
-                dropdown.style.visibility = 'visible';
-                dropdown.style.transform = 'translateY(0)';
-            });
-            nav.addEventListener('mouseleave', () => {
-                console.log('Hiding desktop dropdown for category');
-                dropdown.classList.add('hidden');
-                dropdown.style.opacity = '0';
-                dropdown.style.visibility = 'hidden';
-                dropdown.style.transform = 'translateY(-10px)';
+// Toggle Message Code Field
+function toggleMessageCode() {
+    console.log('Toggling message code visibility');
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+    if (paymentMethod) {
+        console.log('Payment method:', paymentMethod.value);
+        const messageCodeSection = document.getElementById('message-code-section');
+        if (messageCodeSection) {
+            messageCodeSection.style.display = paymentMethod.value === 'immediate' ? 'block' : 'none';
+            if (paymentMethod.value !== 'immediate') {
+                const messageCodeInput = document.querySelector('input[name="message_code"]');
+                if (messageCodeInput) {
+                    messageCodeInput.value = '';
+                }
+            }
+        } else {
+            console.error('Message code section not found');
+        }
+    } else {
+        console.warn('No payment method selected in toggleMessageCode');
+    }
+}
+
+// Update Payment Details
+function updatePaymentDetails() {
+    console.log('Updating payment details');
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+    const immediateDetails = document.getElementById('immediate-payment-details');
+    const deliveryDetails = document.getElementById('delivery-payment-details');
+
+    if (immediateDetails && deliveryDetails) {
+        if (paymentMethod && paymentMethod.value === 'immediate') {
+            immediateDetails.classList.remove('hidden');
+            deliveryDetails.classList.add('hidden');
+        } else {
+            immediateDetails.classList.add('hidden');
+            deliveryDetails.classList.remove('hidden');
+        }
+    } else {
+        console.error('Payment details elements not found');
+        showToast('Payment details not found', 'error');
+    }
+}
+
+// Toggle Password Visibility
+function togglePassword(inputId) {
+    console.log(`Toggling password visibility for ${inputId}`);
+    const input = document.getElementById(inputId);
+    const icon = input?.nextElementSibling;
+    if (!input || !icon) {
+        console.error(`Input or icon not found for ${inputId}`);
+        return;
+    }
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+    icon.classList.add('animate-pulse');
+    setTimeout(() => icon.classList.remove('animate-pulse'), 300);
+}
+
+// Change Password
+async function changePassword(event) {
+    event.preventDefault();
+    console.log('Change password function called');
+    const form = document.getElementById('password-form');
+    if (!form) {
+        console.error('Password form not found');
+        showToast('Form error, please try again', 'error');
+        return;
+    }
+    const oldPassword = form.querySelector('#old-password')?.value;
+    const newPassword = form.querySelector('#new-password')?.value;
+    const confirmPassword = form.querySelector('#confirm-password')?.value;
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        console.log('Validation failed: Missing password fields');
+        showToast('All password fields are required', 'error');
+        return;
+    }
+    if (newPassword.length < 8) {
+        console.log('Validation failed: New password too short');
+        showToast('New password must be at least 8 characters long', 'error');
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        console.log('Validation failed: Passwords do not match');
+        showToast('New passwords do not match', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/change_password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                old_password: oldPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            }),
+            credentials: 'include'
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to change password');
+        }
+        showToast(data.message || 'Password changed successfully', 'success');
+        closeModal('password-modal');
+        setTimeout(() => {
+            console.log('Reloading page after password change');
+            location.reload();
+        }, 3000);
+    } catch (error) {
+        console.error('Error changing password:', error);
+        showToast('Failed to change password: ' + error.message, 'error');
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        }
+    }
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing account page');
+    try {
+        // Initialize Currency Button and Dropdowns
+        initializeCurrencyButton();
+
+        // Toggle Country Dropdown
+        const countryBtn = document.getElementById('country-btn');
+        const mobileCountryBtn = document.getElementById('mobile-country-btn');
+
+        if (countryBtn) {
+            countryBtn.addEventListener('click', () => {
+                console.log('Toggling country dropdown');
+                const dropdown = document.getElementById('country-dropdown');
+                if (dropdown) dropdown.classList.toggle('hidden');
             });
         }
-    });
 
-    // Initialize Mobile Sidebar Subcategory Toggles
-    document.querySelectorAll('.toggle-subcategories').forEach(button => {
-        button.addEventListener('click', () => {
-            console.log('Toggling mobile subcategory');
-            const icon = button.querySelector('.fa-chevron-down');
-            const subcategories = button.closest('.category-item').querySelector('.subcategories');
-            if (subcategories && icon) {
-                const isHidden = subcategories.style.display === 'none' || !subcategories.style.display;
-                subcategories.style.display = isHidden ? 'block' : 'none';
-                subcategories.classList.toggle('active', isHidden);
-                icon.classList.toggle('active', isHidden);
+        if (mobileCountryBtn) {
+            mobileCountryBtn.addEventListener('click', () => {
+                console.log('Toggling mobile country dropdown');
+                const dropdown = document.getElementById('mobile-country-dropdown');
+                if (dropdown) dropdown.classList.toggle('hidden');
+            });
+        }
+
+        // Currency Selection
+        document.querySelectorAll('.country-option').forEach(option => {
+            option.addEventListener('click', async (e) => {
+                e.preventDefault();
+                console.log('Currency option clicked');
+                const country = e.target.getAttribute('data-country');
+                const flag = e.target.getAttribute('data-flag');
+                currentCurrency = e.target.getAttribute('data-currency');
+
+                // Update button displays
+                if (countryBtn) {
+                    countryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${flag}</span> ${currentCurrency}`;
+                }
+                if (mobileCountryBtn) {
+                    mobileCountryBtn.innerHTML = `<span class="floating-text">Currency</span><span class="flag">${flag}</span> ${currentCurrency}`;
+                }
+
+                // Hide dropdowns
+                const desktopDropdown = document.getElementById('country-dropdown');
+                const mobileDropdown = document.getElementById('mobile-country-dropdown');
+                if (desktopDropdown) desktopDropdown.classList.add('hidden');
+                if (mobileDropdown) mobileDropdown.classList.add('hidden');
+
+                // Save to localStorage
+                localStorage.setItem('currency', currentCurrency);
+                localStorage.setItem('country', country);
+                localStorage.setItem('flag', flag);
+
+                // Send request to /set_currency
+                try {
+                    const response = await fetch('/set_currency', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currency: currentCurrency }),
+                        credentials: 'include'
+                    });
+                    if (!response.ok) {
+                        console.error('Failed to set currency:', response.status, response.statusText);
+                        showToast('Failed to change currency', 'error');
+                    } else {
+                        await fetchExchangeRates();
+                        showToast(`Currency changed to ${currentCurrency}`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error setting currency:', error);
+                    showToast('Failed to change currency', 'error');
+                    updatePrices(); // Fallback to local update
+                }
+            });
+        });
+
+        // Initialize Password Form
+        const passwordButton = document.getElementById('change-password-btn');
+        if (passwordButton) {
+            passwordButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal('password-modal');
+            });
+        } else {
+            console.error('Change Password button (#change-password-btn) not found');
+        }
+
+        function initializePasswordForm() {
+            const passwordForm = document.getElementById('password-form');
+            const submitButton = document.getElementById('change-password-submit');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', changePassword);
+            }
+            if (submitButton) {
+                submitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (passwordForm) {
+                        changePassword({ preventDefault: () => {}, target: passwordForm });
+                    } else {
+                        showToast('Form error, please try again', 'error');
+                    }
+                });
+            }
+        }
+
+        initializePasswordForm();
+
+        const passwordModal = document.getElementById('password-modal');
+        if (passwordModal) {
+            const observer = new MutationObserver(() => {
+                if (passwordModal.classList.contains('open')) {
+                    initializePasswordForm();
+                }
+            });
+            observer.observe(passwordModal, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        // Initialize checkout form submission
+        const checkoutForm = document.getElementById('checkout-form');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', (event) => {
+                console.log('Checkout form submitted');
+                placeOrder(event);
+            });
+        } else {
+            console.error('Checkout form (#checkout-form) not found');
+        }
+
+        // Mobile Navbar Toggle
+        document.getElementById('nav-toggler')?.addEventListener('click', () => {
+            console.log('Toggling mobile navbar');
+            const sidebar = document.getElementById('mobile-sidebar');
+            const icon = document.querySelector('#nav-toggler i');
+            if (sidebar && icon) {
+                sidebar.classList.toggle('-translate-x-full');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+                icon.classList.add('animate-rotateToggle');
+                setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
             }
         });
-    });
+
+        // Close Mobile Sidebar
+        document.getElementById('close-sidebar')?.addEventListener('click', () => {
+            console.log('Closing mobile sidebar');
+            const sidebar = document.getElementById('mobile-sidebar');
+            const icon = document.querySelector('#nav-toggler i');
+            if (sidebar && icon) {
+                sidebar.classList.add('-translate-x-full');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-times');
+                icon.classList.add('animate-rotateToggle');
+                setTimeout(() => icon.classList.remove('animate-rotateToggle'), 300);
+            }
+        });
+
+        // Mobile Search Toggle
+        document.getElementById('mobile-search-icon')?.addEventListener('click', () => {
+            console.log('Toggling mobile search');
+            const searchBar = document.getElementById('mobile-search-bar');
+            const icon = document.getElementById('mobile-search-icon');
+            if (searchBar && icon) {
+                searchBar.classList.toggle('active');
+                icon.classList.add('animate-bounce');
+                setTimeout(() => icon.classList.remove('animate-bounce'), 200);
+            }
+        });
+
+        // Close Modals on Outside Click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    console.log(`Closing modal ${modal.id} on outside click`);
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // Initialize Desktop Category Dropdowns
+        document.querySelectorAll('.nav-hover').forEach(nav => {
+            const dropdown = nav.querySelector('.dropdown-menu');
+            if (dropdown) {
+                nav.addEventListener('mouseenter', () => {
+                    console.log('Showing desktop dropdown for category');
+                    dropdown.classList.remove('hidden');
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                });
+                nav.addEventListener('mouseleave', () => {
+                    console.log('Hiding desktop dropdown for category');
+                    dropdown.classList.add('hidden');
+                    dropdown.style.opacity = '0';
+                    dropdown.style.visibility = 'hidden';
+                    dropdown.style.transform = 'translateY(-10px)';
+                });
+            }
+        });
+
+        // Initialize Mobile Sidebar Subcategory Toggles
+        document.querySelectorAll('.toggle-subcategories').forEach(button => {
+            button.addEventListener('click', () => {
+                console.log('Toggling mobile subcategory');
+                const icon = button.querySelector('.fa-chevron-down');
+                const subcategories = button.closest('.category-item').querySelector('.subcategories');
+                if (subcategories && icon) {
+                    const isHidden = subcategories.style.display === 'none' || !subcategories.style.display;
+                    subcategories.style.display = isHidden ? 'block' : 'none';
+                    subcategories.classList.toggle('active', isHidden);
+                    icon.classList.toggle('active', isHidden);
+                }
+            });
+        });
+
+        // Fetch exchange rates and populate orders
+        fetchExchangeRates();
+        populateOrders();
+    } catch (error) {
+        console.error('Error during page initialization:', error);
+        showToast('Page initialization failed: ' + error.message, 'error');
+    }
+});
 </script>
 </body>
 </html>
