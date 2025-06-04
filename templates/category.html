@@ -28,7 +28,7 @@
         /* Smooth Scroll */
         html { scroll-behavior: smooth; }
 
-        /* Hero Section */
+       /* Updated Hero Section with Smooth Moving Showroom Effect */
         .hero-section {
             position: relative;
             height: 100vh;
@@ -45,13 +45,14 @@
             background-position: center;
             opacity: 0;
             animation: showroomTour 52s infinite ease-in-out;
+            will-change: transform, opacity;
         }
         .hero-bg:nth-child(1) {
             background-image: url('https://s1.bwallpapers.com/wallpapers/2014/06/18/digital-art-desktop-wallpapers_052436925.jpg');
             animation-delay: 0s;
         }
         .hero-bg:nth-child(2) {
-            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230610/pngtree-ancient-artifacts.jpg');
+            background-image: url('https://c4.wallpaperflare.com/wallpaper/30/326/458/gifts-boxes-set-bright-wallpaper-preview.jpg');
             animation-delay: 13s;
         }
         .hero-bg:nth-child(3) {
@@ -63,11 +64,29 @@
             animation-delay: 39s;
         }
         @keyframes showroomTour {
-            0% { opacity: 0; transform: scale(1.2); }
-            5% { opacity: 1; transform: scale(1.1); }
-            25% { opacity: 1; transform: scale(1.1); }
-            30% { opacity: 0; transform: scale(1.2); }
-            100% { opacity: 0; }
+            0% { 
+                opacity: 0;
+                transform: scale(1.2) translateX(0);
+            }
+            5% { 
+                opacity: 1;
+                transform: scale(1.1) translateX(0);
+            }
+            15% {
+                transform: scale(1.1) translateX(-5%);
+            }
+            25% { 
+                opacity: 1;
+                transform: scale(1.1) translateX(5%);
+            }
+            30% { 
+                opacity: 0;
+                transform: scale(1.2) translateX(0);
+            }
+            100% { 
+                opacity: 0;
+                transform: scale(1.2) translateX(0);
+            }
         }
 
         /* Animations */
@@ -626,7 +645,7 @@
                 </h1>
                 <p class="text-lg md:text-2xl mb-6 animate-fadeIn delay-100">
                     {% if selected_subcategory and selected_subcategory.name %}
-                        Discover Exquisite {{ selected_subcategory.name }} in {{ selected_category.name }}
+                        Discover Exquisite {{ selected_subcategory.name }} in our {{ selected_category.name }} Collection
                     {% elif selected_category and selected_category.name %}
                         {% if selected_category.name|lower == 'home' %}
                             Elevate Your Space with Authentic African Home Artifacts
@@ -775,8 +794,8 @@
             <div class="modal-content space-y-4">
                 <img id="modal-image" src="" alt="" class="w-full h-64 object-cover rounded-md">
                 <h3 id="modal-name" class="text-2xl font-semibold"></h3>
-                <p id="modal-category" class="text-gray-600"></p>
-                <p id="modal-subcategory" class="text-gray-600"></p>
+                <p style="display: none;" id="modal-category" class="text-gray-600"></p>
+                <p style="display: none;" id="modal-subcategory" class="text-gray-600"></p>
                 <p id="modal-price" class="text-lg font-semibold text-gray-800"></p>
                 <p id="modal-description" class="text-gray-600"></p>
                 <div class="flex flex-col gap-2">
