@@ -187,196 +187,327 @@
 </div>
 
     <!-- Hero Section -->
-<section class="relative h-screen overflow-hidden pt-16">
-    <div id="hero-slider" class="w-full h-full relative">
-        <!-- Slide 1: Our Discounts (Text on Left, Four Images Horizontally, Two on Small Screens) -->
-        <div class="hero-slide absolute inset-0 opacity-0 flex flex-col">
-            <div class="w-full h-full bg-gradient-to-r from-black/60 to-transparent absolute z-10"></div>
-            <div class="w-full h-full flex flex-col lg:flex-row items-center justify-between p-6 bg-gradient-to-br from-amber-900/30 to-black/80">
-                <div class="w-full flex items-center justify-center z-20">
-                    <div class="text-left p-6 bg-black/30 lg:bg-black/30 backdrop-blur-md rounded-xl shadow-lg w-full">
-                        <h1 class="text-4xl md:text-5xl italic text-amber-300 tracking-wide mb-4 font-[Playfair Display] leading-tight">
-                            Our Discounts
-                        </h1>
-                        <p class="text-lg md:text-xl italic text-amber-100 font-[Lora] mb-4">
-                            Unbeatable Deals Await!
-                        </p>
-                        <p class="text-md md:text-lg italic text-amber-200 font-[Lora] mb-6">
-                            Save big on handcrafted treasures today.
-                        </p>
-                        <!-- <a href="/collections/discounts" class="inline-block px-8 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
-                            Grab Yours Now
-                        </a> -->
-                    </div>
+<!-- Hero Slideshow Section -->
+<section class="relative h-screen overflow-hidden bg-gradient-to-b from-amber-100/20 to-white" role="banner">
+    <div id="zira-hero-slider" class="w-full h-full relative">
+        <!-- Slide 1: Welcome to Zira Collection -->
+        <div class="zira-slide absolute inset-0 opacity-0 transition-opacity duration-1000 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="container mx-auto h-full flex flex-col lg:flex-row items-center">
+                <!-- Image 1: Beadwork Close-up -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/art6.jpg') }}" alt="Intricate beadwork jewelry" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent"></div>
                 </div>
-                <div class="w-full flex items-center justify-center gap-4 p-4 bg-white">
-                    <div class="relative flex-1 min-h-[120px]">
-                        <img src="{{ url_for('static', filename='images/curve6.jpg') }}" alt="Discount Item 1" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px]">
-                        <img src="{{ url_for('static', filename='images/pot6.jpg') }}" alt="Discount Item 2" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px] hidden sm:block">
-                        <img src="{{ url_for('static', filename='images/art6.jpg') }}" alt="Discount Item 3" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px] hidden sm:block">
-                        <img src="{{ url_for('static', filename='images/pot7.jpg') }}" alt="Discount Item 4" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
+                <!-- Image 2: Artisan with creation -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/craftt.jpg') }}" alt="Artisan holding creation" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent"></div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Slide 2: Wooden Kitchen Collection (Text on Right, Overlapping Collage) -->
-        <div class="hero-slide absolute inset-0 opacity-0 flex">
-            <div class="w-full h-full bg-gradient-to-l from-amber-100/50 to-transparent absolute z-10"></div>
-            <div class="w-full h-full flex flex-col lg:flex-row items-center justify-between p-6 bg-gradient-to-br from-amber-200/30 to-white/80">
-                <div class="w-full lg:w-2/3 relative h-full">
-                    <div class="absolute left-0 top-10 lg:top-20 w-1/2 h-1/2">
-                        <img src="{{ url_for('static', filename='images/at2.jpg') }}" alt="Wooden Tray" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-amber-300/30 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="absolute right-0 bottom-10 lg:bottom-20 w-1/2 h-1/2 z-10">
-                        <img src="{{ url_for('static', filename='images/curve5.jpg') }}" alt="Wooden Bowl" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-amber-300/30 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="absolute left-1/4 top-1/3 w-1/2 h-1/2 z-20">
-                        <img src="{{ url_for('static', filename='images/craftt.jpg') }}" alt="Wooden Spoons" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-amber-300/30 to-transparent rounded-lg glossy"></div>
-                    </div>
-                </div>
-                <div class="w-full lg:w-1/3 flex items-center justify-center z-20">
-                    <div class="text-right p-8 bg-white/60 backdrop-blur-md rounded-2xl shadow-xl">
-                        <h1 class="text-4xl lg:text-5xl italic text-amber-800 mb-4 font-[Playfair Display] tracking-wider">
-                            Soapstone Collection
-                        </h1>
-                        <p class="text-lg lg:text-xl italic text-amber-700 font-[Lora] mb-6">
-                            Our soapstone products are expertly handcrafted to showcase timeless elegance and cultural heritage. Each piece combines natural beauty with unique artistry, making it a perfect addition to any space.
+                <!-- Text Overlay -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="text-center max-w-3xl px-4 py-8 bg-black/30 backdrop-blur-sm rounded-xl mx-4">
+                        <h2 class="text-3xl md:text-5xl font-serif italic text-amber-200 mb-4 animate-fade-in">
+                            Celebrate Africa's Artistic Soul
+                        </h2>
+                        <p class="text-lg md:text-xl text-white font-sans">
+                            Authentic artefacts, handcrafted with passion and pride.
                         </p>
-                        <!-- <a href="/collections/wooden-kitchen" class="inline-block px-6 py-3 bg-amber-700 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-800 transition-all duration-300">
-                            Shop Now
+                        <!-- <a href="#collections" class="pointer-events-auto mt-6 inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-300 animate-bounce-in">
+                            Explore the Collection
                         </a> -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 3: Stone Artifacts (Text on Top, Single Background Image) -->
-        <div class="hero-slide absolute inset-0 opacity-0 flex flex-col">
-            <div class="w-full h-full bg-gradient-to-b from-gray-900/50 to-transparent absolute z-10"></div>
-            <div class="w-full h-full flex flex-col bg-gradient-to-br from-gray-800/50 to-black/80 p-6">
-                <!-- Title -->
-                <h1 class="text-center text-4xl md:text-5xl lg:text-6xl italic text-amber-400 mb-4 font-[Playfair Display] tracking-tight drop-shadow-lg z-20 mt-8">
-                    Stone Products
-                </h1>
-                <!-- Image -->
-                <div class="relative flex-1 max-h-[40vh] md:max-h-none">
-                    <img src="{{ url_for('static', filename='images/pot1.jpg') }}" alt="Stone Artifact" class="w-full h-full object-cover opacity-70 rounded-lg">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent glossy rounded-lg"></div>
+        <!-- Slide 2: Beauty of Craftsmanship -->
+        <div class="zira-slide absolute inset-0 opacity-0 transition-opacity duration-1000 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="container mx-auto h-full flex flex-col lg:flex-row items-center">
+                <!-- Image 1: Soapstone carving -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/curve6.jpg') }}" alt="Soapstone carving in progress" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-black/10 to-transparent"></div>
                 </div>
-                <!-- Text and Button -->
-                <div class="text-center z-20 p-6 bg-black/30 md:bg-black/30 backdrop-blur-md rounded-xl shadow-lg mx-auto my-4 w-full max-w-2xl">
-                    <p class="text-lg md:text-xl italic text-amber-200 font-[Lora] mb-6">
-                        Timeless Stone Sculptures
-                    </p>
-                    <!-- <a href="/collections/stone-artifacts" class="inline-block px-8 py-3 bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-700 transition-all duration-300">
-                        Explore Now
-                    </a> -->
+                <!-- Image 2: Wooden decor in interior -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/pot6.jpg') }}" alt="Wooden decor in modern interior" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-l from-black/30 via-black/10 to-transparent"></div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Slide 4: Woven Heritage (Text on Bottom, Overlapping Collage) -->
-        <div class="hero-slide absolute inset-0 opacity-0 flex flex-col">
-            <div class="w-full h-full bg-gradient-to-r from-amber-800/50 to-transparent absolute z-10"></div>
-            <div class="w-full h-full flex flex-col bg-gradient-to-br from-amber-700/40 to-black/80 p-6">
-                <div class="relative flex-1">
-                    <div class="absolute left-10 top-10 w-1/3 h-2/3">
-                        <img src="{{ url_for('static', filename='images/curv1.jpg') }}" alt="Woven Item 1" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent glossy"></div>
+                <!-- Text Overlay -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="text-center max-w-3xl px-4 py-8 bg-black/30 backdrop-blur-sm rounded-xl mx-4">
+                        <h2 class="text-3xl md:text-5xl font-serif italic text-amber-200 mb-4 animate-fade-in">
+                            Tradition Meets Modern Design
+                        </h2>
+                        <p class="text-lg md:text-xl text-white font-sans">
+                            Timeless treasures shaped by skilled African hands.
+                        </p>
+                        <!-- <a href="#collections" class="pointer-events-auto mt-6 inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-300 animate-bounce-in">
+                            Discover Craftsmanship
+                        </a> -->
                     </div>
-                    <div class="absolute right-10 top-20 w-1/3 h-2/3 z-10">
-                        <img src="{{ url_for('static', filename='images/curve2.jpg') }}" alt="Woven Item 2" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent glossy"></div>
-                    </div>
-                    <div class="absolute left-1/3 top-1/4 w-1/3 h-2/3 z-20">
-                        <img src="{{ url_for('static', filename='images/curve3.jpg') }}" alt="Woven Item 3" class="w-full h-full object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent glossy"></div>
-                    </div>
-                </div>
-                <div class="text-center z-20 p-6 bg-black/30 backdrop-blur-md rounded-xl shadow-lg mx-auto mb-8">
-                    <h1 class="text-4xl lg:text-5xl italic text-amber-300 mb-4 font-[Playfair Display] tracking-widest">
-                        Carved Heritage
-                    </h1>
-                    <p class="text-lg lg:text-xl italic text-amber-100 font-[Lora] mb-6 max-w-3xl mx-auto">
-                        Celebrate the skillful artistry behind our handcrafted stone pieces. Each item reflects deep cultural roots and timeless craftsmanship, bringing authenticity and beauty to every space.
-                    </p>
-                    <!-- <a href="/collections/woven-heritage" class="inline-block px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-all duration-300">
-                        Shop Now
-                    </a> -->
                 </div>
             </div>
         </div>
 
-        <!-- Slide 5: Ancient Pottery (Four Images Full Width, Two on Small Screens) -->
-        <div class="hero-slide ancient-pottery-slide absolute inset-0 opacity-0 flex flex-col">
-            <!-- Background Image -->
-            <div class="absolute inset-0 z-0">
-                <!-- <img src="{{ url_for('static', filename='images/pot6.jpg') }}" alt="Pottery Background" class="w-full h-full object-cover opacity-70"> -->
-                <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-black/50"></div>
+        <!-- Slide 3: Wear Culture, Live Culture -->
+        <div class="zira-slide absolute inset-0 opacity-0 transition-opacity duration-1000 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="container mx-auto h-full flex flex-col lg:flex-row items-center">
+                <!-- Image 1: Cultural regalia -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/art6.jpg') }}" alt="Person in cultural regalia" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-br from-black/30 via-black/10 to-transparent"></div>
+                </div>
+                <!-- Image 2: Handwoven rug -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/pot7.jpg') }}" alt="Handwoven rug in living room" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-tl from-black/30 via-black/10 to-transparent"></div>
+                </div>
+                <!-- Text Overlay -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="text-center max-w-3xl px-4 py-8 bg-black/30 backdrop-blur-sm rounded-xl mx-4">
+                        <h2 class="text-3xl md:text-5xl font-serif italic text-amber-200 mb-4 animate-fade-in">
+                            Cultural Expression You Can Wear or Display
+                        </h2>
+                        <p class="text-lg md:text-xl text-white font-sans">
+                            Add meaning and beauty to your wardrobe and home.
+                        </p>
+                        <!-- <a href="#collections" class="pointer-events-auto mt-6 inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-300 animate-bounce-in">
+                            Shop Cultural Pieces
+                        </a> -->
+                    </div>
+                </div>
             </div>
-            <!-- Content -->
-            <div class="relative w-full h-full flex flex-col items-center justify-between p-6 z-10">
-                <!-- Text at Top -->
-                <div class="text-center p-6 bg-black/30 backdrop-blur-md rounded-xl shadow-lg mt-8 w-full max-w-2xl" style="padding: 10px; margin:10px;">
-                    <h1 class="text-4xl md:text-5xl italic text-amber-400 mb-4 font-[Playfair Display] tracking-tight">
-                        Ancient/Modern Pottery
-                    </h1>
-                    <p class="text-lg md:text-xl italic text-amber-200 font-[Lora] mb-6">
-                        Cultural Pottery Masterpieces
-                    </p>
+        </div>
+
+        <!-- Slide 4: Impact Beyond Beauty -->
+        <div class="zira-slide absolute inset-0 opacity-0 transition-opacity duration-1000 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="container mx-auto h-full flex flex-col lg:flex-row items-center">
+                <!-- Image 1: Artisans at work -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/curve5.jpg') }}" alt="Artisans working in workshop" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-black/30 via-black/10 to-transparent"></div>
                 </div>
-                <!-- Two Images on Small Screens -->
-                <div class="w-full flex items-center justify-center gap-4 px-4">
-                    <div class="relative flex-1 min-h-[120px]">
-                        <img src="{{ url_for('static', filename='images/pot7.jpg') }}" alt="Pottery 1" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px]">
-                        <img src="{{ url_for('static', filename='images/pot1.jpg') }}" alt="Pottery 2" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px] hidden sm:block">
-                        <img src="{{ url_for('static', filename='images/pot2.jpg') }}" alt="Pottery 3" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
-                    </div>
-                    <div class="relative flex-1 min-h-[120px] hidden sm:block">
-                        <img src="{{ url_for('static', filename='images/pot3.jpg') }}" alt="Pottery 4" class="w-full h-full min-h-[120px] object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-lg glossy"></div>
+                <!-- Image 2: Community celebration -->
+                <div class="w-full lg:w-1/2 h-1/2 lg:h-full relative overflow-hidden">
+                    <img src="{{ url_for('static', filename='images/at2.jpg') }}" alt="Community crafting together" 
+                         class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-bl from-black/30 via-black/10 to-transparent"></div>
+                </div>
+                <!-- Text Overlay -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="text-center max-w-3xl px-4 py-8 bg-black/30 backdrop-blur-sm rounded-xl mx-4">
+                        <h2 class="text-3xl md:text-5xl font-serif italic text-amber-200 mb-4 animate-fade-in">
+    Crafted Heritage, Shared With the World
+</h2>
+<p class="text-lg md:text-xl text-white font-sans">
+    Each artifact tells a story — preserving African traditions while inspiring global appreciation.
+</p>
+
+                        <!-- <a href="#collections" class="pointer-events-auto mt-6 inline-block px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-300 animate-bounce-in">
+                            Make an Impact
+                        </a> -->
                     </div>
                 </div>
-                <!-- Button at Bottom -->
-                <!-- <div class="text-center mb-8" style="padding: 5px; margin:5px;">
-                    <a href="/collections/ancient-pottery" class="inline-block px-8 py-3 bg-amber-600 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-700 transition-all duration-300">
-                        Discover Now
-                    </a>
-                </div> -->
             </div>
         </div>
 
         <!-- Navigation Dots -->
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30">
-            <span class="dot w-2.5 h-2.5 bg-gray-400 rounded-full cursor-pointer transition-all duration-300"></span>
-            <span class="dot w-2.5 h-2.5 bg-gray-400 rounded-full cursor-pointer transition-all duration-300"></span>
-            <span class="dot w-2.5 h-2.5 bg-gray-400 rounded-full cursor-pointer transition-all duration-300"></span>
-            <span class="dot w-2.5 h-2.5 bg-gray-400 rounded-full cursor-pointer transition-all duration-300"></span>
-            <span class="dot w-2.5 h-2.5 bg-gray-400 rounded-full cursor-pointer transition-all duration-300"></span>
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30">
+            <button class="zira-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300" aria-label="Go to slide 1"></button>
+            <button class="zira-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300" aria-label="Go to slide 2"></button>
+            <button class="zira-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300" aria-label="Go to slide 3"></button>
+            <button class="zira-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300" aria-label="Go to slide 4"></button>
         </div>
+
+        <!-- Navigation Arrows -->
+        <button style="display: none;" class="zira-prev absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+        <button style="display: none" class="zira-next absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
     </div>
 </section>
+
+<style>
+    /* Animation Keyframes */
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce-in {
+        0% { opacity: 0; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Slide Styles */
+    .zira-slide {
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+    }
+    
+    .zira-slide.active {
+        opacity: 1;
+        z-index: 10;
+    }
+    
+    .zira-slide .animate-fade-in {
+        animation: fade-in 1s ease-out both;
+    }
+    
+    .zira-slide .animate-bounce-in {
+        animation: bounce-in 0.8s ease-out both;
+        animation-delay: 0.5s;
+    }
+    
+    /* Navigation Dots */
+    .zira-dot.active {
+        background-color: #fff !important;
+        transform: scale(1.3);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .zira-slide .text-center {
+            padding: 1rem !important;
+        }
+        
+        .zira-slide h2 {
+            font-size: 1.75rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .zira-slide p {
+            font-size: 1rem !important;
+        }
+        
+        .zira-slide a {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slides = document.querySelectorAll('.zira-slide');
+        const dots = document.querySelectorAll('.zira-dot');
+        const prevBtn = document.querySelector('.zira-prev');
+        const nextBtn = document.querySelector('.zira-next');
+        let currentSlide = 0;
+        let slideInterval;
+        const slideDuration = 7000; // 7 seconds
+        
+        // Initialize slider
+        function initSlider() {
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            startSlideTimer();
+        }
+        
+        // Show specific slide
+        function showSlide(index) {
+            // Wrap around if at ends
+            if (index >= slides.length) index = 0;
+            if (index < 0) index = slides.length - 1;
+            
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            // Show new slide
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            
+            // Reset timer
+            resetSlideTimer();
+        }
+        
+        // Next slide
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+        
+        // Previous slide
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+        
+        // Start automatic slideshow
+        function startSlideTimer() {
+            slideInterval = setInterval(nextSlide, slideDuration);
+        }
+        
+        // Reset slide timer
+        function resetSlideTimer() {
+            clearInterval(slideInterval);
+            startSlideTimer();
+        }
+        
+        // Event listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => showSlide(index));
+        });
+        
+        // Pause on hover
+        document.getElementById('zira-hero-slider').addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+        });
+        
+        document.getElementById('zira-hero-slider').addEventListener('mouseleave', () => {
+            startSlideTimer();
+        });
+        
+        // Touch events for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.getElementById('zira-hero-slider').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(slideInterval);
+        }, {passive: true});
+        
+        document.getElementById('zira-hero-slider').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            startSlideTimer();
+        }, {passive: true});
+        
+        function handleSwipe() {
+            const threshold = 50;
+            if (touchEndX < touchStartX - threshold) {
+                nextSlide(); // Swipe left
+            } else if (touchEndX > touchStartX + threshold) {
+                prevSlide(); // Swipe right
+            }
+        }
+        
+        // Initialize
+        initSlider();
+    });
+</script>
 
 
     <!-- WhatsApp Floating Button -->

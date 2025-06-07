@@ -1,4 +1,3 @@
-
 // Currency Conversion Logic (KES as base currency)
 let exchangeRates = {
   EUR: 0.0073, // Fallback rates
@@ -309,35 +308,99 @@ $(document).ready(function() {
   });
 
   // Hero Slider
-  let currentSlide = 0;
-  const slides = $('.hero-slide');
-  const dots = $('.dot');
-  slides.eq(currentSlide).addClass('active');
-  dots.eq(currentSlide).addClass('active');
+  const $slides = $('.hero-slide');
+  const $dots = $('.dot');
+  let currentIndex = 0;
+  let isAnimating = false;
+  let autoSlideInterval;
 
-  function showSlide(index) {
-    slides.eq(currentSlide).removeClass('active');
-    dots.eq(currentSlide).removeClass('active');
-    currentSlide = index;
-    slides.eq(currentSlide).addClass('active');
-    dots.eq(currentSlide).addClass('active');
+  // Initialize Slider
+  function initSlider() {
+    $slides.eq(currentIndex).addClass('active').css('opacity', 1);
+    $dots.eq(currentIndex).addClass('active');
+    startAutoSlide();
+    addEventListeners();
   }
 
-  let autoSlide = setInterval(function() {
-    let nextSlide = (currentSlide + 1) % slides.length;
-    showSlide(nextSlide);
-  }, 5000);
+  // Start Auto Slide
+  function startAutoSlide() {
+    autoSlideInterval = setInterval(nextSlide, 6000);
+  }
 
-  dots.each(function(index) {
-    $(this).click(function() {
-      clearInterval(autoSlide);
-      showSlide(index);
-      autoSlide = setInterval(function() {
-        let nextSlide = (currentSlide + 1) % slides.length;
-        showSlide(nextSlide);
-      }, 5000);
+  // Stop Auto Slide
+  function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+  }
+
+  // Go to Next Slide
+  function nextSlide() {
+    goToSlide((currentIndex + 1) % $slides.length);
+  }
+
+  // Go to Previous Slide
+  function prevSlide() {
+    goToSlide((currentIndex - 1 + $slides.length) % $slides.length);
+  }
+
+  // Go to Specific Slide
+  function goToSlide(index) {
+    if (isAnimating || index === currentIndex) return;
+
+    isAnimating = true;
+    stopAutoSlide();
+
+    $slides.eq(currentIndex).removeClass('active').animate({ opacity: 0 }, 1500);
+    $dots.eq(currentIndex).removeClass('active');
+
+    $slides.eq(index).addClass('active').animate({ opacity: 1 }, 1500);
+    $dots.eq(index).addClass('active');
+
+    currentIndex = index;
+
+    setTimeout(() => {
+      isAnimating = false;
+      startAutoSlide();
+    }, 1500);
+  }
+
+  // Event Listeners
+  function addEventListeners() {
+    $dots.each(function(index) {
+      $(this).click(function() {
+        if (!isAnimating && index !== currentIndex) {
+          goToSlide(index);
+        }
+      });
     });
-  });
+
+    // Touch Swipe
+    let touchStartX = 0;
+    $('#hero-slider').on('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    $('#hero-slider').on('touchend', function(e) {
+      const touchEndX = e.changedTouches[0].screenX;
+      const threshold = 50;
+      if (touchStartX - touchEndX > threshold) {
+        nextSlide();
+      } else if (touchEndX - touchStartX > threshold) {
+        prevSlide();
+      }
+    });
+
+    // Keyboard Navigation
+    $(document).keydown(function(e) {
+      if (e.key === 'ArrowRight') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  }
+
+  // Initialize Hero Slider
+  initSlider();
 
   // Discount Popup
   $('.discount-btn-container .floating-btn').click(function() {
