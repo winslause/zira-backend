@@ -369,133 +369,83 @@
         z-index: 10;
     }
     
-    .zira-slide .animate-fade-in {
-        animation: fade-in 1s ease-out both;
-    }
-    
-    .zira-slide .animate-bounce-in {
-        animation: bounce-in 0.8s ease-out both;
-        animation-delay: 0.5s;
-    }
-    
-    /* Text Card Container - Enhanced Size */
+    /* DEFAULT STYLES (Large screens) - Original proportions */
     .zira-slide .text-center {
         min-width: 60%;
-        padding: 2.5rem 3rem !important;
-        margin: 2rem;
+        padding: 2rem 2.5rem !important;
+        margin: 1.5rem;
         background-color: rgba(0, 0, 0, 0.5) !important;
         backdrop-filter: blur(8px);
         border-radius: 1.5rem;
     }
     
-    /* Text Styles - Larger and More Prominent */
     .zira-slide h2 {
-        font-size: 3.5rem !important;
+        font-size: 2.5rem !important;
         line-height: 1.2;
-        margin-bottom: 1.5rem !important;
-        letter-spacing: -0.5px;
-        font-weight: 600;
+        margin-bottom: 1rem !important;
     }
     
     .zira-slide p {
-        font-size: 1.5rem !important;
-        line-height: 1.6;
-        margin-bottom: 2rem !important;
+        font-size: 1.2rem !important;
+        line-height: 1.5;
+        margin-bottom: 1.5rem !important;
         max-width: 80%;
-        margin-left: auto;
-        margin-right: auto;
     }
     
     .zira-slide a {
-        padding: 1rem 2rem !important;
-        font-size: 1.25rem !important;
-        border-radius: 2rem !important;
-        font-weight: 500;
+        padding: 0.8rem 1.6rem !important;
+        font-size: 1rem !important;
     }
     
-    /* Navigation Dots */
-    .zira-dot.active {
-        background-color: #fff !important;
-        transform: scale(1.3);
-        width: 16px;
-        height: 16px;
-    }
-    
-    /* Responsive Adjustments - Maintain Proportions */
-    @media (max-width: 1200px) {
-        .zira-slide h2 {
-            font-size: 3rem !important;
-        }
-        
-        .zira-slide p {
-            font-size: 1.3rem !important;
-        }
-    }
-    
+    /* MEDIUM SCREENS (Tablets) */
     @media (max-width: 992px) {
         .zira-slide .text-center {
-            padding: 2rem 2.5rem !important;
-        }
-        
-        .zira-slide h2 {
-            font-size: 2.5rem !important;
-        }
-        
-        .zira-slide p {
-            font-size: 1.2rem !important;
-        }
-        
-        .zira-slide a {
-            padding: 0.8rem 1.6rem !important;
-            font-size: 1.1rem !important;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .zira-slide .text-center {
-            min-width: 80%;
-            padding: 1.8rem 2rem !important;
-            margin: 1.5rem;
+            padding: 2.2rem 2.8rem !important;
         }
         
         .zira-slide h2 {
             font-size: 2.2rem !important;
+        }
+    }
+    
+    /* SMALL DEVICES (Phones) - Enhanced sizing */
+    @media (max-width: 768px) {
+        .zira-slide .text-center {
+            min-width: 85%;
+            padding: 2.5rem !important;
+            min-height: auto;
+        }
+        
+        .zira-slide h2 {
+            font-size: 2rem !important;
             margin-bottom: 1.2rem !important;
         }
         
         .zira-slide p {
             font-size: 1.1rem !important;
-            margin-bottom: 1.5rem !important;
             max-width: 90%;
-        }
-        
-        .zira-slide a {
-            padding: 0.7rem 1.4rem !important;
-            font-size: 1rem !important;
         }
     }
     
+    /* EXTRA SMALL DEVICES (Small phones) */
     @media (max-width: 576px) {
         .zira-slide .text-center {
             min-width: 90%;
-            padding: 1.5rem !important;
-            margin: 1rem;
+            padding: 2rem !important;
+            margin: 1rem auto;
         }
         
         .zira-slide h2 {
             font-size: 1.8rem !important;
-            margin-bottom: 1rem !important;
         }
         
         .zira-slide p {
             font-size: 1rem !important;
-            margin-bottom: 1.2rem !important;
-            max-width: 100%;
+            margin-bottom: 1.5rem !important;
         }
         
         .zira-slide a {
-            padding: 0.6rem 1.2rem !important;
-            font-size: 0.9rem !important;
+            padding: 0.7rem 1.4rem !important;
         }
     }
 </style>
