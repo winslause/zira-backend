@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+import html
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -3034,7 +3035,7 @@ def category_page(category_slug, subcategory_slug):
 
             # Handle category image
             category_image = get_image_path(selected_category.image)
-            category_description = selected_category.description or f'Explore our collection of {selected_category.name} artifacts.'
+            category_description = html.escape(selected_category.description or f'Explore our collection of {selected_category.name} artifacts.')
 
             if subcategory_slug.lower() == 'all':
                 products = Product.query.filter_by(category_id=selected_category.id).all()
@@ -3050,16 +3051,16 @@ def category_page(category_slug, subcategory_slug):
         for product in products:
             serialized_products.append({
                 'id': product.id,
-                'title': product.title,
+                'title': html.escape(str(product.title or '')),
                 'image': get_image_path(product.image),
-                'price': float(product.price),
-                'discounted_price': float(product.discounted_price) if product.discounted_price else None,
-                'is_discounted': product.is_discounted,
-                'category': product.category.name if product.category else 'N/A',
-                'subcategory': product.subcategory.name if product.subcategory else 'N/A',
+                'price': float(product.price or 0),
+                'discounted_price': float(product.discounted_price or 0) if product.discounted_price else None,
+                'is_discounted': product.is_discounted or False,
+                'category': html.escape(product.category.name if product.category else 'N/A'),
+                'subcategory': html.escape(product.subcategory.name if product.subcategory else 'N/A'),
                 'category_slug': product.category.slug if product.category else 'all',
                 'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
-                'description': product.description or 'No description available',
+                'description': html.escape(str(product.description or 'No description available')),
                 'type': 'product'
             })
 
@@ -3076,16 +3077,16 @@ def category_page(category_slug, subcategory_slug):
             for gift in gifts:
                 serialized_products.append({
                     'id': gift.id,
-                    'title': gift.product_name,
+                    'title': html.escape(str(gift.product_name or '')),
                     'image': get_image_path(gift.image),
-                    'price': float(gift.price),
-                    'discounted_price': float(gift.discounted_price) if gift.discounted_price else None,
-                    'is_discounted': gift.is_discounted,
-                    'category': gift.category.name if gift.category else 'Gifts',
-                    'subcategory': gift.subcategory.name if gift.subcategory else 'N/A',
+                    'price': float(gift.price or 0),
+                    'discounted_price': float(gift.discounted_price or 0) if gift.discounted_price else None,
+                    'is_discounted': gift.is_discounted or False,
+                    'category': html.escape(gift.category.name if gift.category else 'Gifts'),
+                    'subcategory': html.escape(gift.subcategory.name if gift.subcategory else 'N/A'),
                     'category_slug': gift.category.slug if gift.category else 'gifts',
                     'subcategory_slug': gift.subcategory.slug if gift.subcategory else 'all',
-                    'description': gift.description or 'No description available',
+                    'description': html.escape(str(gift.description or 'No description available')),
                     'type': 'gift'
                 })
 
