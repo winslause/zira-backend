@@ -837,298 +837,229 @@
 
     <!-- Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js@latest"></script>
-    <script>
-        // Toastify
-        function showToast(message, type = 'success') {
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: type === 'success' ? '#22c55e' : '#ef4444',
-                stopOnFocus: true
-            }).showToast();
+    <!-- Replace only the <script> section in category.html -->
+<script>
+    // Toastify
+    function showToast(message, type = 'success') {
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: 'top',
+            position: 'right',
+            style: {
+                background: type === 'success' ? '#22c55e' : '#ef4444'
+            },
+            stopOnFocus: true
+        }).showToast();
+    }
+
+    // Sidebar Toggle
+    window.toggleSidebar = function(event) {
+        event.preventDefault();
+        const sidebar = document.getElementById('mobile-sidebar');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        if (sidebar && toggle) {
+            const isOpen = sidebar.classList.toggle('open');
+            toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
+            toggle.querySelector('i').classList.toggle('fa-times', isOpen);
+            sidebar.style.transform = isOpen ? 'translateX(0)' : 'translateX(-100%)';
+            sidebar.style.visibility = isOpen ? 'visible' : 'hidden';
         }
+    };
+    document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
+    document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
 
-        // Sidebar Toggle
-        window.toggleSidebar = function(event) {
-            event.preventDefault();
-            const sidebar = document.getElementById('mobile-sidebar');
-            const toggle = document.getElementById('mobile-menu-toggle');
-            if (sidebar && toggle) {
-                const isOpen = sidebar.classList.toggle('open');
-                toggle.querySelector('i').classList.toggle('fa-bars', !isOpen);
-                toggle.querySelector('i').classList.toggle('fa-times', isOpen);
-                sidebar.style.transform = isOpen ? 'translateX(0)' : 'translateX(-100%)';
-                sidebar.style.visibility = isOpen ? 'visible' : 'hidden';
-            }
-        };
-        document.getElementById('mobile-menu-toggle')?.addEventListener('click', window.toggleSidebar);
-        document.getElementById('close-sidebar')?.addEventListener('click', window.toggleSidebar);
-
-        // Mobile Dropdown
-        function toggleMobileDropdown(id) {
-            const dropdown = document.getElementById(id);
-            if (dropdown) {
-                const isOpen = dropdown.classList.toggle('open');
-                const button = dropdown.previousElementSibling.querySelector('button');
-                button.classList.toggle('dropdown-open', isOpen);
-                document.querySelectorAll('.sidebar-dropdown').forEach(d => {
-                    if (d.id !== id && d.classList.contains('open')) {
-                        d.classList.remove('open');
-                        d.previousElementSibling.querySelector('button').classList.remove('dropdown-open');
-                    }
-                });
-            }
-        }
-
-        // Sidebar Dropdown
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            if (dropdown) {
-                const isOpen = dropdown.classList.toggle('open');
-                const button = dropdown.previousElementSibling;
-                button.classList.toggle('dropdown-open', isOpen);
-                document.querySelectorAll('.sidebar-dropdown').forEach(d => {
-                    if (d.id !== id && d.classList.contains('open')) {
-                        d.classList.remove('open');
-                        d.previousElementSibling.classList.remove('dropdown-open');
-                    }
-                });
-            }
-        }
-
-        // Currency
-        const currencySelect = document.getElementById('currency');
-        let exchangeRates = JSON.parse('{{ exchange_rates|tojson|safe }}');
-        let currentCurrency = '{{ current_currency | default('KES') | safe }}';
-
-        if (currencySelect) {
-            currencySelect.addEventListener('change', async (e) => {
-                currentCurrency = e.target.value;
-                try {
-                    const response = await fetch('/api/exchange_rates');
-                    exchangeRates = await response.json();
-                    updatePrices();
-                    await fetch('/set_currency', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ currency: currentCurrency })
-                    });
-                    showToast('Currency updated');
-                } catch (error) {
-                    console.error('Error updating currency:', error);
-                    showToast('Error updating currency', 'error');
+    // Mobile Dropdown
+    function toggleMobileDropdown(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown) {
+            const isOpen = dropdown.classList.toggle('open');
+            const button = dropdown.previousElementSibling.querySelector('button');
+            button.classList.toggle('dropdown-open', isOpen);
+            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                if (d.id !== id && d.classList.contains('open')) {
+                    d.classList.remove('open');
+                    d.previousElementSibling.querySelector('button').classList.remove('dropdown-open');
                 }
             });
         }
+    }
 
-        function updatePrices() {
-            const modal = document.getElementById('quick-view-modal');
-            if (!modal.classList.contains('hidden')) {
-                const productId = modal.querySelector('#modal-add-to-cart').dataset.productId;
-                const product = products.find(p => `${p.id}-${p.type}` === productId);
-                if (product) {
-                    const priceElement = modal.querySelector('#modal-price');
-                    if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
-                        priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
-                    } else {
-                        priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
-                    }
+    // Sidebar Dropdown
+    function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        if (dropdown) {
+            const isOpen = dropdown.classList.toggle('open');
+            const button = dropdown.previousElementSibling;
+            button.classList.toggle('dropdown-open', isOpen);
+            document.querySelectorAll('.sidebar-dropdown').forEach(d => {
+                if (d.id !== id && d.classList.contains('open')) {
+                    d.classList.remove('open');
+                    d.previousElementSibling.classList.remove('dropdown-open');
                 }
+            });
+        }
+    }
+
+    // Currency
+    const currencySelect = document.getElementById('currency');
+    let exchangeRates = JSON.parse('{{ exchange_rates|tojson|safe }}');
+    let currentCurrency = '{{ current_currency | default('KES') | safe }}';
+
+    if (currencySelect) {
+        currencySelect.addEventListener('change', async (e) => {
+            currentCurrency = e.target.value;
+            try {
+                const response = await fetch('/api/exchange_rates');
+                exchangeRates = await response.json();
+                updatePrices();
+                await fetch('/set_currency', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currency: currentCurrency })
+                });
+                showToast('Currency updated');
+            } catch (error) {
+                console.error('Error updating currency:', error);
+                showToast('Error updating currency', 'error');
             }
-        }
+        });
+    }
 
-        // Products
-        let products = [];
-        try {
-            products = JSON.parse('{{ products|tojson|safe }}');
-            console.log('Products:', products);
-        } catch (error) {
-            console.error('Error parsing products:', error);
-        }
-
-        // Filtering
-        function applyFilters() {
-            let visibleProducts = 0;
-            const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase() || 'all';
-            const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else '' }}'.toLowerCase() || 'all';
-            document.querySelectorAll('.product-card').forEach(card => {
-                const cardCategory = (card.dataset.categorySlug || 'all').toLowerCase();
-                const cardSubcategory = (card.dataset.subcategorySlug || '').toLowerCase() || 'all';
-                const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
-                const subcategoryMatch = selectedSubcategory === 'all' || cardSubcategory === selectedSubcategory;
-                if (categoryMatch && subcategoryMatch) {
-                    card.style.display = 'block';
-                    visibleProducts++;
+    function updatePrices() {
+        const modal = document.getElementById('quick-view-modal');
+        if (!modal.classList.contains('hidden')) {
+            const productId = modal.querySelector('#modal-add-to-cart').dataset.productId;
+            const product = products.find(p => `${p.id}-${p.type}` === productId);
+            if (product) {
+                const priceElement = modal.querySelector('#modal-price');
+                if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
+                    priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
                 } else {
-                    card.style.display = 'none';
+                    priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
                 }
-            });
-            document.getElementById('no-products').style.display = visibleProducts > 0 ? 'none' : 'block';
-        }
-
-        // Gifts Popup
-        document.addEventListener('DOMContentLoaded', () => {
-            const giftsPopup = document.getElementById('gifts-popup');
-            const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase();
-            const isGiftsPage = selectedCategory === 'gifts';
-            const popupClosed = sessionStorage.getItem('giftsPopupClosed');
-            if (giftsPopup && !isGiftsPage && !popupClosed) {
-                giftsPopup.classList.add('open');
-                giftsPopup.style.transform = 'translateY(0)';
             }
-            applyFilters();
-            updatePrices();
-            document.querySelectorAll('.product-image-container img').forEach(img => {
-                img.addEventListener('error', () => {
-                    console.warn(`Image failed to load: ${img.src}`);
-                    img.src = '/static/uploads/placeholder.jpg';
+        }
+    }
+
+    // Products
+    let products = [];
+    try {
+        products = JSON.parse('{{ products|tojson|safe }}');
+        console.log('Products:', products);
+    } catch (error) {
+        console.error('Error parsing products:', error);
+    }
+
+    // Filtering
+    function applyFilters() {
+        let visibleProducts = 0;
+        const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase() || 'all';
+        const selectedSubcategory = '{{ selected_subcategory.slug if selected_subcategory else '' }}'.toLowerCase() || 'all';
+        document.querySelectorAll('.product-card').forEach(card => {
+            const cardCategory = (card.dataset.categorySlug || 'all').toLowerCase();
+            const cardSubcategory = (card.dataset.subcategorySlug || '').toLowerCase() || 'all';
+            const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
+            const subcategoryMatch = selectedSubcategory === 'all' || cardSubcategory === selectedSubcategory;
+            if (categoryMatch && subcategoryMatch) {
+                card.style.display = 'block';
+                visibleProducts++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        document.getElementById('no-products').style.display = visibleProducts > 0 ? 'none' : 'block';
+    }
+
+    // Gifts Popup
+    document.addEventListener('DOMContentLoaded', () => {
+        const giftsPopup = document.getElementById('gifts-popup');
+        const selectedCategory = '{{ selected_category.slug if selected_category else '' }}'.toLowerCase();
+        const isGiftsPage = selectedCategory === 'gifts';
+        const popupClosed = sessionStorage.getItem('giftsPopupClosed');
+        if (giftsPopup && !isGiftsPage && !popupClosed) {
+            giftsPopup.classList.add('open');
+            giftsPopup.style.transform = 'translateY(0)';
+        }
+        applyFilters();
+        updatePrices();
+        document.querySelectorAll('.product-image-container img').forEach(img => {
+            img.addEventListener('error', () => {
+                console.warn(`Image failed to load: ${img.src}`);
+                img.src = '/static/uploads/placeholder.jpg';
+            });
+        });
+    });
+
+    function toggleGiftsPopup() {
+        const popup = document.getElementById('gifts-popup');
+        if (popup) {
+            const isOpen = popup.classList.toggle('open');
+            popup.style.transform = isOpen ? 'translateY(0)' : (window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)');
+            sessionStorage.setItem('giftsPopupClosed', !isOpen ? 'true' : 'false');
+        }
+    }
+
+    function closeGiftsPopup() {
+        const popup = document.getElementById('gifts-popup');
+        if (popup) {
+            popup.classList.remove('open');
+            popup.style.transform = window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)';
+            sessionStorage.setItem('giftsPopupClosed', 'true');
+        }
+    }
+
+    // Cart
+    const cartModal = document.getElementById('cart-modal');
+    const closeCartModal = document.getElementById('close-cart-modal');
+    const confirmCart = document.getElementById('confirm-cart');
+    const cancelCart = document.getElementById('cancel-cart');
+    const cartQuantity = document.getElementById('cart-quantity');
+
+    if (confirmCart) {
+        confirmCart.addEventListener('click', async () => {
+            const productId = confirmCart.dataset.productId;
+            const productType = confirmCart.dataset.productType;
+            const quantity = parseInt(cartQuantity.value) || 1;
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_id: parseInt(productId.split('-')[0]),
+                        product_type: productType,
+                        quantity
+                    })
                 });
-            });
-        });
-
-        function toggleGiftsPopup() {
-            const popup = document.getElementById('gifts-popup');
-            if (popup) {
-                const isOpen = popup.classList.toggle('open');
-                popup.style.transform = isOpen ? 'translateY(0)' : (window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)');
-                sessionStorage.setItem('giftsPopupClosed', !isOpen ? 'true' : 'false');
-            }
-        }
-
-        function closeGiftsPopup() {
-            const popup = document.getElementById('gifts-popup');
-            if (popup) {
-                popup.classList.remove('open');
-                popup.style.transform = window.innerWidth <= 600 ? 'translateY(100%)' : 'translateY(-100%)';
-                sessionStorage.setItem('giftsPopupClosed', 'true');
-            }
-        }
-
-        // Cart
-        const cartModal = document.getElementById('cart-modal');
-        const closeCartModal = document.getElementById('close-cart-modal');
-        const confirmCart = document.getElementById('confirm-cart');
-        const cancelCart = document.getElementById('cancel-cart');
-        const cartQuantity = document.getElementById('cart-quantity');
-
-        if (confirmCart) {
-            confirmCart.addEventListener('click', async () => {
-                const productId = confirmCart.dataset.productId;
-                const productType = confirmCart.dataset.productType;
-                const quantity = parseInt(cartQuantity.value) || 1;
-                try {
-                    const response = await fetch('/api/cart', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            product_id: parseInt(productId.split('-')[0]),
-                            product_type: productType,
-                            quantity
-                        })
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        showToast('Added to cart');
-                        cartModal.classList.add('hidden');
-                    } else {
-                        showToast(`Error: ${result.error || 'Failed to add to cart'}`, 'error');
-                        if (result.redirect) window.location.href = result.redirect;
-                    }
-                } catch (error) {
-                    console.error('Error adding to cart:', error);
-                    showToast('Error adding to cart', 'error');
-                }
-            });
-        }
-
-        if (cancelCart) cancelCart.addEventListener('click', () => cartModal.classList.add('hidden'));
-        if (closeCartModal) closeCartModal.addEventListener('click', () => cartModal.classList.add('hidden'));
-        if (cartModal) {
-            cartModal.addEventListener('click', (e) => {
-                if (e.target === cartModal) cartModal.classList.add('hidden');
-            });
-        }
-
-        // Wishlist
-        document.querySelectorAll('.add-to-wishlist').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const productId = button.dataset.productId;
-                const productType = button.dataset.productType;
-                try {
-                    const response = await fetch('/api/wishlist', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            product_id: parseInt(productId.split('-')[0]),
-                            product_type: productType
-                        })
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        button.classList.toggle('far');
-                        button.classList.toggle('fas');
-                        button.classList.toggle('filled');
-                        showToast(result.message || 'Added to wishlist');
-                    } else {
-                        showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
-                        if (result.error === 'Unauthorized') window.location.href = '/user_login';
-                    }
-                } catch (error) {
-                    console.error('Error adding to wishlist:', error);
-                    showToast('Error adding to wishlist', 'error');
-                }
-            });
-        });
-
-        // Quick View
-        const quickViewModal = document.getElementById('quick-view-modal');
-        const closeModal = document.getElementById('close-modal');
-
-        document.querySelectorAll('.quick-view').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const productId = button.dataset.productId;
-                const product = products.find(p => `${p.id}-${p.type}` === productId);
-                if (product) {
-                    document.getElementById('modal-image').src = product.image || '/static/uploads/placeholder.jpg';
-                    document.getElementById('modal-name').textContent = product.title || 'N/A';
-                    document.getElementById('modal-category').textContent = `Category: ${product.category || 'N/A'}`;
-                    document.getElementById('modal-subcategory').textContent = `Subcategory: ${product.subcategory || 'N/A'}`;
-                    const priceElement = document.getElementById('modal-price');
-                    if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
-                        priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
-                    } else {
-                        priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
-                    }
-                    document.getElementById('modal-description').textContent = product.description || 'No description';
-                    document.getElementById('modal-add-to-cart').dataset.productId = productId;
-                    document.getElementById('modal-add-to-cart').dataset.productType = button.dataset.productType;
-                    document.getElementById('modal-add-to-wishlist').dataset.productId = productId;
-                    document.getElementById('modal-add-to-wishlist').dataset.productType = button.dataset.productType;
-                    quickViewModal.classList.remove('hidden');
+                const result = await response.json();
+                if (response.ok) {
+                    showToast('Added to cart');
+                    cartModal.classList.add('hidden');
                 } else {
-                    showToast('Product not found', 'error');
+                    showToast(`Error: ${result.error || 'Failed to add to cart'}`, 'error');
+                    if (result.redirect) window.location.href = result.redirect;
                 }
-            });
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showToast('Error adding to cart', 'error');
+            }
         });
+    }
 
-        document.getElementById('modal-add-to-cart')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = e.target.dataset.productId;
-            const productType = e.target.dataset.productType;
-            confirmCart.setAttribute('data-product-id', productId);
-            confirmCart.setAttribute('data-product-type', productType);
-            cartModal.classList.remove('hidden');
-            cartQuantity.value = 1;
+    if (cancelCart) cancelCart.addEventListener('click', () => cartModal.classList.add('hidden'));
+    if (closeCartModal) closeCartModal.addEventListener('click', () => cartModal.classList.add('hidden'));
+    if (cartModal) {
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) cartModal.classList.add('hidden');
         });
+    }
 
-        document.getElementById('modal-add-to-wishlist')?.addEventListener('click', async (e) => {
+    // Wishlist
+    document.querySelectorAll('.add-to-wishlist').forEach(button => {
+        button.addEventListener('click', async (e) => {
             e.preventDefault();
-            const productId = e.target.dataset.productId;
-            const productType = e.target.dataset.productType;
+            const productId = button.dataset.productId;
+            const productType = button.dataset.productType;
             try {
                 const response = await fetch('/api/wishlist', {
                     method: 'POST',
@@ -1140,6 +1071,9 @@
                 });
                 const result = await response.json();
                 if (response.ok) {
+                    button.classList.toggle('far');
+                    button.classList.toggle('fas');
+                    button.classList.toggle('filled');
                     showToast(result.message || 'Added to wishlist');
                 } else {
                     showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
@@ -1150,13 +1084,83 @@
                 showToast('Error adding to wishlist', 'error');
             }
         });
+    });
 
-        if (closeModal) closeModal.addEventListener('click', () => quickViewModal.classList.add('hidden'));
-        if (quickViewModal) {
-            quickViewModal.addEventListener('click', (e) => {
-                if (e.target === quickViewModal) quickViewModal.classList.add('hidden');
+    // Quick View
+    const quickViewModal = document.getElementById('quick-view-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    document.querySelectorAll('.quick-view').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = button.dataset.productId;
+            const product = products.find(p => `${p.id}-${p.type}` === productId);
+            if (product) {
+                document.getElementById('modal-image').src = product.image || '/static/uploads/placeholder.jpg';
+                document.getElementById('modal-name').textContent = product.title || 'N/A';
+                document.getElementById('modal-category').textContent = `Category: ${product.category || 'N/A'}`;
+                document.getElementById('modal-subcategory').textContent = `Subcategory: ${product.subcategory || 'N/A'}`;
+                const priceElement = document.getElementById('modal-price');
+                if (product.is_discounted && product.discounted_price && product.discounted_price < product.price) {
+                    priceElement.innerHTML = `<span class="line-through text-gray-500">${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}</span> ${(product.discounted_price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                } else {
+                    priceElement.textContent = `${(product.price * (exchangeRates[currentCurrency] || 1)).toFixed(2)} ${currentCurrency}`;
+                }
+                document.getElementById('modal-description').textContent = product.description || 'No description';
+                document.getElementById('modal-add-to-cart').dataset.productId = productId;
+                document.getElementById('modal-add-to-cart').dataset.productType = button.dataset.productType;
+                document.getElementById('modal-add-to-wishlist').dataset.productId = productId;
+                document.getElementById('modal-add-to-wishlist').dataset.productType = button.dataset.productType;
+                quickViewModal.classList.remove('hidden');
+            } else {
+                console.error(`Product not found for ID: ${productId}`);
+                showToast('Product not found', 'error');
+            }
+        });
+    });
+
+    document.getElementById('modal-add-to-cart')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const productId = e.target.dataset.productId;
+        const productType = e.target.dataset.productType;
+        confirmCart.setAttribute('data-product-id', productId);
+        confirmCart.setAttribute('data-product-type', productType);
+        cartModal.classList.remove('hidden');
+        cartQuantity.value = 1;
+    });
+
+    document.getElementById('modal-add-to-wishlist')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const productId = e.target.dataset.productId;
+        const productType = e.target.dataset.productType;
+        try {
+            const response = await fetch('/api/wishlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product_id: parseInt(productId.split('-')[0]),
+                    product_type: productType
+                })
             });
+            const result = await response.json();
+            if (response.ok) {
+                showToast(result.message || 'Added to wishlist');
+            } else {
+                showToast(`Error: ${result.error || 'Failed to add to wishlist'}`, 'error');
+                if (result.error === 'Unauthorized') window.location.href = '/user_login';
+            }
+        } catch (error) {
+            console.error('Error adding to wishlist:', error);
+            showToast('Error adding to wishlist', 'error');
         }
-    </script>
+    });
+
+    if (closeModal) closeModal.addEventListener('click', () => quickViewModal.classList.add('hidden'));
+    if (quickViewModal) {
+        quickViewModal.addEventListener('click', (e) => {
+            if (e.target === quickViewModal) quickViewModal.classList.add('hidden');
+        });
+    }
+</script>
 </body>
 </html>

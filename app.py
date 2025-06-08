@@ -3129,6 +3129,9 @@ def category_page(category_slug, subcategory_slug):
 
         # Fetch categories
         categories = Category.query.all()
+        if not categories:
+            logger.warning("No categories found in database")
+            return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
 
         # Initialize variables
         selected_category = None
@@ -3137,15 +3140,19 @@ def category_page(category_slug, subcategory_slug):
         category_image = '/static/uploads/placeholder.jpg'
         category_description = 'Explore our collection of authentic African-inspired artifacts.'
 
+        # Normalize slugs to lowercase
+        category_slug = category_slug.lower()
+        subcategory_slug = subcategory_slug.lower()
+
         # Handle category and subcategory filtering
-        if category_slug.lower() == 'all':
+        if category_slug == 'all':
             products = Product.query.options(
                 joinedload(Product.discount),
                 joinedload(Product.category),
                 joinedload(Product.subcategory)
             ).all()
         else:
-            selected_category = Category.query.filter_by(slug=category_slug.lower()).first()
+            selected_category = Category.query.filter_by(slug=category_slug).first()
             if not selected_category:
                 logger.warning(f"Category not found: {category_slug}")
                 return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
@@ -3154,14 +3161,14 @@ def category_page(category_slug, subcategory_slug):
             category_image = get_image_path(selected_category.image) if selected_category.image else '/static/uploads/placeholder.jpg'
             category_description = html.escape(selected_category.description or f'Explore our collection of {selected_category.name} artifacts.')
 
-            if subcategory_slug.lower() == 'all':
+            if subcategory_slug == 'all':
                 products = Product.query.options(
                     joinedload(Product.discount),
                     joinedload(Product.category),
                     joinedload(Product.subcategory)
                 ).filter_by(category_id=selected_category.id).all()
             else:
-                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug.lower(), category_id=selected_category.id).first()
+                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug, category_id=selected_category.id).first()
                 if not selected_subcategory:
                     logger.warning(f"Subcategory not found: {subcategory_slug} in category: {category_slug}")
                     return redirect(url_for('category_page', category_slug=category_slug, subcategory_slug='all'))
@@ -3174,8 +3181,8 @@ def category_page(category_slug, subcategory_slug):
         # Serialize products
         serialized_products = []
         for product in products:
-            serialized_products.append({
-                'id': product.id,
+            serialized_product = {
+                'id': str(product.id),  # Ensure ID is string
                 'title': html.escape(str(product.title or '')),
                 'image': get_image_path(product.image) if product.image else '/static/uploads/placeholder.jpg',
                 'price': float(product.price or 0),
@@ -3187,33 +3194,38 @@ def category_page(category_slug, subcategory_slug):
                 'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
                 'description': html.escape(str(product.description or 'No description available')),
                 'type': 'product'
-            })
-            # Log discount details
+            }
+            serialized_products.append(serialized_product)
+            logger.debug(f"Serialized Product ID {product.id}: title={product.title}, category_slug={serialized_product['category_slug']}")
             if product.is_discounted and product.discount:
-                logger.debug(f"Product ID {product.id}: "
-                             f"title={product.title}, "
-                             f"discount={product.discount.percent}%, "
-                             f"start_date={product.discount.start_date}, "
-                             f"end_date={product.discount.end_date}, "
-                             f"is_discounted={product.is_discounted}, "
-                             f"discounted_price={product.discounted_price}")
+                logger.debug(f"Product ID {product.id}: discount={product.discount.percent}%, "
+                             f"start_date={product.discount.start_date}, end_date={product.discount.end_date}, "
+                             f"is_discounted={product.is_discounted}, discounted_price={product.discounted_price}")
 
         # Handle gifts for 'gifts' category
-        if category_slug.lower() == 'gifts':
+        if category_slug == 'gifts':
             gift_query = Gift.query.options(
                 joinedload(Gift.discount),
                 joinedload(Gift.category),
                 joinedload(Gift.subcategory)
-            )
+            ).filter(Gift.start_date <= today, Gift.end_date >= today)  # Only active gifts
             if selected_category:
                 gift_query = gift_query.filter_by(category_id=selected_category.id)
-            if subcategory_slug.lower() != 'all' and selected_subcategory:
+            if subcategory_slug != 'all' and selected_subcategory:
                 gift_query = gift_query.filter_by(subcategory_id=selected_subcategory.id)
             gifts = gift_query.all()
-            logger.debug(f"Found {len(gifts)} gifts for category_slug={category_slug}, subcategory_slug={subcategory_slug}")
+            logger.info(f"Found {len(gifts)} active gifts for category_slug={category_slug}, subcategory_slug={subcategory_slug}")
+            if not gifts:
+                logger.warning("No active gifts found; checking database for all gifts")
+                all_gifts = Gift.query.all()
+                logger.debug(f"Total gifts in database: {len(all_gifts)}")
+                for g in all_gifts:
+                    logger.debug(f"Gift ID {g.id}: product_name={g.product_name}, start_date={g.start_date}, end_date={g.end_date}, "
+                                 f"category_id={g.category_id}, subcategory_id={g.subcategory_id}")
+
             for gift in gifts:
-                serialized_products.append({
-                    'id': str(gift.id),  # Ensure ID is string for consistency
+                serialized_gift = {
+                    'id': str(gift.id),  # Ensure ID is string
                     'title': html.escape(str(gift.product_name or '')),
                     'image': get_image_path(gift.image) if gift.image else '/static/uploads/placeholder.jpg',
                     'price': float(gift.price or 0),
@@ -3221,29 +3233,23 @@ def category_page(category_slug, subcategory_slug):
                     'is_discounted': gift.is_discounted,
                     'category': html.escape(gift.category.name if gift.category else 'Gifts'),
                     'subcategory': html.escape(gift.subcategory.name if gift.subcategory else 'N/A'),
-                    'category_slug': gift.category.slug if gift.category else 'gifts',
-                    'subcategory_slug': gift.subcategory.slug if gift.subcategory else 'all',
+                    'category_slug': gift.category.slug if gift.category and gift.category.slug else 'gifts',
+                    'subcategory_slug': gift.subcategory.slug if gift.subcategory and gift.subcategory.slug else 'all',
                     'description': html.escape(str(gift.description or 'No description available')),
                     'type': 'gift'
-                })
-                logger.debug(f"Serialized Gift ID {gift.id}: "
-                             f"product_name={gift.product_name}, "
-                             f"category={gift.category.name if gift.category else 'N/A'}, "
-                             f"subcategory={gift.subcategory.name if gift.subcategory else 'N/A'}, "
-                             f"category_slug={gift.category.slug if gift.category else 'gifts'}, "
-                             f"subcategory_slug={gift.subcategory.slug if gift.subcategory else 'all'}")
-                # Log discount details
+                }
+                serialized_products.append(serialized_gift)
+                logger.debug(f"Serialized Gift ID {gift.id}: product_name={gift.product_name}, "
+                             f"category={serialized_gift['category']}, category_slug={serialized_gift['category_slug']}, "
+                             f"subcategory={serialized_gift['subcategory']}, subcategory_slug={serialized_gift['subcategory_slug']}")
                 if gift.is_discounted and gift.discount:
-                    logger.debug(f"Gift ID {gift.id}: "
-                                 f"product_name={gift.product_name}, "
-                                 f"discount={gift.discount.percent}%, "
-                                 f"start_date={gift.discount.start_date}, "
-                                 f"end_date={gift.discount.end_date}, "
-                                 f"is_discounted={gift.is_discounted}, "
-                                 f"discounted_price={gift.discounted_price}")
+                    logger.debug(f"Gift ID {gift.id}: discount={gift.discount.percent}%, "
+                                 f"start_date={gift.discount.start_date}, end_date={gift.discount.end_date}, "
+                                 f"is_discounted={gift.is_discounted}, discounted_price={gift.discounted_price}")
 
         # Log total products
-        logger.debug(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, total_products={len(serialized_products)}")
+        logger.info(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, "
+                    f"total_products={len(serialized_products)}, product_ids={[p['id'] for p in serialized_products]}")
 
         return render_template(
             'category.html',
