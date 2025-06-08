@@ -3123,7 +3123,7 @@ def category_page(category_slug, subcategory_slug):
             'KES': 1.0,
             'USD': exchange_rates.usd if exchange_rates else 1.0,
             'EUR': exchange_rates.eur if exchange_rates else 1.0,
-            'GBP': exchange_rates.gbp if exchange_rates else 1.0
+            'GBP': exchange_rates.gbp if exchange_rates else 600.0  # Fallback value
         }
         current_currency = session.get('currency', 'KES')
 
@@ -3145,13 +3145,13 @@ def category_page(category_slug, subcategory_slug):
                 joinedload(Product.subcategory)
             ).all()
         else:
-            selected_category = Category.query.filter_by(slug=category_slug).first()
+            selected_category = Category.query.filter_by(slug=category_slug.lower()).first()
             if not selected_category:
                 logger.warning(f"Category not found: {category_slug}")
                 return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
 
             # Handle category image and description
-            category_image = get_image_path(selected_category.image)
+            category_image = get_image_path(selected_category.image) if selected_category.image else '/static/uploads/placeholder.jpg'
             category_description = html.escape(selected_category.description or f'Explore our collection of {selected_category.name} artifacts.')
 
             if subcategory_slug.lower() == 'all':
@@ -3161,7 +3161,7 @@ def category_page(category_slug, subcategory_slug):
                     joinedload(Product.subcategory)
                 ).filter_by(category_id=selected_category.id).all()
             else:
-                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug, category_id=selected_category.id).first()
+                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug.lower(), category_id=selected_category.id).first()
                 if not selected_subcategory:
                     logger.warning(f"Subcategory not found: {subcategory_slug} in category: {category_slug}")
                     return redirect(url_for('category_page', category_slug=category_slug, subcategory_slug='all'))
@@ -3177,7 +3177,7 @@ def category_page(category_slug, subcategory_slug):
             serialized_products.append({
                 'id': product.id,
                 'title': html.escape(str(product.title or '')),
-                'image': get_image_path(product.image),
+                'image': get_image_path(product.image) if product.image else '/static/uploads/placeholder.jpg',
                 'price': float(product.price or 0),
                 'discounted_price': float(product.discounted_price or 0) if product.discounted_price else None,
                 'is_discounted': product.is_discounted,
@@ -3188,14 +3188,15 @@ def category_page(category_slug, subcategory_slug):
                 'description': html.escape(str(product.description or 'No description available')),
                 'type': 'product'
             })
-            # Log discount details separately
+            # Log discount details
             if product.is_discounted and product.discount:
-                logger.debug(f"Product {product.title}: "
-                            f"discount={product.discount.percent}%, "
-                            f"start_date={product.discount.start_date}, "
-                            f"end_date={product.discount.end_date}, "
-                            f"is_discounted={product.is_discounted}, "
-                            f"discounted_price={product.discounted_price}")
+                logger.debug(f"Product ID {product.id}: "
+                             f"title={product.title}, "
+                             f"discount={product.discount.percent}%, "
+                             f"start_date={product.discount.start_date}, "
+                             f"end_date={product.discount.end_date}, "
+                             f"is_discounted={product.is_discounted}, "
+                             f"discounted_price={product.discounted_price}")
 
         # Handle gifts for 'gifts' category
         if category_slug.lower() == 'gifts':
@@ -3209,11 +3210,12 @@ def category_page(category_slug, subcategory_slug):
             if subcategory_slug.lower() != 'all' and selected_subcategory:
                 gift_query = gift_query.filter_by(subcategory_id=selected_subcategory.id)
             gifts = gift_query.all()
+            logger.debug(f"Found {len(gifts)} gifts for category_slug={category_slug}, subcategory_slug={subcategory_slug}")
             for gift in gifts:
                 serialized_products.append({
-                    'id': gift.id,
+                    'id': str(gift.id),  # Ensure ID is string for consistency
                     'title': html.escape(str(gift.product_name or '')),
-                    'image': get_image_path(gift.image),
+                    'image': get_image_path(gift.image) if gift.image else '/static/uploads/placeholder.jpg',
                     'price': float(gift.price or 0),
                     'discounted_price': float(gift.discounted_price or 0) if gift.discounted_price else None,
                     'is_discounted': gift.is_discounted,
@@ -3224,17 +3226,24 @@ def category_page(category_slug, subcategory_slug):
                     'description': html.escape(str(gift.description or 'No description available')),
                     'type': 'gift'
                 })
-                # Log discount details separately
+                logger.debug(f"Serialized Gift ID {gift.id}: "
+                             f"product_name={gift.product_name}, "
+                             f"category={gift.category.name if gift.category else 'N/A'}, "
+                             f"subcategory={gift.subcategory.name if gift.subcategory else 'N/A'}, "
+                             f"category_slug={gift.category.slug if gift.category else 'gifts'}, "
+                             f"subcategory_slug={gift.subcategory.slug if gift.subcategory else 'all'}")
+                # Log discount details
                 if gift.is_discounted and gift.discount:
-                    logger.debug(f"Gift {gift.product_name}: "
-                                f"discount={gift.discount.percent}%, "
-                                f"start_date={gift.discount.start_date}, "
-                                f"end_date={gift.discount.end_date}, "
-                                f"is_discounted={gift.is_discounted}, "
-                                f"discounted_price={gift.discounted_price}")
+                    logger.debug(f"Gift ID {gift.id}: "
+                                 f"product_name={gift.product_name}, "
+                                 f"discount={gift.discount.percent}%, "
+                                 f"start_date={gift.discount.start_date}, "
+                                 f"end_date={gift.discount.end_date}, "
+                                 f"is_discounted={gift.is_discounted}, "
+                                 f"discounted_price={gift.discounted_price}")
 
         # Log total products
-        logger.debug(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, products={len(serialized_products)}")
+        logger.debug(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, total_products={len(serialized_products)}")
 
         return render_template(
             'category.html',
@@ -3249,7 +3258,7 @@ def category_page(category_slug, subcategory_slug):
             today=today
         )
     except Exception as e:
-        logger.error(f"Error in category_page: {str(e)}")
+        logger.error(f"Error in category_page: {str(e)}", exc_info=True)
         return render_template('error.html', error='Failed to load category'), 500
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
