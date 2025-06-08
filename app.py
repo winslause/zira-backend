@@ -879,88 +879,31 @@ def add_product():
 @app.route('/api/discounted_artefacts', methods=['GET'])
 def get_products():
     try:
-        # Adjust for user's timezone (+04)
-        utc_now = datetime.utcnow()
-        user_timezone_offset = timedelta(hours=4)  # +04 timezone
-        user_local_time = utc_now + user_timezone_offset
-        today = user_local_time.date()
-        logger.debug(f"UTC datetime: {utc_now}, User local date (+04): {today}")
-
-        # Fetch Products with active discounts
         products = db.session.query(Product).options(
             joinedload(Product.category),
             joinedload(Product.subcategory),
             joinedload(Product.discount)
-        ).join(Discount).filter(
-            Discount.percent > 1,
-            Discount.start_date <= today,
-            Discount.end_date >= today
         ).all()
-
-        # Fetch Gifts with active discounts
-        gifts = db.session.query(Gift).options(
-            joinedload(Gift.category),
-            joinedload(Gift.subcategory),
-            joinedload(Gift.discount)
-        ).join(Discount).filter(
-            Discount.percent > 1,
-            Discount.start_date <= today,
-            Discount.end_date >= today
-        ).all()
-
-        # Combine products and gifts into response
-        response = []
-
-        for p in products:
-            response.append({
-                'id': p.id,
-                'name': p.title,
-                'category_id': p.category_id,
-                'subcategory_id': p.subcategory_id,
-                'price': float(p.price),
-                'discount': {
-                    'percent': float(p.discount.percent),
-                    'start_date': p.discount.start_date.isoformat(),
-                    'end_date': p.discount.end_date.isoformat()
-                } if p.discount else None,
-                'image': p.image,
-                'description': p.description or 'No description available',
-                'type': 'product'
-            })
-
-        for g in gifts:
-            response.append({
-                'id': g.id,
-                'name': g.product_name,
-                'category_id': g.category_id,
-                'subcategory_id': g.subcategory_id,
-                'price': float(g.price),
-                'discount': {
-                    'percent': float(g.discount.percent),
-                    'start_date': g.discount.start_date.isoformat(),
-                    'end_date': g.discount.end_date.isoformat()
-                } if g.discount else None,
-                'image': g.image,
-                'description': g.description or 'No description available',
-                'type': 'gift'
-            })
-
-        # Log the fetched data
-        logger.debug(f"Fetched {len(products)} products and {len(gifts)} gifts for /api/discounted_artefacts")
-        for item in response:
-            if item['discount']:
-                logger.debug(f"{item['type'].capitalize()} {item['name']}: "
-                            f"discount={item['discount']['percent']}%, "
-                            f"start_date={item['discount']['start_date']}, "
-                            f"end_date={item['discount']['end_date']}")
-
-        return jsonify(response)
+        return jsonify([{
+            'id': p.id,
+            'name': p.title,  # Map title to name
+            'category_id': p.category_id,
+            'subcategory_id': p.subcategory_id,
+            'price': float(p.price),
+            'discount': {
+                'percent': float(p.discount.percent),
+                'start_date': p.discount.start_date.isoformat(),
+                'end_date': p.discount.end_date.isoformat()
+            } if p.discount else None,
+            'image': p.image,
+            'description': p.description
+        } for p in products])
     except SQLAlchemyError as e:
-        logger.error(f"Error fetching products: {str(e)}")
+        logger.error(f'Error fetching products: {str(e)}')
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f"Error fetching products: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error fetching products: {str(e)}')
+        return jsonify({'error': str(e)}), 500     
     
 @app.route('/api/discounted_artefacts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_product(id):
