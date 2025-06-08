@@ -949,7 +949,16 @@
         console.log('Products:', products);
     } catch (error) {
         console.error('Error parsing products:', error);
-        console.error('Raw JSON:', '{{ products|tojson|safe }}');
+        console.error('Raw JSON:', rawJson);
+        // Log character at error position
+        if (error.message.includes('at position')) {
+            const posMatch = error.message.match(/at position (\d+)/);
+            if (posMatch) {
+                const pos = parseInt(posMatch[1]);
+                console.error(`Character at position ${pos}:`, JSON.stringify(rawJson[pos]));
+                console.error(`Context (positions ${Math.max(0, pos-20)}-${Math.min(rawJson.length, pos+20)}):`, rawJson.slice(Math.max(0, pos-20), Math.min(rawJson.length, pos+20)));
+            }
+        }
     }
 
     // Filtering
@@ -961,7 +970,7 @@
             const cardCategory = (card.dataset.categorySlug || 'all').toLowerCase();
             const cardSubcategory = (card.dataset.subcategorySlug || '').toLowerCase() || 'all';
             const categoryMatch = selectedCategory === 'all' || cardCategory === selectedCategory;
-            const subcategoryMatch = selectedSubcategory === 'all' || cardSubcategory === selectedSubcategory;
+            const subcategoryMatch = selectedSubcategory === 'all' || cardSubcategory === selected_subcategory;
             if (categoryMatch && subcategoryMatch) {
                 card.style.display = 'block';
                 visibleProducts++;

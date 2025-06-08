@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from slugify import slugify
 import os
 import re
+import json
 import uuid
 from dotenv import load_dotenv
 import secrets
@@ -117,25 +118,17 @@ def update_exchange_rates():
             app.logger.info("Daily exchange rates updated")
         except Exception as e:
             app.logger.error(f"Failed to update exchange rates: {str(e)}")
+            
+            
 def sanitize_string(s):
-    """Remove control characters and ensure valid JSON string."""
+    """Remove all non-printable characters and ensure valid JSON string."""
     if s is None:
         return ""
     s = str(s)
-    # Remove control characters (ASCII 0-31, except 9, 10, 13 for tab, newline, carriage return)
-    s = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', s)
-    # Escape quotes and backslashes
-    s = s.replace('"', '\\"').replace('\\', '\\\\')
-    return s
-def sanitize_string(s):
-    """Remove control characters and ensure valid JSON string."""
-    if s is None:
-        return ""
-    s = str(s)
-    # Remove control characters (ASCII 0-31, except 9, 10, 13 for tab, newline, carriage return)
-    s = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', s)
-    # Escape quotes and backslashes
-    s = s.replace('"', '\\"').replace('\\', '\\\\')
+    # Remove all control characters (ASCII 0-31 and 127)
+    s = re.sub(r'[\x00-\x1F\x7F]', '', s)
+    # Replace problematic characters with escaped versions
+    s = s.replace('"', '\\"').replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
     return s
 
 # Initialize scheduler
@@ -3237,25 +3230,25 @@ def category_page(category_slug, subcategory_slug):
                 all_gifts = Gift.query.all()
                 logger.debug(f"Total gifts in database: {len(all_gifts)}")
                 for g in all_gifts:
-                    logger.debug(f"Gift ID {g.id}: product_name={g.product_name}, start_date={g.start_date}, "
+                    logger.debug(f"Gift ID {g.id}: product_name={repr(g.product_name)}, start_date={g.start_date}, "
                                  f"end_date={g.end_date}, category_id={g.category_id}, subcategory_id={g.subcategory_id}, "
-                                 f"description={g.description}")
+                                 f"description={repr(g.description)}")
 
             for gift in gifts:
-                # Log raw gift data before sanitization
+                # Log raw gift data
                 logger.debug(f"Raw Gift ID {gift.id}: product_name={repr(gift.product_name)}, description={repr(gift.description)}")
                 serialized_gift = {
                     'id': str(gift.id),
-                    'title': html.escape(sanitize_string(gift.product_name)),
+                    'title': json.dumps(sanitize_string(gift.product_name), ensure_ascii=False)[1:-1],  # Remove surrounding quotes
                     'image': get_image_path(gift.image) if gift.image else '/static/uploads/placeholder.jpg',
                     'price': float(gift.price or 0),
                     'discounted_price': float(gift.discounted_price or 0) if gift.discounted_price else None,
                     'is_discounted': gift.is_discounted,
-                    'category': html.escape(sanitize_string(gift.category.name if gift.category else 'Gifts')),
-                    'subcategory': html.escape(sanitize_string(gift.subcategory.name if gift.subcategory else 'N/A')),
-                    'category_slug': sanitize_string(gift.category.slug if gift.category else 'gifts'),
-                    'subcategory_slug': sanitize_string(gift.subcategory.slug if gift.subcategory else 'all'),
-                    'description': html.escape(sanitize_string(gift.description or 'No description available')),
+                    'category': json.dumps(sanitize_string(gift.category.name if gift.category else 'Gifts'), ensure_ascii=False)[1:-1],
+                    'subcategory': json.dumps(sanitize_string(gift.subcategory.name if gift.subcategory else 'N/A'), ensure_ascii=False)[1:-1],
+                    'category_slug': json.dumps(sanitize_string(gift.category.slug if gift.category else 'gifts'), ensure_ascii=False)[1:-1],
+                    'subcategory_slug': json.dumps(sanitize_string(gift.subcategory.slug if gift.subcategory else 'all'), ensure_ascii=False)[1:-1],
+                    'description': json.dumps(sanitize_string(gift.description or 'No description available'), ensure_ascii=False)[1:-1],
                     'type': 'gift'
                 }
                 serialized_products.append(serialized_gift)
@@ -3263,10 +3256,10 @@ def category_page(category_slug, subcategory_slug):
                              f"category={serialized_gift['category']}, category_slug={serialized_gift['category_slug']}, "
                              f"description={serialized_gift['description']}")
 
-        # Log serialized products for debugging
+        # Log serialized products
         try:
             serialized_json = json.dumps(serialized_products, ensure_ascii=False)
-            logger.debug(f"Serialized JSON length: {len(serialized_json)}")
+            logger.debug(f"Serialized JSON: {serialized_json[:1000]}... (length: {len(serialized_json)})")  # Truncate for brevity
         except Exception as e:
             logger.error(f"Failed to serialize products to JSON: {str(e)}", exc_info=True)
             for p in serialized_products:
