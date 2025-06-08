@@ -837,8 +837,7 @@
 
     <!-- Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js@latest"></script>
-    <!-- Replace only the <script> section in category.html -->
-<script>
+    <script>
     // Toastify
     function showToast(message, type = 'success') {
         Toastify({
@@ -945,10 +944,12 @@
     // Products
     let products = [];
     try {
-        products = JSON.parse('{{ products|tojson|safe }}');
+        const rawJson = '{{ products|tojson|safe }}';
+        products = JSON.parse(rawJson);
         console.log('Products:', products);
     } catch (error) {
         console.error('Error parsing products:', error);
+        console.error('Raw JSON:', '{{ products|tojson|safe }}');
     }
 
     // Filtering

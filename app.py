@@ -10,6 +10,7 @@ from sqlalchemy import desc
 from datetime import datetime, timedelta
 from slugify import slugify
 import os
+import re
 import uuid
 from dotenv import load_dotenv
 import secrets
@@ -116,6 +117,26 @@ def update_exchange_rates():
             app.logger.info("Daily exchange rates updated")
         except Exception as e:
             app.logger.error(f"Failed to update exchange rates: {str(e)}")
+def sanitize_string(s):
+    """Remove control characters and ensure valid JSON string."""
+    if s is None:
+        return ""
+    s = str(s)
+    # Remove control characters (ASCII 0-31, except 9, 10, 13 for tab, newline, carriage return)
+    s = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', s)
+    # Escape quotes and backslashes
+    s = s.replace('"', '\\"').replace('\\', '\\\\')
+    return s
+def sanitize_string(s):
+    """Remove control characters and ensure valid JSON string."""
+    if s is None:
+        return ""
+    s = str(s)
+    # Remove control characters (ASCII 0-31, except 9, 10, 13 for tab, newline, carriage return)
+    s = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', s)
+    # Escape quotes and backslashes
+    s = s.replace('"', '\\"').replace('\\', '\\\\')
+    return s
 
 # Initialize scheduler
 scheduler = BackgroundScheduler()
@@ -3159,7 +3180,7 @@ def category_page(category_slug, subcategory_slug):
 
             # Handle category image and description
             category_image = get_image_path(selected_category.image) if selected_category.image else '/static/uploads/placeholder.jpg'
-            category_description = html.escape(selected_category.description or f'Explore our collection of {selected_category.name} artifacts.')
+            category_description = html.escape(sanitize_string(selected_category.description) or f'Explore our collection of {selected_category.name} artifacts.')
 
             if subcategory_slug == 'all':
                 products = Product.query.options(
@@ -3182,25 +3203,21 @@ def category_page(category_slug, subcategory_slug):
         serialized_products = []
         for product in products:
             serialized_product = {
-                'id': str(product.id),  # Ensure ID is string
-                'title': html.escape(str(product.title or '')),
+                'id': str(product.id),
+                'title': html.escape(sanitize_string(product.title)),
                 'image': get_image_path(product.image) if product.image else '/static/uploads/placeholder.jpg',
                 'price': float(product.price or 0),
                 'discounted_price': float(product.discounted_price or 0) if product.discounted_price else None,
                 'is_discounted': product.is_discounted,
-                'category': html.escape(product.category.name if product.category else 'N/A'),
-                'subcategory': html.escape(product.subcategory.name if product.subcategory else 'N/A'),
-                'category_slug': product.category.slug if product.category else 'all',
-                'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
-                'description': html.escape(str(product.description or 'No description available')),
+                'category': html.escape(sanitize_string(product.category.name if product.category else 'N/A')),
+                'subcategory': html.escape(sanitize_string(product.subcategory.name if product.subcategory else 'N/A')),
+                'category_slug': sanitize_string(product.category.slug if product.category else 'all'),
+                'subcategory_slug': sanitize_string(product.subcategory.slug if product.subcategory else 'all'),
+                'description': html.escape(sanitize_string(product.description or 'No description available')),
                 'type': 'product'
             }
             serialized_products.append(serialized_product)
             logger.debug(f"Serialized Product ID {product.id}: title={product.title}, category_slug={serialized_product['category_slug']}")
-            if product.is_discounted and product.discount:
-                logger.debug(f"Product ID {product.id}: discount={product.discount.percent}%, "
-                             f"start_date={product.discount.start_date}, end_date={product.discount.end_date}, "
-                             f"is_discounted={product.is_discounted}, discounted_price={product.discounted_price}")
 
         # Handle gifts for 'gifts' category
         if category_slug == 'gifts':
@@ -3208,7 +3225,7 @@ def category_page(category_slug, subcategory_slug):
                 joinedload(Gift.discount),
                 joinedload(Gift.category),
                 joinedload(Gift.subcategory)
-            ).filter(Gift.start_date <= today, Gift.end_date >= today)  # Only active gifts
+            ).filter(Gift.start_date <= today, Gift.end_date >= today)
             if selected_category:
                 gift_query = gift_query.filter_by(category_id=selected_category.id)
             if subcategory_slug != 'all' and selected_subcategory:
@@ -3220,32 +3237,40 @@ def category_page(category_slug, subcategory_slug):
                 all_gifts = Gift.query.all()
                 logger.debug(f"Total gifts in database: {len(all_gifts)}")
                 for g in all_gifts:
-                    logger.debug(f"Gift ID {g.id}: product_name={g.product_name}, start_date={g.start_date}, end_date={g.end_date}, "
-                                 f"category_id={g.category_id}, subcategory_id={g.subcategory_id}")
+                    logger.debug(f"Gift ID {g.id}: product_name={g.product_name}, start_date={g.start_date}, "
+                                 f"end_date={g.end_date}, category_id={g.category_id}, subcategory_id={g.subcategory_id}, "
+                                 f"description={g.description}")
 
             for gift in gifts:
+                # Log raw gift data before sanitization
+                logger.debug(f"Raw Gift ID {gift.id}: product_name={repr(gift.product_name)}, description={repr(gift.description)}")
                 serialized_gift = {
-                    'id': str(gift.id),  # Ensure ID is string
-                    'title': html.escape(str(gift.product_name or '')),
+                    'id': str(gift.id),
+                    'title': html.escape(sanitize_string(gift.product_name)),
                     'image': get_image_path(gift.image) if gift.image else '/static/uploads/placeholder.jpg',
                     'price': float(gift.price or 0),
                     'discounted_price': float(gift.discounted_price or 0) if gift.discounted_price else None,
                     'is_discounted': gift.is_discounted,
-                    'category': html.escape(gift.category.name if gift.category else 'Gifts'),
-                    'subcategory': html.escape(gift.subcategory.name if gift.subcategory else 'N/A'),
-                    'category_slug': gift.category.slug if gift.category and gift.category.slug else 'gifts',
-                    'subcategory_slug': gift.subcategory.slug if gift.subcategory and gift.subcategory.slug else 'all',
-                    'description': html.escape(str(gift.description or 'No description available')),
+                    'category': html.escape(sanitize_string(gift.category.name if gift.category else 'Gifts')),
+                    'subcategory': html.escape(sanitize_string(gift.subcategory.name if gift.subcategory else 'N/A')),
+                    'category_slug': sanitize_string(gift.category.slug if gift.category else 'gifts'),
+                    'subcategory_slug': sanitize_string(gift.subcategory.slug if gift.subcategory else 'all'),
+                    'description': html.escape(sanitize_string(gift.description or 'No description available')),
                     'type': 'gift'
                 }
                 serialized_products.append(serialized_gift)
-                logger.debug(f"Serialized Gift ID {gift.id}: product_name={gift.product_name}, "
+                logger.debug(f"Serialized Gift ID {gift.id}: product_name={serialized_gift['title']}, "
                              f"category={serialized_gift['category']}, category_slug={serialized_gift['category_slug']}, "
-                             f"subcategory={serialized_gift['subcategory']}, subcategory_slug={serialized_gift['subcategory_slug']}")
-                if gift.is_discounted and gift.discount:
-                    logger.debug(f"Gift ID {gift.id}: discount={gift.discount.percent}%, "
-                                 f"start_date={gift.discount.start_date}, end_date={gift.discount.end_date}, "
-                                 f"is_discounted={gift.is_discounted}, discounted_price={gift.discounted_price}")
+                             f"description={serialized_gift['description']}")
+
+        # Log serialized products for debugging
+        try:
+            serialized_json = json.dumps(serialized_products, ensure_ascii=False)
+            logger.debug(f"Serialized JSON length: {len(serialized_json)}")
+        except Exception as e:
+            logger.error(f"Failed to serialize products to JSON: {str(e)}", exc_info=True)
+            for p in serialized_products:
+                logger.debug(f"Problematic product: {p}")
 
         # Log total products
         logger.info(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, "
@@ -3266,6 +3291,7 @@ def category_page(category_slug, subcategory_slug):
     except Exception as e:
         logger.error(f"Error in category_page: {str(e)}", exc_info=True)
         return render_template('error.html', error='Failed to load category'), 500
+        
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
 def discounted_artefacts():
