@@ -3748,18 +3748,67 @@ def delete_cart_item(id):
 
 @app.route('/api/profile/picture', methods=['POST'])
 def upload_profile_picture():
-    if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    if 'image' not in request.files:
-        return jsonify({'error': 'Image is required'}), 400
-    image = request.files['image']
-    if not allowed_file(image.filename):
-        return jsonify({'error': 'Invalid image format'}), 400
-    filename = save_file(image)
-    user = User.query.filter_by(email=session['user']).first()
-    user.profile_picture = filename
-    db.session.commit()
-    return jsonify({'message': 'Profile picture updated', 'image_url': url_for('static', filename=f'uploads/{filename}')})
+    try:
+        # Check if user is logged in
+        if 'user' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # Check if image is provided
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image provided'}), 400
+
+        image = request.files['image']
+        if image.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        # Validate file type
+        if not allowed_file(image.filename):
+            return jsonify({'error': 'Invalid image format. Allowed formats: PNG, JPEG, GIF'}), 400
+
+        # Secure the filename and save the file
+        filename = secure_filename(image.filename)
+        upload_dir = os.path.join(current_app.root_path, 'static/uploads')
+        
+        # Ensure upload directory exists
+        if not os.path.exists(upload_dir):
+            try:
+                os.makedirs(upload_dir, mode=0o755)
+            except Exception as e:
+                logging.error(f"Failed to create upload directory: {str(e)}")
+                return jsonify({'error': 'Server error: Unable to create upload directory'}), 500
+
+        # Save the file
+        file_path = os.path.join(upload_dir, filename)
+        try:
+            image.save(file_path)
+        except Exception as e:
+            logging.error(f"Failed to save image: {str(e)}")
+            return jsonify({'error': 'Failed to save image'}), 500
+
+        # Verify file was saved and is accessible
+        if not os.path.exists(file_path):
+            logging.error(f"Image not found after saving: {file_path}")
+            return jsonify({'error': 'Failed to save image'}), 500
+
+        # Update user's profile picture in the database
+        user = User.query.filter_by(email=session['user']).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        user.profile_picture = filename
+        try:
+            db.session.commit()
+        except Exception as e:
+            logging.error(f"Database error while updating profile picture: {str(e)}")
+            return jsonify({'error': 'Database error'}), 500
+
+        # Generate the URL for the uploaded image
+        image_url = url_for('static', filename=f'uploads/{filename}', _external=True)
+        return jsonify({'message': 'Profile picture updated', 'image_url': image_url})
+
+    except Exception as e:
+        logging.error(f"Unexpected error in upload_profile_picture: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/profile/address', methods=['POST'])
 def add_address():

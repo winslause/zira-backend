@@ -1501,7 +1501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {% if item.name %}
                         <tr class="wishlist-card" data-wishlist-id="{{ item.id }}">
                             <td>
-                                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
+                                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
                             </td>
                             <td>
                                 <h3 class="text-lg font-semibold text-gray-800">{{ item.name }}</h3>
@@ -1561,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {% if item.name %}
                         <tr class="cart-card" data-product-id="{{ item.product_id }}" data-product-type="{{ item.product_type }}">
                             <td>
-                                <img loading="lazy" src="{{ url_for('static', filename='Uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
+                                <img loading="lazy" src="{{ url_for('static', filename='uploads/' + item.image) | default('https://via.placeholder.com/80x80') }}" alt="{{ item.name }}">
                             </td>
                             <td>
                                 <h3 class="text-lg font-semibold text-gray-800">{{ item.name }}</h3>
