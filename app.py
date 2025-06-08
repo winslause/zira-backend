@@ -3751,7 +3751,8 @@ def delete_cart_item(id):
 @app.route('/api/profile/picture', methods=['POST'])
 def upload_profile_picture():
     try:
-        # Check authentication
+        # Log session info
+        app.logger.debug(f"Session user: {session.get('user')}")
         if 'user' not in session:
             return jsonify({'error': 'Unauthorized'}), 401
 
@@ -3765,32 +3766,27 @@ def upload_profile_picture():
             app.logger.warning(f"Invalid file extension: {image.filename}")
             return jsonify({'error': 'Invalid image format'}), 400
 
-        # Check file size (5MB limit)
+        # Check file size
         if image.content_length and image.content_length > 5 * 1024 * 1024:
             app.logger.warning(f"File too large: {image.filename}, size: {image.content_length}")
             return jsonify({'error': 'File size exceeds 5MB limit'}), 413
 
-        # Sanitize filename
+        # Sanitize and generate unique filename
         filename = secure_filename(image.filename)
         if not filename:
             app.logger.error(f"Invalid filename after sanitization: {image.filename}")
             return jsonify({'error': 'Invalid filename'}), 400
-
-        # Ensure upload directory exists
-        upload_folder = app.config['UPLOAD_FOLDER']
-        os.makedirs(upload_folder, exist_ok=True)
-
-        # Generate unique filename to avoid conflicts
         unique_filename = f"{uuid.uuid4().hex}_{filename}"
-        file_path = os.path.join(upload_folder, unique_filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        app.logger.debug(f"Saving file to: {file_path}")
 
         # Validate image integrity
         try:
             img = Image.open(image)
             img.verify()
-            image.seek(0)  # Reset file pointer after verification
+            image.seek(0)  # Reset file pointer
         except Exception as e:
-            app.logger.error(f"Corrupted image: {filename}, error: {str(e)}")
+            app.logger.error(f"Corrupted image: {image.filename}, error: {str(e)}")
             return jsonify({'error': 'Corrupted or invalid image'}), 400
 
         # Save the file
@@ -3800,7 +3796,7 @@ def upload_profile_picture():
                 app.logger.error(f"File not saved: {file_path}")
                 return jsonify({'error': 'Failed to save image'}), 500
         except Exception as e:
-            app.logger.error(f"Error saving file: {filename}, error: {str(e)}")
+            app.logger.error(f"Error saving file: {image.filename}, error: {str(e)}")
             return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
 
         # Update user profile
@@ -3818,7 +3814,7 @@ def upload_profile_picture():
             return jsonify({'error': f'Failed to update database: {str(e)}'}), 500
 
         # Return success response
-        image_url = url_for('static', filename=f'Uploads/{unique_filename}', _external=True)
+        image_url = url_for('static', filename=f'uploads/{unique_filename}', _external=True)
         app.logger.info(f"Profile picture updated: {unique_filename}")
         return jsonify({
             'message': 'Profile picture updated',
@@ -3828,6 +3824,12 @@ def upload_profile_picture():
     except Exception as e:
         app.logger.error(f"Unexpected error in upload_profile_picture: {str(e)}")
         return jsonify({'error': f'Failed to upload profile picture: {str(e)}'}), 500
+
+# Custom error handlers
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    app.logger.error("File upload exceeded size limit")
+    return jsonify({'error': 'File too large, maximum size is 5MB'}), 413
 
 @app.route('/api/profile/address', methods=['POST'])
 def add_address():

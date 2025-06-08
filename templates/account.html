@@ -2295,13 +2295,14 @@ document.getElementById('picture-form').addEventListener('submit', async (e) => 
             body: formData,
             credentials: 'include'
         });
+        // Read the response body once
+        const responseText = await response.text();
         let data;
         try {
-            data = await response.json();
+            data = JSON.parse(responseText);
         } catch (jsonError) {
             console.error('Failed to parse JSON:', jsonError);
-            const text = await response.text();
-            console.error('Response body:', text);
+            console.error('Response body:', responseText);
             throw new Error(`Server returned invalid response (status: ${response.status})`);
         }
         if (!response.ok) {
@@ -2314,9 +2315,11 @@ document.getElementById('picture-form').addEventListener('submit', async (e) => 
         console.error('Error uploading picture:', error);
         let errorMessage = error.message;
         if (error.message.includes('Unauthorized')) {
-            window.location.href = '/login';
+            window.location.href = '/user_login';
         } else if (error.message.includes('413')) {
             errorMessage = 'File too large, maximum size is 5MB';
+        } else if (error.message.includes('invalid response')) {
+            errorMessage = 'Server returned an invalid response';
         }
         showToast(`Failed to upload picture: ${errorMessage}`, 'error');
     }
