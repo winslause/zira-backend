@@ -384,36 +384,142 @@ class ExchangeRate(db.Model):
     
 @app.route('/')
 def index():
-    # Get currency from session, default to KES
-    current_currency = session.get('currency', 'KES')
+    try:
+        # Get currency from session, default to KES
+        current_currency = session.get('currency', 'KES')
 
-    # Fetch categories
-    categories = Category.query.all()
+        # Adjust for user's timezone (+04)
+        utc_now = datetime.utcnow()
+        user_timezone_offset = timedelta(hours=4)  # +04 timezone
+        user_local_time = utc_now + user_timezone_offset
+        today = user_local_time.date()
+        logger.debug(f"UTC datetime: {utc_now}, User local date (+04): {today}")
 
-    stories = Story.query.all()
-    latest_products = Product.query.order_by(Product.created_at.desc()).limit(4).all()
-    current_date = datetime.utcnow().date()
-    discount_products = Product.query.join(Discount, Product.discount_id == Discount.id).filter(
-        Discount.start_date <= current_date,
-        Discount.end_date >= current_date
-    ).order_by(Product.created_at.desc()).limit(4).all()
-    popular_products = db.session.query(Product, func.count(OrderItem.id).label('order_count'))\
-        .join(OrderItem, Product.id == OrderItem.product_id)\
-        .group_by(Product.id)\
-        .order_by(func.count(OrderItem.id).desc())\
-        .limit(4).all()
-    popular_products = [product for product, _ in popular_products]
+        # Fetch categories
+        categories = Category.query.all()
 
-    return render_template(
-        'index.html',
-        latest_products=latest_products,
-        discount_products=discount_products,
-        popular_products=popular_products,
-        today=datetime.utcnow().date(),
-        current_currency=current_currency,
-        stories=stories,
-        categories=categories  # Add categories to the template context
-    )
+        # Fetch stories
+        stories = Story.query.all()
+
+        # Fetch latest products
+        latest_products = Product.query.options(
+            joinedload(Product.discount),
+            joinedload(Product.category),
+            joinedload(Product.subcategory)
+        ).order_by(Product.created_at.desc()).limit(4).all()
+
+        # Fetch discounted products and gifts
+        discount_products = Product.query.options(
+            joinedload(Product.discount),
+            joinedload(Product.category),
+            joinedload(Product.subcategory)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
+        ).order_by(Product.created_at.desc()).limit(4).all()
+
+        discount_gifts = Gift.query.options(
+            joinedload(Gift.discount),
+            joinedload(Gift.category),
+            joinedload(Gift.subcategory)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
+        ).order_by(Gift.created_at.desc()).limit(4).all()
+
+        # Combine discounted products and gifts, prioritizing products
+        all_discount_items = []
+        for product in discount_products:
+            all_discount_items.append({
+                'id': product.id,
+                'title': product.title,
+                'image': product.image,
+                'price': float(product.price),
+                'discounted_price': product.discounted_price,
+                'is_discounted': product.is_discounted,
+                'category': product.category.name if product.category else 'N/A',
+                'subcategory': product.subcategory.name if product.subcategory else 'N/A',
+                'category_slug': product.category.slug if product.category else 'all',
+                'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
+                'description': product.description or 'No description available',
+                'discount': product.discount,
+                'type': 'product'
+            })
+
+        for gift in discount_gifts:
+            all_discount_items.append({
+                'id': gift.id,
+                'title': gift.product_name,
+                'image': gift.image,
+                'price': float(gift.price),
+                'discounted_price': gift.discounted_price,
+                'is_discounted': gift.is_discounted,
+                'category': gift.category.name if gift.category else 'Gifts',
+                'subcategory': gift.subcategory.name if gift.subcategory else 'N/A',
+                'category_slug': gift.category.slug if gift.category else 'gifts',
+                'subcategory_slug': gift.subcategory.slug if gift.subcategory else 'all',
+                'description': gift.description or 'No description available',
+                'discount': gift.discount,
+                'type': 'gift'
+            })
+
+        # Limit to 4 items, prioritizing products
+        all_discount_items = all_discount_items[:4]
+
+        # Fetch popular products
+        popular_products = db.session.query(Product, func.count(OrderItem.id).label('order_count'))\
+            .options(
+                joinedload(Product.discount),
+                joinedload(Product.category),
+                joinedload(Product.subcategory)
+            )\
+            .join(OrderItem, Product.id == OrderItem.product_id)\
+            .group_by(Product.id)\
+            .order_by(func.count(OrderItem.id).desc())\
+            .limit(4).all()
+        popular_products = [{
+            'id': product.id,
+            'title': product.title,
+            'image': product.image,
+            'price': float(product.price),
+            'discounted_price': product.discounted_price,
+            'is_discounted': product.is_discounted,
+            'category': product.category.name if product.category else 'N/A',
+            'subcategory': product.subcategory.name if product.subcategory else 'N/A',
+            'category_slug': product.category.slug if product.category else 'all',
+            'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
+            'description': product.description or 'No description available',
+            'discount': product.discount,
+            'type': 'product'
+        } for product, _ in popular_products]
+
+        # Log fetched data
+        logger.debug(f"Fetched {len(latest_products)} latest products, {len(all_discount_items)} discounted items, {len(popular_products)} popular products")
+        for item in all_discount_items:
+            if item['discount']:
+                logger.debug(f"{item['type'].capitalize()} {item['title']}: "
+                            f"discount={item['discount'].percent}%, "
+                            f"start_date={item['discount'].start_date}, "
+                            f"end_date={item['discount'].end_date}, "
+                            f"is_active={item['discount'].is_active()}, "
+                            f"discounted_price={item['discounted_price']}")
+
+        return render_template(
+            'index.html',
+            latest_products=latest_products,
+            discount_products=all_discount_items,
+            popular_products=popular_products,
+            today=today,
+            current_currency=current_currency,
+            stories=stories,
+            categories=categories
+        )
+    except Exception as e:
+        logger.error(f"Error in index route: {str(e)}")
+        return render_template('error.html', error='Failed to load homepage'), 500
+    
     
 @app.route('/set_currency', methods=['POST'])
 def set_currency():
@@ -773,31 +879,88 @@ def add_product():
 @app.route('/api/discounted_artefacts', methods=['GET'])
 def get_products():
     try:
+        # Adjust for user's timezone (+04)
+        utc_now = datetime.utcnow()
+        user_timezone_offset = timedelta(hours=4)  # +04 timezone
+        user_local_time = utc_now + user_timezone_offset
+        today = user_local_time.date()
+        logger.debug(f"UTC datetime: {utc_now}, User local date (+04): {today}")
+
+        # Fetch Products with active discounts
         products = db.session.query(Product).options(
             joinedload(Product.category),
             joinedload(Product.subcategory),
             joinedload(Product.discount)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
         ).all()
-        return jsonify([{
-            'id': p.id,
-            'name': p.title,  # Map title to name
-            'category_id': p.category_id,
-            'subcategory_id': p.subcategory_id,
-            'price': float(p.price),
-            'discount': {
-                'percent': float(p.discount.percent),
-                'start_date': p.discount.start_date.isoformat(),
-                'end_date': p.discount.end_date.isoformat()
-            } if p.discount else None,
-            'image': p.image,
-            'description': p.description
-        } for p in products])
+
+        # Fetch Gifts with active discounts
+        gifts = db.session.query(Gift).options(
+            joinedload(Gift.category),
+            joinedload(Gift.subcategory),
+            joinedload(Gift.discount)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
+        ).all()
+
+        # Combine products and gifts into response
+        response = []
+
+        for p in products:
+            response.append({
+                'id': p.id,
+                'name': p.title,
+                'category_id': p.category_id,
+                'subcategory_id': p.subcategory_id,
+                'price': float(p.price),
+                'discount': {
+                    'percent': float(p.discount.percent),
+                    'start_date': p.discount.start_date.isoformat(),
+                    'end_date': p.discount.end_date.isoformat()
+                } if p.discount else None,
+                'image': p.image,
+                'description': p.description or 'No description available',
+                'type': 'product'
+            })
+
+        for g in gifts:
+            response.append({
+                'id': g.id,
+                'name': g.product_name,
+                'category_id': g.category_id,
+                'subcategory_id': g.subcategory_id,
+                'price': float(g.price),
+                'discount': {
+                    'percent': float(g.discount.percent),
+                    'start_date': g.discount.start_date.isoformat(),
+                    'end_date': g.discount.end_date.isoformat()
+                } if g.discount else None,
+                'image': g.image,
+                'description': g.description or 'No description available',
+                'type': 'gift'
+            })
+
+        # Log the fetched data
+        logger.debug(f"Fetched {len(products)} products and {len(gifts)} gifts for /api/discounted_artefacts")
+        for item in response:
+            if item['discount']:
+                logger.debug(f"{item['type'].capitalize()} {item['name']}: "
+                            f"discount={item['discount']['percent']}%, "
+                            f"start_date={item['discount']['start_date']}, "
+                            f"end_date={item['discount']['end_date']}")
+
+        return jsonify(response)
     except SQLAlchemyError as e:
-        logger.error(f'Error fetching products: {str(e)}')
+        logger.error(f"Error fetching products: {str(e)}")
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f'Error fetching products: {str(e)}')
-        return jsonify({'error': str(e)}), 500     
+        logger.error(f"Error fetching products: {str(e)}")
+        return jsonify({'error': str(e)}), 500
     
 @app.route('/api/discounted_artefacts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_product(id):
@@ -3004,6 +3167,13 @@ def categories():
 @app.route('/category/<category_slug>/<subcategory_slug>')
 def category_page(category_slug, subcategory_slug):
     try:
+        # Adjust for user's timezone (+04)
+        utc_now = datetime.utcnow()
+        user_timezone_offset = timedelta(hours=4)  # +04 timezone
+        user_local_time = utc_now + user_timezone_offset
+        today = user_local_time.date()
+        logger.debug(f"UTC datetime: {utc_now}, User local date (+04): {today}")
+
         # Fetch exchange rates and current currency
         exchange_rates = ExchangeRate.query.order_by(ExchangeRate.timestamp.desc()).first()
         exchange_rates_dict = {
@@ -3026,25 +3196,37 @@ def category_page(category_slug, subcategory_slug):
 
         # Handle category and subcategory filtering
         if category_slug.lower() == 'all':
-            products = Product.query.all()
+            products = Product.query.options(
+                joinedload(Product.discount),
+                joinedload(Product.category),
+                joinedload(Product.subcategory)
+            ).all()
         else:
             selected_category = Category.query.filter_by(slug=category_slug).first()
             if not selected_category:
                 logger.warning(f"Category not found: {category_slug}")
                 return redirect(url_for('category_page', category_slug='all', subcategory_slug='all'))
 
-            # Handle category image
+            # Handle category image and description
             category_image = get_image_path(selected_category.image)
             category_description = html.escape(selected_category.description or f'Explore our collection of {selected_category.name} artifacts.')
 
             if subcategory_slug.lower() == 'all':
-                products = Product.query.filter_by(category_id=selected_category.id).all()
+                products = Product.query.options(
+                    joinedload(Product.discount),
+                    joinedload(Product.category),
+                    joinedload(Product.subcategory)
+                ).filter_by(category_id=selected_category.id).all()
             else:
                 selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug, category_id=selected_category.id).first()
                 if not selected_subcategory:
                     logger.warning(f"Subcategory not found: {subcategory_slug} in category: {category_slug}")
                     return redirect(url_for('category_page', category_slug=category_slug, subcategory_slug='all'))
-                products = Product.query.filter_by(subcategory_id=selected_subcategory.id).all()
+                products = Product.query.options(
+                    joinedload(Product.discount),
+                    joinedload(Product.category),
+                    joinedload(Product.subcategory)
+                ).filter_by(subcategory_id=selected_subcategory.id).all()
 
         # Serialize products
         serialized_products = []
@@ -3055,7 +3237,7 @@ def category_page(category_slug, subcategory_slug):
                 'image': get_image_path(product.image),
                 'price': float(product.price or 0),
                 'discounted_price': float(product.discounted_price or 0) if product.discounted_price else None,
-                'is_discounted': product.is_discounted or False,
+                'is_discounted': product.is_discounted,
                 'category': html.escape(product.category.name if product.category else 'N/A'),
                 'subcategory': html.escape(product.subcategory.name if product.subcategory else 'N/A'),
                 'category_slug': product.category.slug if product.category else 'all',
@@ -3063,16 +3245,26 @@ def category_page(category_slug, subcategory_slug):
                 'description': html.escape(str(product.description or 'No description available')),
                 'type': 'product'
             })
+            # Log discount details separately
+            if product.is_discounted and product.discount:
+                logger.debug(f"Product {product.title}: "
+                            f"discount={product.discount.percent}%, "
+                            f"start_date={product.discount.start_date}, "
+                            f"end_date={product.discount.end_date}, "
+                            f"is_discounted={product.is_discounted}, "
+                            f"discounted_price={product.discounted_price}")
 
         # Handle gifts for 'gifts' category
         if category_slug.lower() == 'gifts':
-            gift_query = Gift.query
+            gift_query = Gift.query.options(
+                joinedload(Gift.discount),
+                joinedload(Gift.category),
+                joinedload(Gift.subcategory)
+            )
             if selected_category:
                 gift_query = gift_query.filter_by(category_id=selected_category.id)
-            if subcategory_slug.lower() != 'all':
-                selected_subcategory = Subcategory.query.filter_by(slug=subcategory_slug).first()
-                if selected_subcategory:
-                    gift_query = gift_query.filter_by(subcategory_id=selected_subcategory.id)
+            if subcategory_slug.lower() != 'all' and selected_subcategory:
+                gift_query = gift_query.filter_by(subcategory_id=selected_subcategory.id)
             gifts = gift_query.all()
             for gift in gifts:
                 serialized_products.append({
@@ -3081,7 +3273,7 @@ def category_page(category_slug, subcategory_slug):
                     'image': get_image_path(gift.image),
                     'price': float(gift.price or 0),
                     'discounted_price': float(gift.discounted_price or 0) if gift.discounted_price else None,
-                    'is_discounted': gift.is_discounted or False,
+                    'is_discounted': gift.is_discounted,
                     'category': html.escape(gift.category.name if gift.category else 'Gifts'),
                     'subcategory': html.escape(gift.subcategory.name if gift.subcategory else 'N/A'),
                     'category_slug': gift.category.slug if gift.category else 'gifts',
@@ -3089,8 +3281,18 @@ def category_page(category_slug, subcategory_slug):
                     'description': html.escape(str(gift.description or 'No description available')),
                     'type': 'gift'
                 })
+                # Log discount details separately
+                if gift.is_discounted and gift.discount:
+                    logger.debug(f"Gift {gift.product_name}: "
+                                f"discount={gift.discount.percent}%, "
+                                f"start_date={gift.discount.start_date}, "
+                                f"end_date={gift.discount.end_date}, "
+                                f"is_discounted={gift.is_discounted}, "
+                                f"discounted_price={gift.discounted_price}")
 
+        # Log total products
         logger.debug(f"Rendering category page: category={category_slug}, subcategory={subcategory_slug}, products={len(serialized_products)}")
+
         return render_template(
             'category.html',
             categories=categories,
@@ -3100,27 +3302,119 @@ def category_page(category_slug, subcategory_slug):
             category_image=category_image,
             category_description=category_description,
             exchange_rates=exchange_rates_dict,
-            current_currency=current_currency
+            current_currency=current_currency,
+            today=today
         )
     except Exception as e:
         logger.error(f"Error in category_page: {str(e)}")
         return render_template('error.html', error='Failed to load category'), 500
-    
 
 @app.route('/discounted_artefacts', endpoint='discounted_artefacts')
-def products():
- #   if 'user' not in session:
-    #    return redirect(url_for('user_login'))
-    
-    all_products = Product.query.order_by(Product.created_at.desc()).all()
-    categories = Category.query.all()
-    
-    return render_template('products.html',
-                           products=all_products,
-                           categories=categories,
-                           today=datetime.utcnow().date(),
-                           current_currency='USD')
+def discounted_artefacts():
+    try:
+        # Adjust for user's timezone (+04)
+        utc_now = datetime.utcnow()
+        user_timezone_offset = timedelta(hours=4)  # +04 timezone
+        user_local_time = utc_now + user_timezone_offset
+        today = user_local_time.date()
+        logger.debug(f"UTC datetime: {utc_now}, User local date (+04): {today}")
 
+        # Eagerly load Product discounts and relationships
+        products = Product.query.options(
+            joinedload(Product.discount),
+            joinedload(Product.category),
+            joinedload(Product.subcategory)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
+        ).order_by(Product.created_at.desc()).all()
+
+        # Fetch Gift items with discounts
+        gifts = Gift.query.options(
+            joinedload(Gift.discount),
+            joinedload(Gift.category),
+            joinedload(Gift.subcategory)
+        ).join(Discount).filter(
+            Discount.percent > 1,
+            Discount.start_date <= today,
+            Discount.end_date >= today
+        ).all()
+
+        # Combine products and gifts for the template
+        all_products = []
+
+        for product in products:
+            all_products.append({
+                'id': product.id,
+                'title': product.title,
+                'image': product.image,
+                'price': float(product.price),
+                'discounted_price': product.discounted_price,
+                'is_discounted': product.is_discounted,
+                'category': product.category.name if product.category else 'N/A',
+                'subcategory': product.subcategory.name if product.subcategory else 'N/A',
+                'category_slug': product.category.slug if product.category else 'all',
+                'subcategory_slug': product.subcategory.slug if product.subcategory else 'all',
+                'description': product.description or 'No description available',
+                'discount': product.discount,
+                'type': 'product'
+            })
+
+        for gift in gifts:
+            all_products.append({
+                'id': gift.id,
+                'title': gift.product_name,
+                'image': gift.image,
+                'price': float(gift.price),
+                'discounted_price': gift.discounted_price,
+                'is_discounted': gift.is_discounted,
+                'category': gift.category.name if gift.category else 'Gifts',
+                'subcategory': gift.subcategory.name if gift.subcategory else 'N/A',
+                'category_slug': gift.category.slug if gift.category else 'gifts',
+                'subcategory_slug': gift.subcategory.slug if gift.subcategory else 'all',
+                'description': gift.description or 'No description available',
+                'discount': gift.discount,
+                'type': 'gift'
+            })
+
+        # Fetch categories
+        categories = Category.query.all()
+
+        # Fetch exchange rates
+        exchange_rates = ExchangeRate.query.order_by(ExchangeRate.timestamp.desc()).first()
+        exchange_rates_dict = {
+            'KES': 1.0,
+            'USD': exchange_rates.usd if exchange_rates else 1.0,
+            'EUR': exchange_rates.eur if exchange_rates else 1.0,
+            'GBP': exchange_rates.gbp if exchange_rates else 1.0
+        }
+        current_currency = session.get('currency', 'USD')
+
+        # Log the fetched data
+        logger.debug(f"Fetched {len(products)} products and {len(gifts)} gifts for discounted_artefacts")
+        for item in all_products:
+            if item['discount']:
+                logger.debug(f"{item['type'].capitalize()} {item['title']}: "
+                            f"discount={item['discount'].percent}%, "
+                            f"start_date={item['discount'].start_date}, "
+                            f"end_date={item['discount'].end_date}, "
+                            f"is_active={item['discount'].is_active()}, "
+                            f"start_date_type={type(item['discount'].start_date)}, "
+                            f"today_type={type(today)}")
+            else:
+                logger.debug(f"{item['type'].capitalize()} {item['title']}: no discount")
+
+        return render_template('products.html',
+                             products=all_products,
+                             categories=categories,
+                             today=today,
+                             current_currency=current_currency,
+                             exchange_rates=exchange_rates_dict)
+    except Exception as e:
+        logger.error(f"Error in discounted_artefacts route: {str(e)}")
+        return render_template('error.html', error='Failed to load discounted products'), 500
+    
 @app.route('/api/wishlist', methods=['GET', 'POST'])
 def handle_wishlist():
     # Check if user is logged in
