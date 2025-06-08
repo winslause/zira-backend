@@ -39,7 +39,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')
 # Set database URI to project root with absolute path
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'database.db')
-# app.config['UPLOAD_FOLDER'] = os.path.join('static', 'Uploads'.lower())
+# app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads'.lower())
 app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
@@ -49,7 +49,7 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
 app.config['SESSION_COOKIE_NAME'] = 'session'
 
 # Ensure upload folder exists
-upload_folder = os.path.join(app.static_folder or 'static', 'Uploads'.lower())
+upload_folder = os.path.join(app.static_folder or 'static', 'uploads'.lower())
 if not os.path.exists(upload_folder):
     os.makedirs(upload_folder)
 
