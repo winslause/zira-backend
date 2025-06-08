@@ -3829,7 +3829,7 @@ def upload_profile_picture():
 @app.errorhandler(413)
 def request_entity_too_large(error):
     app.logger.error("File upload exceeded size limit")
-    return jsonify({'error': 'File too large, maximum size is 5MB'}), 413
+    return jsonify({'error': 'File too large, maximum size is 1MB'}), 413
 
 @app.route('/api/profile/address', methods=['POST'])
 def add_address():
