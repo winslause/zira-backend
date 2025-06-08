@@ -2317,7 +2317,7 @@ document.getElementById('picture-form').addEventListener('submit', async (e) => 
         if (error.message.includes('Unauthorized')) {
             window.location.href = '/user_login';
         } else if (error.message.includes('413')) {
-            errorMessage = 'File too large, maximum size is 5MB';
+            errorMessage = 'File too large, maximum size is 1MB';
         } else if (error.message.includes('invalid response')) {
             errorMessage = 'Server returned an invalid response';
         }
