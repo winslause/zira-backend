@@ -2270,7 +2270,7 @@ function updateProfile(event) {
 }
 
 // Change Profile Picture
-document.getElementById('picture-form').addEventListener('submit', (e) => {
+document.getElementById('picture-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const fileInput = e.target.querySelector('input[type="file"]');
     const file = fileInput.files[0];
@@ -2289,24 +2289,37 @@ document.getElementById('picture-form').addEventListener('submit', (e) => {
     }
     const formData = new FormData();
     formData.append('image', file);
-    fetch('/api/profile/picture', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 400) {
-            throw new Error(body.error || 'Failed to update profile picture');
+    try {
+        const response = await fetch('/api/profile/picture', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error('Failed to parse JSON:', jsonError);
+            const text = await response.text();
+            console.error('Response body:', text);
+            throw new Error(`Server returned invalid response (status: ${response.status})`);
         }
-        document.getElementById('profile-pic').src = body.image_url;
+        if (!response.ok) {
+            throw new Error(data.error || `Server error: ${response.status}`);
+        }
+        document.getElementById('profile-pic').src = data.image_url;
         showToast('Profile picture updated!', 'success');
         closeModal('picture-modal');
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error uploading picture:', error);
-        showToast('Failed to upload picture: ' + error.message, 'error');
-    });
+        let errorMessage = error.message;
+        if (error.message.includes('Unauthorized')) {
+            window.location.href = '/login';
+        } else if (error.message.includes('413')) {
+            errorMessage = 'File too large, maximum size is 5MB';
+        }
+        showToast(`Failed to upload picture: ${errorMessage}`, 'error');
+    }
 });
 
 // Add Address

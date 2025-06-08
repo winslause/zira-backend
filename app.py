@@ -12,6 +12,7 @@ from slugify import slugify
 import os
 import re
 import json
+from PIL import Image
 import uuid
 from dotenv import load_dotenv
 import secrets
@@ -41,6 +42,7 @@ app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'zira_collection')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'database.db')
 # app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads'.lower())
 app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB limit
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -3748,18 +3750,84 @@ def delete_cart_item(id):
 
 @app.route('/api/profile/picture', methods=['POST'])
 def upload_profile_picture():
-    if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    if 'image' not in request.files:
-        return jsonify({'error': 'Image is required'}), 400
-    image = request.files['image']
-    if not allowed_file(image.filename):
-        return jsonify({'error': 'Invalid image format'}), 400
-    filename = save_file(image)
-    user = User.query.filter_by(email=session['user']).first()
-    # user.profile_picture = filename
-    db.session.commit()
-    return jsonify({'message': 'Profile picture updated', 'image_url': url_for('static', filename=f'uploads/{filename}')})
+    try:
+        # Check authentication
+        if 'user' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # Check for image
+        if 'image' not in request.files:
+            return jsonify({'error': 'Image is required'}), 400
+        image = request.files['image']
+
+        # Validate file extension
+        if not allowed_file(image.filename):
+            app.logger.warning(f"Invalid file extension: {image.filename}")
+            return jsonify({'error': 'Invalid image format'}), 400
+
+        # Check file size (5MB limit)
+        if image.content_length and image.content_length > 5 * 1024 * 1024:
+            app.logger.warning(f"File too large: {image.filename}, size: {image.content_length}")
+            return jsonify({'error': 'File size exceeds 5MB limit'}), 413
+
+        # Sanitize filename
+        filename = secure_filename(image.filename)
+        if not filename:
+            app.logger.error(f"Invalid filename after sanitization: {image.filename}")
+            return jsonify({'error': 'Invalid filename'}), 400
+
+        # Ensure upload directory exists
+        upload_folder = app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
+
+        # Generate unique filename to avoid conflicts
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        file_path = os.path.join(upload_folder, unique_filename)
+
+        # Validate image integrity
+        try:
+            img = Image.open(image)
+            img.verify()
+            image.seek(0)  # Reset file pointer after verification
+        except Exception as e:
+            app.logger.error(f"Corrupted image: {filename}, error: {str(e)}")
+            return jsonify({'error': 'Corrupted or invalid image'}), 400
+
+        # Save the file
+        try:
+            image.save(file_path)
+            if not os.path.exists(file_path):
+                app.logger.error(f"File not saved: {file_path}")
+                return jsonify({'error': 'Failed to save image'}), 500
+        except Exception as e:
+            app.logger.error(f"Error saving file: {filename}, error: {str(e)}")
+            return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
+
+        # Update user profile
+        user = User.query.filter_by(email=session['user']).first()
+        if not user:
+            app.logger.error(f"User not found: {session['user']}")
+            return jsonify({'error': 'User not found'}), 404
+
+        user.profile_picture = unique_filename
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Database error: {str(e)}")
+            return jsonify({'error': f'Failed to update database: {str(e)}'}), 500
+
+        # Return success response
+        image_url = url_for('static', filename=f'Uploads/{unique_filename}', _external=True)
+        app.logger.info(f"Profile picture updated: {unique_filename}")
+        return jsonify({
+            'message': 'Profile picture updated',
+            'image_url': image_url
+        })
+
+    except Exception as e:
+        app.logger.error(f"Unexpected error in upload_profile_picture: {str(e)}")
+        return jsonify({'error': f'Failed to upload profile picture: {str(e)}'}), 500
 
 @app.route('/api/profile/address', methods=['POST'])
 def add_address():
