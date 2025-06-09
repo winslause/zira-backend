@@ -346,108 +346,109 @@
 </section>
 
 <style>
-    /* Animation Keyframes */
-    @keyframes fade-in {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes bounce-in {
-        0% { opacity: 0; transform: scale(0.8); }
-        50% { opacity: 1; transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
-    
-    /* Slide Styles */
-    .zira-slide {
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-    }
-    
-    .zira-slide.active {
-        opacity: 1;
-        z-index: 10;
-    }
-    
-    /* DEFAULT STYLES (Large screens) - Original proportions */
+   /* Animation Keyframes */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-in {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Slide Styles */
+.zira-slide {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.zira-slide.active {
+    opacity: 1;
+    z-index: 10;
+}
+
+/* DEFAULT STYLES (Large screens) - Original proportions */
+.zira-slide .text-center {
+    min-width: 60%;
+    padding: 2rem 2.5rem !important;
+    margin: 1.5rem;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 1.5rem;
+}
+
+.zira-slide h2 {
+    font-size: 2.5rem !important;
+    line-height: 1.2;
+    margin-bottom: 1rem !important;
+}
+
+.zira-slide p {
+    font-size: 1.2rem !important;
+    line-height: 1.5;
+    margin-bottom: 1.5rem !important;
+    max-width: 80%;
+}
+
+.zira-slide a {
+    padding: 0.8rem 1.6rem !important;
+    font-size: 1rem !important;
+}
+
+/* MEDIUM SCREENS (Tablets) */
+@media (max-width: 992px) {
     .zira-slide .text-center {
-        min-width: 60%;
-        padding: 2rem 2.5rem !important;
-        margin: 1.5rem;
-        background-color: rgba(0, 0, 0, 0.5) !important;
-        backdrop-filter: blur(8px);
-        border-radius: 1.5rem;
+        padding: 2.2rem 2.8rem !important;
     }
     
     .zira-slide h2 {
-        font-size: 2.5rem !important;
-        line-height: 1.2;
-        margin-bottom: 1rem !important;
+        font-size: 2.2rem !important;
+    }
+}
+
+/* SMALL DEVICES (Phones) - Enhanced sizing with increased height */
+@media (max-width: 768px) {
+    .zira-slide .text-center {
+        min-width: 85%;
+        padding: 2.5rem !important;
+        min-height: 300px; /* Increased height for phones */
+    }
+    
+    .zira-slide h2 {
+        font-size: 2rem !important;
+        margin-bottom: 1.2rem !important;
     }
     
     .zira-slide p {
-        font-size: 1.2rem !important;
-        line-height: 1.5;
+        font-size: 1.1rem !important;
+        max-width: 90%;
+    }
+}
+
+/* EXTRA SMALL DEVICES (Small phones) - Further increased height */
+@media (max-width: 576px) {
+    .zira-slide .text-center {
+        min-width: 90%;
+        padding: 2rem !important;
+        margin: 1rem auto;
+        min-height: 280px; /* Slightly smaller height for very small phones */
+    }
+    
+    .zira-slide h2 {
+        font-size: 1.8rem !important;
+    }
+    
+    .zira-slide p {
+        font-size: 1rem !important;
         margin-bottom: 1.5rem !important;
-        max-width: 80%;
     }
     
     .zira-slide a {
-        padding: 0.8rem 1.6rem !important;
-        font-size: 1rem !important;
+        padding: 0.7rem 1.4rem !important;
     }
-    
-    /* MEDIUM SCREENS (Tablets) */
-    @media (max-width: 992px) {
-        .zira-slide .text-center {
-            padding: 2.2rem 2.8rem !important;
-        }
-        
-        .zira-slide h2 {
-            font-size: 2.2rem !important;
-        }
-    }
-    
-    /* SMALL DEVICES (Phones) - Enhanced sizing */
-    @media (max-width: 768px) {
-        .zira-slide .text-center {
-            min-width: 85%;
-            padding: 2.5rem !important;
-            min-height: auto;
-        }
-        
-        .zira-slide h2 {
-            font-size: 2rem !important;
-            margin-bottom: 1.2rem !important;
-        }
-        
-        .zira-slide p {
-            font-size: 1.1rem !important;
-            max-width: 90%;
-        }
-    }
-    
-    /* EXTRA SMALL DEVICES (Small phones) */
-    @media (max-width: 576px) {
-        .zira-slide .text-center {
-            min-width: 90%;
-            padding: 2rem !important;
-            margin: 1rem auto;
-        }
-        
-        .zira-slide h2 {
-            font-size: 1.8rem !important;
-        }
-        
-        .zira-slide p {
-            font-size: 1rem !important;
-            margin-bottom: 1.5rem !important;
-        }
-        
-        .zira-slide a {
-            padding: 0.7rem 1.4rem !important;
-        }
-    }
+}
 </style>
 
 <script>
