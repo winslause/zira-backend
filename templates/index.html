@@ -189,34 +189,7 @@
   <!-- Hero Slideshow Section -->
 <section class="relative h-screen overflow-hidden bg-white" role="banner" aria-label="Hero Slideshow">
   <div id="hero-slider" class="w-full h-full relative pt-16 sm:pt-20" style="padding-top: 4rem;">
-    <!-- Slide 1: Asymmetrical Split Layout -->
-    <div class="slide inset-0 flex items-center justify-center opacity-0" role="group" aria-hidden="true">
-      <div class="absolute inset-0 bg-white"></div>
-      <div class="container mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <!-- Left Image -->
-        <div class="w-2/3 sm:w-7/12 h-full relative overflow-hidden transform -skew-x-6 sm:-skew-x-12">
-          <img src="{{ url_for('static', filename='images/art6.jpg') }}" alt="Intricate beadwork jewelry glowing with craftsmanship" 
-               class="w-full h-full object-cover object-center transform skew-x-6 sm:skew-x-12 transition-transform duration-1000 hover:scale-105" loading="eager">
-        </div>
-        <!-- Right Text -->
-        <div class="w-1/3 sm:w-5/12 text-right px-4 sm:px-6 lg:px-8 z-20">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif italic text-amber-800 mb-4 animate-slide-in-left drop-shadow-lg">
-            Weave the Soul of Africa
-          </h2>
-          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
-            Handcrafted treasures pulse with the heartbeat of ancient traditions.
-          </p>
-          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
-            Each bead tells a story of heritage and artistry.
-          </p>
-          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
-            Celebrate the vibrant spirit of African craftsmanship.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide 2: Full-Screen Layout (Optimized for Mobile) -->
+    <!-- Slide 1: Full-Screen Layout (Originally Slide 2) -->
     <div class="slide inset-0 flex flex-col sm:flex-row items-center justify-center opacity-0" role="group" aria-hidden="true">
       <div class="absolute inset-0 bg-white"></div>
       <div class="container mx-auto h-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 lg:px-8 z-10 gap-0 sm:gap-2">
@@ -243,7 +216,34 @@
       </div>
     </div>
 
-    <!-- Slide 3: Single Image Layout (Optimized for Mobile) -->
+    <!-- Slide 2: Asymmetrical Split Layout (Originally Slide 1) -->
+    <div class="slide inset-0 flex items-center justify-center opacity-0" role="group" aria-hidden="true">
+      <div class="absolute inset-0 bg-white"></div>
+      <div class="container mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <!-- Left Image -->
+        <div class="w-2/3 sm:w-7/12 h-full relative overflow-hidden transform -skew-x-6 sm:-skew-x-12">
+          <img src="{{ url_for('static', filename='images/art6.jpg') }}" alt="Intricate beadwork jewelry glowing with craftsmanship" 
+               class="w-full h-full object-cover object-center transform skew-x-6 sm:skew-x-12 transition-transform duration-1000 hover:scale-105" loading="eager">
+        </div>
+        <!-- Right Text -->
+        <div class="w-1/3 sm:w-5/12 text-right px-4 sm:px-6 lg:px-8 z-20">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif italic text-amber-800 mb-4 animate-slide-in-left drop-shadow-lg">
+            Weave the Soul of Africa
+          </h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
+            Handcrafted treasures pulse with the heartbeat of ancient traditions.
+          </p>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
+            Each bead tells a story of heritage and artistry.
+          </p>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-700 font-sans leading-relaxed max-w-md">
+            Celebrate the vibrant spirit of African craftsmanship.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Single Image Layout -->
     <div class="slide inset-0 flex flex-col sm:flex-row items-center justify-center opacity-0" role="group" aria-hidden="true">
       <div class="absolute inset-0 bg-white"></div>
       <div class="container mx-auto h-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 lg:px-8 gap-0 sm:gap-2">
@@ -307,12 +307,12 @@
     </div>
 
     <!-- Navigation Arrows -->
-    <button  class="prev absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-gray-800/50 hover:bg-gray-800/70 text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Previous slide">
+    <button class="prev absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-gray-800/50 hover:bg-gray-800/70 text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Previous slide">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </button>
-    <button  class="next absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-gray-800/50 hover:bg-gray-800/70 text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Next slide">
+    <button class="next absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-gray-800/50 hover:bg-gray-800/70 text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Next slide">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
